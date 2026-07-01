@@ -1,0 +1,134 @@
+<ion-header mode="ios" class="ion-no-border">
+  <ion-toolbar color="dark">
+    <ion-buttons>
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      Ticket Details
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card mode="ios" class="ticket-card" style="padding: 0px;box-shadow: unset;">
+    <ion-card-header style="padding: 5px;border-bottom: 1px solid #EEEEEE;">
+      <ion-card-title class="text-sm font-medium text-light">Journey Date<br><span
+          class="text-slate-700 font-semibold">{{journeyData?.JourneyDate |
+          date:'MMM dd, yyyy'}}</span></ion-card-title>
+    </ion-card-header>
+    <ion-card-header style="padding: 5px;border-bottom: 1px solid #EEEEEE;">
+      <ion-grid class="p-0 m-0">
+        <ion-row class="p-0 m-0">
+          <ion-col class="p-0 m-0">
+            <ion-card-title class="text-sm font-medium text-light">PNR No<br><span
+                class="text-slate-700 font-semibold">{{journeyData?.PNRNo}}</span></ion-card-title>
+          </ion-col>
+          <ion-col class="p-0 m-0">
+            <ion-card-title class="text-sm font-medium text-light">Ticket No<br><span
+                class="text-slate-700 font-semibold">{{journeyData?.TicketNo}}</span></ion-card-title>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-header>
+
+    <ion-card-content style="padding: 5px;">
+      <ion-grid class="p-0 m-0">
+        <ion-row class="p-0 m-0">
+          <ion-col size="8" class="p-0 m-0">
+            <ion-row class="p-0 m-0">
+              <ion-col class="p-0 m-0">
+                <img src="assets/icon/Iconsax/Broken/login.png" width="30px" height="30px" class="p-0 m-0">
+
+              </ion-col>
+              <ion-col size="10" class="p-0 m-0">
+                <p class="text-xs font-medium text-light">Boarding Point</p>
+                <p class="text-xs font-medium text-dark" style="line-height: 1.1;">{{journeyData?.PickupInfo?.PickupTime
+                  | date: 'hh:mm a'}}, {{journeyData?.PickupInfo?.PickupName}}{{journeyData?.PickupInfo?.Address ? ', ' + journeyData.PickupInfo.Address : ''}}{{journeyData?.PickupInfo?.Landmark ? ', ' + journeyData.PickupInfo.Landmark : ''}}</p>
+              </ion-col>
+            </ion-row>
+
+            <ion-row class="p-0 m-0" style="margin-top: 5px !important;">
+              <ion-col class="p-0 m-0">
+                <img src="assets/icon/Iconsax/Broken/logout.png" width="30px" height="30px" class="p-0 m-0">
+
+              </ion-col>
+              <ion-col size="10" class="p-0 m-0">
+                <p class="text-xs font-medium text-light">Drop Point</p>
+                <p class="text-xs font-medium text-dark" style="line-height: 1.1;">{{journeyData?.ArrivalDateTime |
+                  date: 'hh:mm a'}}, {{journeyData?.ToCityName}}</p>
+              </ion-col>
+            </ion-row>
+          </ion-col>
+          <ion-col>
+            <div style="line-height:1.1;border-left: 1px solid #EEEEEE;">
+              <p class="text-sm font-regular text-center text-light uppercase">{{journeyData?.FromCityName}}</p>
+              <p class="text-sm font-medium text-center text-dark">{{journeyData?.DepartureDateTime | date: 'hh:mm a'}}
+              </p>
+              <p class="text-[10px] font-medium text-center text-dark">{{journeyData?.DepartureDateTime
+                | date: 'EEE dd, MMM'}}</p>
+
+              <p class="text-[10px] font-bold text-center text-secondary py-1">TO</p>
+
+              <p class="text-sm font-regular text-center text-light uppercase">{{journeyData?.ToCityName}}</p>
+              <p class="text-sm font-medium text-center text-dark">{{journeyData?.ArrivalDateTime | date: 'hh:mm a'}}
+              </p>
+              <p class="text-[10px] font-medium text-center text-dark">{{journeyData?.ArrivalDateTime |
+                date: 'EEE dd, MMM'}}</p>
+            </div>
+
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+
+    <ion-card-header style="padding: 5px;border-top: 1px solid #EEEEEE;">
+      <ion-grid class="p-0 m-0">
+        <ion-row class="p-0 m-0">
+          <ion-col size="8" class="p-0 m-0">
+            <ion-row class="p-0 m-0">
+              <ion-col class="p-0 m-0">
+                <img src="assets/icon/Iconsax/Linear/bus.png" width="30px" height="30px" class="p-0 m-0">
+              </ion-col>
+              <ion-col size="10" class="p-0 m-0">
+                <p class="text-sm font-medium text-dark" style="line-height: 1.1;">{{journeyData?.CompanyName}}</p>
+                <p class="text-xs font-medium text-light">{{journeyData?.BusTypeName}}</p>
+              </ion-col>
+            </ion-row>
+          </ion-col>
+          <ion-col class="p-0 m-0">
+            <p class="text-sm font-bold text-center text-dark">{{journeyData?.TotalSeats}} Seats</p>
+          </ion-col>
+
+        </ion-row>
+      </ion-grid>
+    </ion-card-header>
+
+    <ion-card-header style="padding: 5px;border-top: 1px solid #EEEEEE;">
+      <ion-item class="border-b" style="--min-height:40px;--padding-start:0px" lines="none">
+        <ion-label class="font-semibold mb-0 mt-0" style="font-size: 12px;">PASSENGER DETAILS</ion-label>
+        <ion-label slot="end" class="font-semibold mb-0 mt-0" style="font-size: 12px;">SEAT</ion-label>
+      </ion-item>
+      <ion-item lines="none" *ngFor="let item of journeyData?.Passengers"
+        style="--padding-start:0px;border-width: 0px 0px 1px 0px">
+        <ion-label class="m-0" style="font-size: 14px;" slot="start">
+          <span class="font-bold">{{item.Name}}</span><br>
+          <span class="opacity-80" *ngIf="item.Gender == 'Male'">MALE, {{item.Age}} yrs</span>
+          <span class="opacity-80" *ngIf="item.Gender == 'Female'">FEMALE, {{item.Age}} yrs</span>
+        </ion-label>
+        <ion-label slot="end" class="font-semibold" style="font-size: 14px;">
+          {{item.SeatNo}}
+        </ion-label>
+      </ion-item>
+      <ion-item lines="none" style="border-width: 0px 0px 1px 0px;--padding-start:0px;">
+        <ion-label class="font-semibold mb-0 mt-0" style="font-size: 14px !important;">Total Amount</ion-label>
+        <ion-label slot="end" class="font-semibold mb-0 mt-0" style="font-size: 14px !important;">₹
+          {{journeyData?.TotalFare}}</ion-label>
+      </ion-item>
+    </ion-card-header>
+    <ion-card-header class="text-center p-0" *ngIf="ticketDetails.IsCancellable">
+      <ion-button fill="clear" class="text-sm font-bold" size="small" (click)="presentAlert()" [disabled]="loader">
+        <ion-spinner *ngIf="loader"></ion-spinner>Cancel Ticket</ion-button>
+    </ion-card-header>
+  </ion-card>
+
+</ion-content>

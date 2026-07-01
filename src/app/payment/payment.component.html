@@ -1,0 +1,127 @@
+<!-- <ion-header class="ion-no-border">
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button (click)="cancel()">
+                <ion-icon name="chevron-back-outline"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title class="text-center">PAYMENT</ion-title>
+        <ion-buttons slot="end" style="width: 47px;">
+            -->
+            <!-- allredycomment <ion-button (click)="confirm()" [strong]="true">Confirm</ion-button> -->
+        <!-- </ion-buttons>
+
+
+    </ion-toolbar>
+</ion-header>
+<ion-content>
+    <div class="bg-primary mb-2">
+        <ion-item color="primary" lines="none" mode="ios">
+            <span slot="start">
+                <p class="font-14 font-medium leading-[1.3rem]">{{busDetails?.FromName}}</p>
+                <p class="font-14 font-medium leading-[1.3rem]">{{busDetails?.DeptTime | date:'hh:mm a'}}</p>
+                <p class="font-14 opacity-80 leading-[1.3rem]">{{busDetails?.DeptTime | date:'dd MMM, yyyy'}}</p>
+            </span>
+            <span class="w-full text-center">
+                <ion-icon name="swap-horizontal-outline"></ion-icon>
+                <p class="font-12 opacity-80 leading-[1.3rem]">{{busDetails?.Duration}} hrs</p>
+            </span>
+            <span slot="end">
+                <p class="font-14 font-medium leading-[1.3rem]">{{busDetails?.ToName}}</p>
+                <p class="font-14 font-medium leading-[1.3rem]">{{busDetails?.ArrTime | date:'hh:mm a'}}</p>
+                <p class="font-14 opacity-80 leading-[1.3rem]">{{busDetails?.ArrTime | date:'dd MMM, yyyy'}}</p>
+            </span>
+        </ion-item>
+        <ion-item color="primary" lines="none" mode="ios" *ngIf="!viewDetails">
+            <span slot="start" class="font-16 font-medium">
+                Pay ₹ {{fare}}
+            </span>
+            <span slot="end" class="font-14 opacity-80" (click)="viewDetails = !viewDetails">
+                View Details <ion-icon name="chevron-down-outline" class="align-bottom text-[20px]"></ion-icon>
+            </span>
+        </ion-item>
+        <ion-card class="shadow-none border border-white" *ngIf="viewDetails" color="primary">
+            <ion-item class="border-b" color="primary" style="--min-height:40px" lines="none" >
+                <ion-label class="font-12 font-semibold mb-0 mt-0">BUS DETAILS</ion-label>
+            </ion-item>
+            <div class="m-4 mt-2 mb-1">
+                <ion-label class="font-14 font-bold mt-0">{{busDetails?.CompanyName}}</ion-label><br>
+                <ion-label class="font-14 opacity-80">{{busDetails?.BusLabel}}</ion-label>
+            </div>
+            <div class="m-4 mt-2 mb-1">
+                <ion-label class="font-14 font-bold">Boarding Point</ion-label><br>
+                <ion-label class="font-14 opacity-80">{{pickups.PickupName}}</ion-label>
+            </div>
+            <div class="m-4 mt-2 mb-3">
+                <ion-label class="font-14 font-bold">Dropping Point</ion-label><br>
+                <ion-label class="font-14 opacity-80">{{dropoffs.DropoffName}}</ion-label>
+            </div>
+            <ion-item class="border-b" color="primary" style="--min-height:40px" lines="none" >
+                <ion-label class="font-12 font-semibold mb-0 mt-0">PASSENGER DETAILS</ion-label>
+                <ion-label slot="end" class="font-12 font-semibold mb-0 mt-0">SEAT</ion-label>
+            </ion-item>
+            <ion-item lines="none" color="primary" *ngFor="let item of passengers">
+                <ion-label class="font-14 m-0" slot="start">
+                    <span class="font-bold">{{item.Name}}</span><br>
+                    <span class="opacity-80" *ngIf="item.Gender == 'M'">MALE, {{item.Age}} yrs</span>
+                    <span class="opacity-80" *ngIf="item.Gender == 'F'">FEMALE, {{item.Age}} yrs</span>
+                </ion-label>
+                <ion-label slot="end" class="font-14 font-bold">
+                    {{item.SeatNo}}
+                </ion-label>
+            </ion-item>
+            <ion-item class="border" lines="none" color="primary" style="border-bottom: unset;">
+                <ion-label class="font-semibold mb-0 mt-0" style="font-size: 20px !important;">Payable</ion-label>
+                <ion-label slot="end" class="font-semibold mb-0 mt-0" style="font-size: 20px !important;">₹ {{fare}}</ion-label>
+            </ion-item>
+            <ion-item class="" lines="none" color="primary">
+                <ion-label class="font-semibold mb-0 mt-0 font-12">Discount</ion-label>
+                <ion-label slot="end" class="font-semibold mb-0 mt-0 font-16">- ₹ {{discountAmount}}</ion-label>
+            </ion-item>
+            <ion-item class="border" lines="none" color="primary" style="border-top: unset;">
+                <ion-label class="font-semibold mb-0 mt-0" style="font-size: 20px !important;">Total Payable</ion-label>
+                <ion-label slot="end" class="font-semibold mb-0 mt-0" style="font-size: 20px !important;">₹ {{amount}}</ion-label>
+            </ion-item>
+        </ion-card>
+        <ion-item color="primary" lines="none" mode="ios"  *ngIf="viewDetails">
+            <span slot="start" class="font-16 font-medium">
+                
+            </span>
+            
+        </ion-item>
+    </div>
+    <ion-item lines="none" style="height: 40px; --min-height:40px;">
+        <ion-icon class="text-[18px] me-3" slot="start" name="ticket-outline"></ion-icon>
+        <ion-label class="text-[18px] opacity-70 m-0">Have a coupon code?</ion-label>
+    </ion-item>
+    <ion-item lines="none">
+        <ion-input [(ngModel)]="couponValue" placeholder="Enter Coupon Code" class="custom"></ion-input>
+        <ion-button fill="outline" (click)="applyCoupon()">Apply</ion-button>
+    </ion-item>
+
+    <div *ngIf="auth.currentUserValue.walletBalance > 0">
+    <ion-item lines="none" style="height: 40px; --min-height:40px;">
+        <ion-label class="text-[18px] opacity-70 m-0">Choose Payment Method</ion-label>
+    </ion-item>
+    <ion-list>
+        <ion-radio-group value="full" (ionChange)="changePaymentMode($event)">
+          <ion-item>
+            <ion-label>Pay full amount</ion-label>
+            <ion-radio slot="end" value="full"></ion-radio>
+          </ion-item>
+      
+          <ion-item>
+            <ion-label>Use Wallet Balance Rs.{{auth.currentUserValue.walletBalance}}</ion-label>
+            <ion-radio slot="end" value="wallet"></ion-radio>
+          </ion-item>
+        </ion-radio-group>
+      </ion-list>
+    </div>
+
+    <div class="m-3"> 
+        <ion-button expand="block" (click)="payWithRazorpay()" mode="ios" style="font-size: 18px !important; font-weight: unset !important;--border-radius: 20px !important;margin: unset;height: 50px">Pay ₹ {{amount}}</ion-button>
+    </div>
+    
+</ion-content> -->
+
+

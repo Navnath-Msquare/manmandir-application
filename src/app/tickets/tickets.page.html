@@ -1,0 +1,221 @@
+<ion-header color="primary" mode="ios" class="ion-no-border">
+  <ion-toolbar color="dark">
+    <ion-title>
+      My Tickets
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content pullingIcon="chevron-down-circle-outline" pullingText="Pull to refresh"
+      refreshingSpinner="crescent" refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+  <ion-segment mode="ios" value="{{segmentData}}" class="segment" (ionChange)="changeBooking($event)">
+    <ion-segment-button mode="ios" value="upcoming">
+      <ion-label>Upcoming</ion-label>
+    </ion-segment-button>
+    <ion-segment-button mode="ios" value="completed">
+      <ion-label>Completed</ion-label>
+    </ion-segment-button>
+    <ion-segment-button mode="ios" value="cancelled">
+      <ion-label>Cancelled</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+  <ion-card mode="ios" class="ticket-card" *ngIf="loader && journeyData.length == 0" style="padding: 5px;">
+    <ion-card-header style="padding: 5px;border-bottom: 1px solid #EEEEEE;">
+      <ion-skeleton-text [animated]="true" style="width: 20%"></ion-skeleton-text>
+      <ion-skeleton-text [animated]="true" style="width: 20%"></ion-skeleton-text>
+    </ion-card-header>
+    <ion-card-header style="padding: 5px;border-bottom: 1px solid #EEEEEE;">
+      <ion-grid class="p-0 m-0">
+        <ion-row class="p-0 m-0">
+          <ion-col class="p-0 m-0">
+            <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+            <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+          </ion-col>
+          <ion-col class="p-0 m-0">
+            <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+            <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+          </ion-col>
+          <ion-col class="p-0 m-0">
+            <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+            <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-header>
+
+    <ion-card-content style="padding: 5px;">
+      <ion-grid class="p-0 m-0">
+        <ion-row class="p-0 m-0">
+          <ion-col size="8" class="p-0 m-0">
+            <ion-row class="p-0 m-0">
+              <ion-col class="p-0 m-0">
+                <ion-skeleton-text [animated]="true" style="width: 30px; height:30px"></ion-skeleton-text>
+              </ion-col>
+              <ion-col size="10" class="p-0 m-0">
+                <ion-skeleton-text [animated]="true" style="width: 20%"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+              </ion-col>
+            </ion-row>
+
+            <ion-row class="p-0 m-0" style="margin-top: 5px !important;">
+              <ion-col class="p-0 m-0">
+                <ion-skeleton-text [animated]="true" style="width: 30px; height:30px"></ion-skeleton-text>
+              </ion-col>
+              <ion-col size="10" class="p-0 m-0">
+                <ion-skeleton-text [animated]="true" style="width: 20%"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+              </ion-col>
+            </ion-row>
+          </ion-col>
+          <ion-col>
+            <div style="line-height:1.1;border-left: 1px solid #EEEEEE;">
+              <ion-skeleton-text [animated]="true" class="mx-auto" style="width: 20%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" class="mx-auto" style="width: 80%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" class="mx-auto" style="width: 80%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" class="mx-auto" style="width: 20%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" class="mx-auto" style="width: 20%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" class="mx-auto" style="width: 80%"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" class="mx-auto" style="width: 80%"></ion-skeleton-text>
+            </div>
+
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+
+    <ion-card-header style="padding: 5px;border-top: 1px solid #EEEEEE;">
+      <ion-grid class="p-0 m-0">
+        <ion-row class="p-0 m-0">
+          <ion-col size="8" class="p-0 m-0">
+            <ion-row class="p-0 m-0">
+              <ion-col class="p-0 m-0">
+                <ion-skeleton-text [animated]="true" style="width: 30px; height:30px"></ion-skeleton-text>
+              </ion-col>
+              <ion-col size="10" class="p-0 m-0">
+                <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 20%"></ion-skeleton-text>
+              </ion-col>
+            </ion-row>
+          </ion-col>
+          <ion-col class="p-0 m-0">
+            <ion-skeleton-text [animated]="true" class="mx-auto" style="width: 80%"></ion-skeleton-text>
+          </ion-col>
+
+        </ion-row>
+      </ion-grid>
+    </ion-card-header>
+  </ion-card>
+  <ion-card mode="ios" class="ticket-card" *ngIf="!loader && journeyData.length == 0" style="padding: 5px;">
+    <ion-card-header style="padding: 5px;">
+      <ion-card-title class="text-sm font-medium text-light text-center">No Bookings Found</ion-card-title>
+    </ion-card-header>
+  </ion-card>
+  <ion-card mode="ios" class="ticket-card" *ngFor="let item of journeyData" style="padding: 5px;"
+    [routerLink]="['/ticket-details']" [queryParams]="{id: item._id}">
+    <ion-card-header style="padding: 5px;border-bottom: 1px solid #EEEEEE;">
+      <ion-card-title class="text-sm font-medium text-light">Journey Date<br><span
+          class="text-slate-700 font-semibold">{{item.JourneyDate | date:'MMM dd, yyyy'}}</span></ion-card-title>
+    </ion-card-header>
+    <ion-card-header style="padding: 5px;border-bottom: 1px solid #EEEEEE;">
+      <ion-grid class="p-0 m-0">
+        <ion-row class="p-0 m-0">
+          <ion-col class="p-0 m-0">
+            <ion-card-title class="text-sm font-medium text-light">PNR No<br><span
+                class="text-slate-700 font-semibold">{{item.PNRNo}}</span></ion-card-title>
+          </ion-col>
+          <ion-col class="p-0 m-0">
+            <ion-card-title class="text-sm font-medium text-light">Ticket No<br><span
+                class="text-slate-700 font-semibold">{{item.TicketNo}}</span></ion-card-title>
+          </ion-col>
+          <ion-col class="p-0 m-0">
+            <ion-card-title class="text-sm font-medium text-light">Seat No<br><span
+                class="text-slate-700 font-semibold"><span
+                  *ngFor="let data of item?.Passengers;let ind = index">{{data.SeatNo}}<span
+                    *ngIf="ind != item.Passengers.length -1">, </span></span></span></ion-card-title>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-header>
+
+    <ion-card-content style="padding: 5px;">
+      <ion-grid class="p-0 m-0">
+        <ion-row class="p-0 m-0">
+          <ion-col size="8" class="p-0 m-0">
+            <ion-row class="p-0 m-0">
+              <ion-col class="p-0 m-0">
+                <img src="assets/icon/Iconsax/Broken/login.png" width="30px" height="30px" class="p-0 m-0">
+
+              </ion-col>
+              <ion-col size="10" class="p-0 m-0">
+                <p class="font-12 font-medium text-light">Boarding Point</p>
+                <p class="font-12 font-medium text-dark" style="line-height: 1.1;">{{item.PickupInfo?.PickupTime | date:
+                  'hh:mm a'}}, {{item.PickupInfo?.PickupName}}{{item.PickupInfo?.Address ? ', ' + item.PickupInfo.Address : ''}}{{item.PickupInfo?.Landmark ? ', ' + item.PickupInfo.Landmark : ''}}</p>
+              </ion-col>
+            </ion-row>
+
+            <ion-row class="p-0 m-0" style="margin-top: 5px !important;">
+              <ion-col class="p-0 m-0">
+                <img src="assets/icon/Iconsax/Broken/logout.png" width="30px" height="30px" class="p-0 m-0">
+
+              </ion-col>
+              <ion-col size="10" class="p-0 m-0">
+                <p class="font-12 font-medium text-light">Drop Point</p>
+                <p class="font-12 font-medium text-dark" style="line-height: 1.1;">
+                  {{item.ArrivalDateTime | date: 'hh:mm a'}}, {{item.ToCityName}}</p>
+              </ion-col>
+            </ion-row>
+          </ion-col>
+          <ion-col>
+            <div style="line-height:1.1;border-left: 1px solid #EEEEEE;">
+              <p class="text-sm font-regular text-center text-light uppercase">{{item.FromCityName}}</p>
+              <p class="text-sm font-medium text-center text-dark">{{item.DepartureDateTime | date: 'hh:mm a'}}</p>
+              <p class="font-10 font-medium text-center text-dark">{{item.DepartureDateTime | date: 'EEE dd, MMM'}}</p>
+
+              <p class="font-10 font-bold text-center text-secondary py-1">TO</p>
+
+              <p class="text-sm font-regular text-center text-light uppercase">{{item.ToCityName}}</p>
+              <p class="text-sm font-medium text-center text-dark">{{item.ArrivalDateTime | date: 'hh:mm a'}}</p>
+              <p class="font-10 font-medium text-center text-dark">{{item.ArrivalDateTime | date: 'EEE dd, MMM'}}</p>
+            </div>
+
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+
+    <ion-card-header style="padding: 5px;border-top: 1px solid #EEEEEE;">
+      <ion-grid class="p-0 m-0">
+        <ion-row class="p-0 m-0">
+          <ion-col size="8" class="p-0 m-0">
+            <ion-row class="p-0 m-0">
+              <ion-col class="p-0 m-0">
+                <img src="assets/icon/Iconsax/Linear/bus.png" width="30px" height="30px" class="p-0 m-0">
+              </ion-col>
+              <ion-col size="10" class="p-0 m-0">
+                <p class="text-sm font-medium text-dark" style="line-height: 1.1;">{{item.CompanyName}}</p>
+                <p class="font-12 font-medium text-light">{{item.BusTypeName}}</p>
+              </ion-col>
+            </ion-row>
+          </ion-col>
+          <ion-col class="p-0 m-0">
+            <p class="text-sm font-bold text-center text-dark">{{item.TotalSeats}} Seats</p>
+          </ion-col>
+
+        </ion-row>
+      </ion-grid>
+    </ion-card-header>
+  </ion-card>
+
+</ion-content>

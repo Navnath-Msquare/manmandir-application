@@ -1,0 +1,7 @@
+{
+  "name": "redbus",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

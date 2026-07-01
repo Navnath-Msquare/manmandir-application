@@ -1,0 +1,275 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+
+/* Core CSS required for Ionic components to work properly */
+@import "~@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "~@ionic/angular/css/normalize.css";
+@import "~@ionic/angular/css/structure.css";
+@import "~@ionic/angular/css/typography.css";
+@import '~@ionic/angular/css/display.css';
+
+/* Optional CSS utils that can be commented out */
+@import "~@ionic/angular/css/padding.css";
+@import "~@ionic/angular/css/float-elements.css";
+@import "~@ionic/angular/css/text-alignment.css";
+@import "~@ionic/angular/css/text-transformation.css";
+@import "~@ionic/angular/css/flex-utils.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// @font-face {
+//     font-family: 'Ubuntu';
+//     src: url('assets/font/Ubuntu/Ubuntu-Regular.ttf') format('truetype');
+//     font-weight: 500;
+//     font-style: normal;
+// }
+
+// @font-face {
+//     font-family: 'Ubuntu';
+//     src: url('assets/font/Ubuntu/Ubuntu-Bold.ttf') format('truetype');
+//     font-weight: 900;
+//     font-style: normal;
+// }
+
+// @font-face {
+//     font-family: 'Ubuntu';
+//     src: url('assets/font/Ubuntu/Ubuntu-Medium.ttf') format('truetype');
+//     font-weight: 700;
+//     font-style: normal;
+// }
+
+// @font-face {
+//     font-family: 'Ubuntu';
+//     src: url('assets/font/Ubuntu/Ubuntu-Light.ttf') format('truetype');
+//     font-weight: 300;
+//     font-style: normal;
+// }
+
+
+
+
+/* Set Poppins as the default font */
+
+
+
+// * {
+//     font-family: 'Ubuntu';
+//     font-weight: 500;
+// }
+
+// ion-toolbar{
+//     --background:#880808;
+//     color: white;
+// }
+
+// ion-button{
+//     font-weight: bold;
+//     font-size: 18px;
+//     letter-spacing: 0.5px;
+//     --border-radius: 20px;
+// }
+
+// .otp-input{
+//     width: 65px !important;
+//     height: 45px !important;
+//     font-size: 22px !important;
+//     border: unset !important;
+// }
+
+// .ng-otp-input-wrapper .otp-input:not(:last-child){
+//     margin-right: 15px !important;
+// }
+
+// .font-ubuntu{
+//     font-family: 'Ubuntu' !important;   
+// }
+
+// .font-light{
+//     font-weight: 300 !important;
+// }
+
+// .font-medium{
+//     font-weight: 700 !important;
+// }
+
+// .font-bold{
+//     font-weight: 900 !important;
+// }
+
+// .font-regular{
+//     font-weight: 500 !important;
+// }
+
+
+// .font-10{
+//     font-size: 10px !important;
+// }
+
+// .font-12{
+//     font-size: 12px !important;
+// }
+
+// .font-14{
+//     font-size: 14px !important;
+// }
+
+// .font-18{
+//     font-size: 18px !important;
+// }
+
+// .font-20{
+//     font-size: 20px !important;
+// }
+
+// .font-22{
+//     font-size: 22px !important;
+// }
+
+// .font-24{
+//     font-size: 24px !important;
+// }
+
+// .font-34{
+//     font-size: 34px !important;
+// }
+
+
+.bg-primary {
+    background-color: #b43533 !important;
+}
+
+// .bg-secondary{
+//     background-color: #F9A602 !important;
+// }
+
+// .text-primary{
+//     color: #880808 !important;
+// }
+
+// .text-secondary{
+//     color: #F9A602 !important;
+// }
+
+// .text-success{
+//     color: #43A047 !important;
+// }
+
+// .text-light{
+//     color: #A0A0A0 !important;
+// }
+
+// .text-white{
+//     color: #ffffff !important;
+// }
+
+// .text-dark{
+//     color: #000000 !important;
+// }
+
+// .text-center{
+//     text-align: center !important;
+// }
+
+// .text-right{
+//     text-align: right !important;
+// }
+
+// .text-left{
+//     text-align: left !important;
+// }
+
+// .m-0{
+//     margin: unset !important;
+// }
+
+// .p-0{
+//     padding: unset !important;
+// }
+
+
+// .otp-input{
+//     border: 1px solid #ccc !important; 
+//   }
+
+//   .profile-update{
+//     --border-radius:15px !important
+// }
+
+// .swiper-container-horizontal>.swiper-pagination-bullets{
+//     bottom:0px;
+// }
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+body,
+ion-app {
+    --ion-font-family: 'Poppins', sans-serif !important;
+}
+
+.font-black {
+    font-weight: 600 !important;
+}
+
+
+//my code
+.otp-input {
+    background: #e8e4e4;
+    border: unset !important;
+    font-size: 16px;
+    width: 45px !important;
+    height: 45px !important;
+    border-radius: 6px !important;
+}
+
+.homeSlides {
+    .swiper-pagination-bullets {
+        bottom: 0px !important;
+    }
+}
+
+#searchbar {
+    .searchbar-input {
+        padding-inline-start: unset !important;
+    }
+
+    --clear-button-color: #b43533;
+    padding-top: unset !important;
+    padding-bottom: unset !important;
+    height: 44px !important;
+    padding-inline-end: unset;
+
+    .searchbar-clear-icon.sc-ion-searchbar-ios {
+        width: 25px;
+    }
+}
+
+.ion-color-faint {
+    --ion-color-base: var(--ion-color-faint);
+    --ion-color-base-rgb: var(--ion-color-faint-rgb);
+    --ion-color-contrast: var(--ion-color-faint-contrast);
+    --ion-color-contrast-rgb: var(--ion-color-faint-contrast-rgb);
+    --ion-color-shade: var(--ion-color-faint-shade);
+    --ion-color-tint: var(--ion-color-faint-tint);
+}
+
+.ion-color-sky {
+    --ion-color-base: var(--ion-color-sky);
+    --ion-color-base-rgb: var(--ion-color-sky-rgb);
+    --ion-color-contrast: var(--ion-color-sky-contrast);
+    --ion-color-contrast-rgb: var(--ion-color-sky-contrast-rgb);
+    --ion-color-shade: var(--ion-color-sky-shade);
+    --ion-color-tint: var(--ion-color-sky-tint);
+}

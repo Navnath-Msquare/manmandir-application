@@ -1,0 +1,111 @@
+<ion-header mode="ios" class="ion-no-border">
+  <ion-toolbar color="dark">
+    <ion-title>
+      Wallet
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div style="height: 250px;" class="bg-[#222428]">
+    <h1 class="text-white font-bold text-center text-[34px] pt-12">₹ {{userWalletBalance}}</h1>
+    <p class="text-white font-medium text-center text-lg">Wallet Balance</p>
+    <p class="text-center">
+      <ion-button class="px-14 mt-7 font-medium" color="primary" mode="ios" id="open-modal">
+        <!-- <ion-icon slot="start" name="add-circle-outline"></ion-icon> -->
+        <img src="assets/icon/Add.png" style="width: 20px;margin-right: 5px;">
+        Add Money
+      </ion-button>
+    </p>
+  </div>
+  <div class="passbook">
+    <h1 class="text-base font-bold">Passbook</h1>
+    <div *ngIf="!lodingTrans">
+      <ion-card mode="ios" class="passbook-card" *ngFor="let item of walletTransactions;">
+        <ion-card-content style="padding:5px;">
+          <ion-grid class="p-0 m-0">
+            <ion-row class="p-0 m-0">
+              <ion-col size="8">
+                <p class="text-base font-medium text-dark" style="line-height: 1.1;">{{item.description}}</p>
+                <p class="text-sm font-medium text-light">{{item.createdAt | date:"dd MMM yyy hh:mm a" }}</p>
+              </ion-col>
+              <ion-col>
+                <p *ngIf="item.type == 'credit'" class="text-lg font-bold text-center text-green-500 py-1">+ ₹
+                  {{item.amount}}</p>
+                <p *ngIf="item.type == 'debit'" class="text-lg font-bold text-center text-red-500 py-1">- ₹
+                  {{item.amount}}</p>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <div *ngIf="lodingTrans">
+      <ion-card mode="ios" class="passbook-card">
+        <ion-card-content style="padding:5px;">
+          <ion-grid class="p-0 m-0">
+            <ion-row class="p-0 m-0">
+              <ion-col size="8">
+                <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+              </ion-col>
+              <ion-col>
+                <ion-skeleton-text class="mx-auto" [animated]="true" style="width: 20%"></ion-skeleton-text>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+
+
+
+  <ion-modal #modal trigger="open-modal" mode="ios" style="--height: 50%;
+  --border-radius: 16px;
+  --box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--width:90%">
+    <ng-template>
+      <ion-content style="--background: #fff;">
+        <div class="p-4">
+          <h1 class="text-xl font-black">Add Money to <span class="text-primary text-xl font-black">Wallet</span></h1>
+          <br>
+
+          <div class="container">
+            <ion-item lines="none">
+              <ion-avatar slot="start">
+                <img alt="" src="assets/ruppe.png" />
+              </ion-avatar>
+              <input type="number" [(ngModel)]="addAmountValue" style="background-color: white;" id="mobile-number" autofocus>
+            </ion-item>
+          </div>
+
+          <div class="py-4 mt-6">
+            <ion-chip class="px-5" (click)="addAmount(100)">
+              <ion-label class="font-bold">+100</ion-label>
+            </ion-chip>
+            <ion-chip class="px-5" (click)="addAmount(200)">
+              <ion-label class="font-bold">+200</ion-label>
+            </ion-chip>
+            <ion-chip class="px-5" (click)="addAmount(500)">
+              <ion-label class="font-bold">+500</ion-label>
+            </ion-chip>
+            <ion-chip class="px-5" (click)="addAmount(1000)">
+              <ion-label class="font-bold">+1000</ion-label>
+            </ion-chip>
+          </div>
+
+          <ion-button class="mt-6" expand="block" mode="ios" (click)="payWithRazorpay()" color="primary">Proceed to
+            add ₹{{addAmountValue}}</ion-button>
+        </div>
+
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Karobooking</string>
+    <string name="title_activity_main">Karobooking</string>
+    <string name="package_name">com.msquare.karobooking</string>
+    <string name="custom_url_scheme">com.msquare.karobooking</string>
+</resources>

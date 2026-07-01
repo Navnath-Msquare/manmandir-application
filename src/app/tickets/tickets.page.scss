@@ -1,0 +1,26 @@
+// ion-content{
+//     --background: #EEEEEE;
+// }
+
+.user-avatar{
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+.segment{
+    --background: unset !important;
+    ion-segment-button{
+        --background: unset !important;
+        --background-checked: unset !important;
+        font-weight: normal;
+        font-size: 17px;
+        --color-checked: #b43533 !important;
+        --indicator-box-shadow: unset !important;
+        --indicator-color: unset!important;
+        padding-bottom: 5px;
+    }
+    ion-segment-button.segment-button-checked{
+        border-bottom: 2px solid #b43533;
+        --border-radius: unset;
+    }
+}

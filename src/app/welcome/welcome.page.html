@@ -1,0 +1,71 @@
+<!-- <ion-content>
+  <div class="image">
+    <img src="assets/welcome.png">
+  </div>
+
+  <h1 class="welcome">Welcome</h1>
+  <div class="ion-text-center" style="margin-bottom: 50px;">
+    <span class="welcome-text">You are just one step away</span>
+  </div>
+
+  <div class="container">
+    
+      <label for="mobile-number" class="text-dark">Mobile Number</label>
+      <input type="tel" id="mobile-number" [(ngModel)]="mobileNo" pattern="[0-9]{10}" [disabled]="optBox" required>
+
+      
+      <div class="ion-text-center" *ngIf="optBox">
+        <input type="tel" id="mobile-number" [(ngModel)]="valueOTP" pattern="[0-9]{10}" placeholder="OTP" required>
+      </div>
+      <div class="ion-text-right mt-2" *ngIf="optBox" (click)="changeNumber()">
+        <p class="text-light">Change Number</p>
+      </div>
+  </div>
+  
+
+  <div style="text-align: center;padding: 15px 50px;">
+    <ion-button mode="ios" color="warning" expand="block" (click)="sendOTP()" *ngIf="!optBox">Send OTP</ion-button>
+    <ion-button mode="ios" color="warning" expand="block" (click)="verifyOTP()" *ngIf="optBox">Verify</ion-button>
+    <p style="color: #585656;font-size: 14px;">By Clicking on Continue, you are agree to <span class="text-primary" (click)="openPrivacyModal()">Privacy
+      Policy</span> and <span class="text-primary" (click)="openTermsModal()">Terms & Conditions</span></p>
+  </div>
+  </ion-content>   -->
+
+
+
+
+
+<ion-content>
+  <img style="height: auto; margin: 20px auto"
+    src="assets\img\Screenshot_2024-06-20_at_11.58.05_AM-removebg-preview 2.png">
+  <p style="font-size: xx-large; font-weight: bolder; text-align: center;">
+    KaroBooking.Com
+  </p>
+
+  <div class="px-8 py-2 mt-5">
+
+    <div class="float-right mb-1 text-red-600 font-semibold" (click)="changeNumber()">
+      <p class="text-light">Change Number</p>
+    </div>
+    <ion-label class="mb-1" style="display: block;">Mobile No.</ion-label>
+    <ion-input class="mb-6" id="user-name" pattern="[0-9]{10}" [disabled]="optBox" type="number" fill="outline"
+      [(ngModel)]="mobileNo" placeholder="Enter Your Mobile No. Here">
+    </ion-input>
+
+    <!-- <ion-label class="mb-1" style="display: block;">OTP</ion-label> -->
+    <!-- <ion-input id="password" class="mb-2" type="password" fill="outline" placeholder="Enter Your Password Here">
+    </ion-input> -->
+    <ng-otp-input class="text-center mt-3" *ngIf="optBox" (onInputChange)="onOtpChange($event)"
+      [config]="{length:4,allowNumbersOnly:true}"></ng-otp-input>
+
+    <!-- <p color="danger" class="text-red-600 mb-4 ion-text-right font-semibold"> Forgot Password?</p> -->
+    <ion-button [disabled]="loader" color="primary" mode="ios" (click)="sendOTP()" *ngIf="!optBox" class="mt-4 mx-0"
+      expand="block">
+      <ion-spinner name="bubbles" class="me-1" *ngIf="loader"></ion-spinner>Send OTP
+    </ion-button>
+    <ion-button [disabled]="loader" color="primary" mode="ios" (click)="verifyOTP()" *ngIf="optBox" class="mt-4 mx-0"
+      expand="block">
+      <ion-spinner name="bubbles" class="me-1" *ngIf="loader"></ion-spinner>Verify OTP
+    </ion-button>
+  </div>
+</ion-content>

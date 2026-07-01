@@ -1,0 +1,388 @@
+/* ===========================
+   LOCATION
+=========================== */
+.locationname {
+  font-size: 14px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-weight: 600;
+}
+
+/* ===========================
+   SEAT CARD
+=========================== */
+.seat-card {
+  border: 1px solid black;
+  box-shadow: none;
+  border-radius: 100px 100px 10px 10px;
+  margin-top: 10px;
+  padding-top: 20px;
+}
+
+/* ===========================
+   STATUS PATHS
+=========================== */
+.statusBooked path {
+  fill: #CBCBCB !important;
+}
+
+.statusAvailable path {
+  fill: none !important;
+}
+
+.statusYourSeat path {
+  fill: black !important;
+}
+
+.statusForMale>path {
+  stroke: #00A2FE !important;
+  fill: none !important;
+}
+
+.statusForFemale path {
+  stroke: #EC48A6 !important;
+  fill: none !important;
+}
+
+.statusSelected path {
+  fill: #0ab39c !important;
+  stroke: black !important;
+}
+
+/* ===========================
+   STATUS CONTAINER
+=========================== */
+.status-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.status-container h1 {
+  display: flex;
+  align-items: center;
+}
+
+.status-container h1 svg {
+  width: 25px;
+  margin-right: 10px;
+}
+
+/* ===========================
+   CIRCLE INDICATORS
+=========================== */
+.circle1,
+.circle3,
+.circle4,
+.circle5,
+.circle2 {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+}
+
+.circle1 {
+  background-color: #d9d9d9;
+}
+
+.circle2 {
+  border: 1px solid black;
+}
+
+.circle3 {
+  background-color: #EC48A6;
+}
+
+.circle4 {
+  background-color: #0ab39c;
+}
+
+.circle5 {
+  background-color: #00A2FE;
+}
+
+/* ===========================
+   LAYOUT
+=========================== */
+#upperlower {
+  display: flex;
+  justify-content: center;
+}
+
+#lower {
+  width: 70%;
+  border-radius: 10px 0 0 10px;
+  background-color: violet;
+  text-align: end;
+}
+
+#upper {
+  width: 70%;
+  border-radius: 0 10px 10px 0;
+  background-color: grey;
+}
+
+#layout {
+  height: 300px;
+  width: 300px;
+}
+
+#layoutlower,
+#layoutupper {
+  position: relative;
+  left: 20%;
+}
+
+#user-name {
+  border-radius: 6px;
+  background-color: rgb(232, 228, 228);
+  --padding-start: 10px;
+  --padding-end: 10px;
+}
+
+.block {
+  width: 100%;
+  height: auto;
+}
+
+.blocks {
+  width: 100%;
+  height: 450px;
+  overflow-y: auto;
+}
+
+.modal-fare {
+  --height: auto;
+}
+
+/* ===========================
+   SEGMENTS
+=========================== */
+.segment,
+.segmentPassenger {
+  border-radius: 20px;
+}
+
+.segment ion-segment-button {
+  --border-radius: 20px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.segment ion-segment-button ion-label {
+  line-height: inherit;
+}
+
+.segment ion-segment-button::part(indicator-background) {
+  background: #bebff9;
+}
+
+.segmentPassenger {
+  --background: #f8f8f8 !important;
+}
+
+.segmentPassenger ion-segment-button {
+  --background: unset !important;
+  --background-checked: unset !important;
+  font-weight: normal;
+  font-size: 17px;
+  --color-checked: #b43533 !important;
+  --indicator-box-shadow: unset !important;
+  --indicator-color: unset !important;
+  padding-bottom: 5px;
+  --border-radius: unset;
+}
+
+.segmentPassenger ion-segment-button.segment-button-checked {
+  border-bottom: 2px solid #b43533;
+}
+
+/* ===========================
+   ITEM
+=========================== */
+.item ion-item .input-wapper {
+  justify-content: center;
+}
+
+/* ===========================
+   SEAT GRID
+=========================== */
+.statusForMale {
+  color: #2196F3;
+  fill: #E3F2FD;
+}
+
+.statusForFemale {
+  color: #E91E63;
+  fill: #FCE4EC;
+}
+
+.seat-grid {
+  padding: 0;
+  margin: 0;
+}
+
+.wheel-row,
+.seat-row {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 0 8px;
+}
+
+@media (max-width: 576px) {
+
+  .wheel-row,
+  .seat-row {
+    gap: 4px;
+    padding: 0 4px;
+  }
+}
+
+.wheel-cell,
+.seat-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  position: relative;
+}
+
+.seat-cell.is-sleeper {
+  min-height: 90px;
+}
+
+/* ===========================
+   STEERING WHEEL
+=========================== */
+.steering-wheel {
+  width: clamp(30px, 5vw, 40px);
+  height: auto;
+  object-fit: contain;
+}
+
+/* ===========================
+   SEAT WRAPPER
+=========================== */
+.seat-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 65px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.seat-row:has(.seat-cell:nth-child(7):last-child) .seat-wrapper {
+  max-width: 48px;
+}
+
+@media (max-width: 576px) {
+  .seat-wrapper {
+    max-width: 50px;
+  }
+}
+
+/* ===========================
+   SEAT ICON
+=========================== */
+.seat-icon {
+  width: 100%;
+  height: auto;
+  max-height: 55px;
+  display: block;
+  transition: all 0.2s ease;
+}
+
+.seat-icon.is-sleeper {
+  max-height: 90px;
+}
+
+.seat-icon.statusBooked {
+  color: #9E9E9E;
+  fill: #E0E0E0;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.seat-icon.statusAvailable {
+  color: #4CAF50;
+  fill: #E8F5E9;
+}
+
+.seat-icon.statusForMale {
+  color: #2196F3;
+  fill: #E3F2FD;
+}
+
+.seat-icon.statusForFemale {
+  color: #E91E63;
+  fill: #FCE4EC;
+}
+
+.seat-icon.statusSelected {
+  color: #FF9800;
+  fill: #FFF3E0;
+  animation: seatPulse 1.2s ease-in-out infinite;
+}
+
+.seat-row:has(.seat-cell:nth-child(7):last-child) .seat-icon {
+  max-height: 45px;
+}
+
+@keyframes seatPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 transparent);
+  }
+
+  50% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 4px rgba(255, 152, 0, 0.4));
+  }
+}
+
+/* ===========================
+   SEAT NUMBER
+=========================== */
+.seat-number {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(9px, 1.8vw, 12px);
+  font-weight: 700;
+  color: #212121;
+  pointer-events: none;
+  z-index: 10;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.statusBooked .seat-number {
+  color: #757575;
+}
+
+/* ===========================
+   PRICE LABEL
+=========================== */
+.seat-price {
+  font-size: clamp(9px, 1.5vw, 11px);
+  color: #424242;
+  font-weight: 600;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+@media (max-width: 576px) {
+  .seat-price {
+    font-size: 9px;
+  }
+}

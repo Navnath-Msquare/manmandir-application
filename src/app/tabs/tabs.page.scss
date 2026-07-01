@@ -1,0 +1,50 @@
+
+// ion-tab-bar {
+//     --background:white;
+//     padding: 10px 0px;
+//     --border:unset;
+    
+//     .tab-selected{
+//         ion-icon{
+//             font-size: 24px;
+//             color: #FF6260;
+//         }
+    
+//         ion-label{
+//             font-size: 14px;
+//             font-weight: 700;
+//             color: #FF6260;
+//         }
+//     }
+//     ion-icon{
+//         font-size: 24px;
+//         color: #000;
+//     }
+
+//     ion-label{
+//         font-size: 14px;
+//         color: #000;
+//         font-weight: 700;
+//     }
+// }
+
+//mycode
+
+ion-tab-bar {
+    --background: rgb(223, 222, 222);
+    padding: 10px 0px;
+    --border:unset;
+    
+    .tab-selected{
+        ion-label{
+            font-size: 14px;
+            font-weight: 800;
+        }
+    }
+
+    ion-label{
+        font-size: 13px;
+        color: #000;
+        font-weight: 500;
+    }
+}

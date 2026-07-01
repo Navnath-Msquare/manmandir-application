@@ -1,0 +1,33 @@
+<div class="bg-white">
+    <section *ngIf="status.paymentStatus == 'success' || status.paymentStatus == 'Success'">
+        <div class="grid grid-cols-1 place-content-center h-[70vh]">
+            <div>
+                <img src="assets/check.png" class="w-1/4 mx-auto">
+                <h3 class="text-2xl text-center font-bold leading-normal text-[#1F4878]">Payment success. <br><span *ngIf="!authS.currentUserValue">Please sign in to continue.</span></h3>
+                <div class="text-center" *ngIf="!authS.currentUserValue">
+                    <button class="my-3 text-center rounded-md py-2 px-10 text-sm font-semibold border-[#1F4878] bg-[#1F4878] hover:bg-[#517097] text-white" [routerLink]="['/welcome']">Sign In</button>
+                </div>
+                <div class="text-center" *ngIf="authS.currentUserValue">
+                    <button class="my-3 text-center rounded-md py-2 px-10 text-sm font-semibold border-[#1F4878] bg-[#1F4878] hover:bg-[#517097] text-white" [routerLink]="['/home']">Get Started</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section *ngIf="status.paymentStatus != 'success' && status.paymentStatus != 'Success'">
+        <div class="grid grid-cols-1 place-content-center h-[70vh]">
+            <div>
+                <img src="assets/cross.png" class="w-1/4 mx-auto">
+                <h3 class="text-2xl text-center font-bold leading-normal text-[#1F4878]">Payment failed. <br><span *ngIf="!authS.currentUserValue">Please Sign In & Proceed Payment to continue.</span></h3>
+                <div class="text-center" *ngIf="!authS.currentUserValue">
+                    <button class="my-3 text-center rounded-md py-2 px-10 text-sm font-semibold border-[#1F4878] bg-[#1F4878] hover:bg-[#517097] text-white" [routerLink]="['/welcome']">Sign In</button>
+                </div>
+                <div class="text-center" *ngIf="authS.currentUserValue">
+                    <button class="my-3 text-center rounded-md py-2 px-10 text-sm font-semibold border-[#1F4878] bg-[#1F4878] hover:bg-[#517097] text-white" [routerLink]="['/home']">Pay to continue</button>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+

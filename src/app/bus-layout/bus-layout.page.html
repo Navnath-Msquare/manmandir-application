@@ -1,0 +1,816 @@
+<!-- my code -->
+<ion-header>
+  <ion-toolbar color="primary" id="toolbar">
+    <ion-grid>
+      <ion-row>
+        <ion-col size="1" class="content-center" (click)="location.back()">
+          <ion-icon name="chevron-back-sharp" class="font-extrabold"></ion-icon>
+        </ion-col>
+        <ion-col size="4.5">
+          <ion-text class="font-bold">{{from}},<p class="border-b border-slate-800 pb-2">{{fromState}}</p></ion-text>
+        </ion-col>
+        <ion-col size="1" class="content-center">
+          <img src="assets\img\Data Transfer.png" class="w-full">
+        </ion-col>
+        <ion-col size="4.5">
+          <ion-text class="font-bold">{{to}},<p class="border-b border-slate-800 pb-2">{{toState}}</p></ion-text>
+        </ion-col>
+        <ion-col size="1">
+          <!-- <ion-icon size="large" name="options-outline" class="pt-2.5"></ion-icon> -->
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-toolbar>
+</ion-header>
+
+
+<ion-content>
+  <div>
+    <ion-card style="border-radius: 15px;" class="mb-3">
+      <ion-grid>
+        <ion-row style="border-bottom: 1px solid black;" class="p-0 m-0">
+          <ion-col size="11">
+            <ion-label color="dark" class="font-black ">
+              {{busList?.CompanyName }}
+            </ion-label>
+          </ion-col>
+          <ion-col size="1">
+            <img src=".\assets\img\Map Pinpoint.png" id="open-modal-routes" (click)="combineLists()" alt="routes">
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="3.5" class="ion-text-start">
+            <p style="color: black; font-weight: bolder;">{{busList.DeptTime | date:'hh:mm a'}}</p>
+            <p>{{from}}</p>
+            <p>{{fromState}}</p>
+          </ion-col>
+          <ion-col size="5" class="ion-text-center">
+            <p><ion-icon name="remove-sharp"></ion-icon> {{busList.Duration}}h <ion-icon name="remove-sharp"></ion-icon>
+            </p>
+            <p style="color: black; font-weight: bolder;">Available Seats:{{Availability}}</p>
+          </ion-col>
+          <ion-col size="3.5" class="ion-text-end">
+            <p style="color: black; font-weight: bolder;">{{busList.ArrTime | date:'hh:mm a'}}</p>
+            <p>{{to}}</p>
+            <p>{{toState}}</p>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card>
+
+    <ion-item color="primary" style="--min-height: 20px;">
+      <p class="m-0 text-xs">This is For The Updates if Any thing Happens...</p>
+    </ion-item>
+
+    <ion-grid>
+      <ion-row class="">
+        <ion-col>
+          <ion-text class="font-medium flex text-xs ion-align-items-center ion-justify-content-center">
+            <div class="self-center circle1 me-1"></div>Booked
+          </ion-text>
+        </ion-col>
+        <ion-col>
+          <ion-text class="font-medium flex text-xs ion-align-items-center ion-justify-content-center">
+            <div class="self-center circle2 me-1"></div>Available
+          </ion-text>
+        </ion-col>
+        <ion-col>
+          <ion-text class="font-medium flex text-xs ion-align-items-center ion-justify-content-center">
+            <div class="self-center circle5 me-1"></div>Male
+          </ion-text>
+        </ion-col>
+        <ion-col>
+          <ion-text class="font-medium flex text-xs ion-align-items-center ion-justify-content-center">
+            <div class="self-center circle3 me-1"></div>Female
+          </ion-text>
+        </ion-col>
+        <ion-col>
+          <ion-text class="font-medium flex text-xs ion-align-items-center ion-justify-content-center">
+            <div class="self-center circle4 me-1"></div>Selected
+          </ion-text>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <div class="px-14 py-2" *ngIf="lower && upper">
+      <ion-segment class="segment" value="Lower" mode="ios" color="primary" [(ngModel)]="upperlower">
+        <ion-segment-button value="Lower">
+          <ion-label class="m-0">Lower</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="Upper">
+          <ion-label class="m-0">Upper</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+
+    <!-- Lower Deck - Search for "upperlower == 'Lower'" -->
+    <ion-card class="seat-card" mode="ios" *ngIf="upperlower == 'Lower'">
+      <ion-card-content>
+        <ion-grid class="seat-grid">
+
+          <!-- Steering Wheel Row -->
+          <div class="wheel-row" [ngStyle]="{'grid-template-columns': gridTemplateColumnsLower}">
+            <div *ngFor="let item of litems; let i = index" class="wheel-cell">
+              <img *ngIf="i === (chartLayout?.Info?.Lower?.MaxCols || 5) - 1" src="assets/icon/wheel.png"
+                class="steering-wheel">
+            </div>
+          </div>
+
+          <!-- Seat Rows -->
+          <div *ngFor="let row of lowerRow" class="seat-row"
+            [ngStyle]="{'grid-template-columns': gridTemplateColumnsLower}">
+
+            <ng-container *ngFor="let seat of row.ar">
+              <div class="seat-cell" [style.grid-column]="seat.col + 1" [class.has-seat]="true"
+                [class.is-sleeper]="seat.seat_type == 2 || seat.seat_type == 4">
+
+                <div class="seat-wrapper" [id]="seat.index"
+                  [class.is-sleeper]="seat.seat_type == 2 || seat.seat_type == 4"
+                  (click)="seat.status != 0 ? getSelectedSeat(seat) : null">
+
+                  <!-- Seat Icon -->
+                  <svg class="seat-icon" [class.is-sleeper]="seat.seat_type == 2 || seat.seat_type == 4"
+                    [class.statusBooked]="seat.status == 0"
+                    [class.statusAvailable]="seat.status == 1 && !isSeatSelected(seat)"
+                    [class.statusForMale]="seat.status == 2 && !isSeatSelected(seat)"
+                    [class.statusForFemale]="seat.status == 3 && !isSeatSelected(seat)"
+                    [class.statusSelected]="isSeatSelected(seat)" xmlns="http://www.w3.org/2000/svg"
+                    [attr.viewBox]="(seat.seat_type == 2 || seat.seat_type == 4) ? '0 0 260 490' : '0 0 473 421'">
+
+                    <!-- Sleeper Path -->
+                    <path *ngIf="seat.seat_type == 2 || seat.seat_type == 4"
+                      d="M21 5H239C247.837 5 255 12.1634 255 21V469C255 477.837 247.837 485 239 485H21C12.1634 485 5 477.837 5 469V21C5 12.1635 12.1634 5 21 5ZM44 413H215C217.761 413 220 415.239 220 418V434C220 436.761 217.761 439 215 439H44C41.2386 439 39 436.761 39 434V418C39 415.239 41.2386 413 44 413ZM215 403H44C35.7157 403 29 409.716 29 418V434C29 442.284 35.7157 449 44 449H215C223.284 449 230 442.284 230 434V418C230 409.716 223.284 403 215 403Z"
+                      stroke="currentColor" stroke-width="5" />
+
+                    <!-- Seater Path -->
+                    <path *ngIf="seat.seat_type == 1"
+                      d="M18.5 232L17.5 4M452.5 239L451.5 11M19.0138 5.49349L453.014 9.49349M65.5475 367.322L34.5526 243.271C30.2645 226.109 5 229.217 5 246.907V400.993C5 409.278 11.7157 415.993 20 415.993H453C461.284 415.993 468 409.278 468 400.993V251.172C468 233.409 442.583 230.387 438.418 247.655L409.587 367.202C407.963 373.939 401.935 378.686 395.005 378.686H80.1002C73.2164 378.686 67.2162 374 65.5475 367.322Z"
+                      stroke="currentColor" stroke-width="10" />
+                  </svg>
+
+                  <!-- Seat Number -->
+                  <span class="seat-number">
+                    {{ seat.seat_no || allData?.ChartSeats?.Seats[seat.index] }}
+                  </span>
+
+                  <!-- Price -->
+                  <span class="seat-price" *ngIf="seat.status >= 1">
+                    ₹{{ seat.fare }}
+                  </span>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Lower Deck - Search for "upperlower == 'Lower'" -->
+    <ion-card class="seat-card" mode="ios" *ngIf="upperlower == 'Upper'">
+      <ion-card-content>
+        <ion-grid class="seat-grid">
+
+          <!-- Steering Wheel Row -->
+          <div class="wheel-row" [ngStyle]="{'grid-template-columns': gridTemplateColumnsUpper}">
+            <div *ngFor="let item of uitems; let i = index" class="wheel-cell">
+              <img *ngIf="i === (chartLayout?.Info?.Upper?.MaxCols || 5) - 1" src="assets/icon/wheel.png"
+                class="steering-wheel">
+            </div>
+          </div>
+
+          <!-- Seat Rows -->
+          <div *ngFor="let row of upperRow" class="seat-row"
+            [ngStyle]="{'grid-template-columns': gridTemplateColumnsUpper}">
+
+            <ng-container *ngFor="let seat of row.ar">
+              <div class="seat-cell" [style.grid-column]="seat.col + 1" [class.has-seat]="true"
+                [class.is-sleeper]="seat.seat_type == 2 || seat.seat_type == 4">
+
+                <div class="seat-wrapper" [id]="seat.index"
+                  [class.is-sleeper]="seat.seat_type == 2 || seat.seat_type == 4"
+                  (click)="seat.status != 0 ? getSelectedSeat(seat) : null">
+
+                  <!-- Seat Icon -->
+                  <svg class="seat-icon" [class.is-sleeper]="seat.seat_type == 2 || seat.seat_type == 4"
+                    [class.statusBooked]="seat.status == 0"
+                    [class.statusAvailable]="seat.status == 1 && !isSeatSelected(seat)"
+                    [class.statusForMale]="seat.status == 2 && !isSeatSelected(seat)"
+                    [class.statusForFemale]="seat.status == 3 && !isSeatSelected(seat)"
+                    [class.statusSelected]="isSeatSelected(seat)" xmlns="http://www.w3.org/2000/svg"
+                    [attr.viewBox]="(seat.seat_type == 2 || seat.seat_type == 4) ? '0 0 260 490' : '0 0 473 421'">
+
+                    <!-- Sleeper Path -->
+                    <path *ngIf="seat.seat_type == 2 || seat.seat_type == 4"
+                      d="M21 5H239C247.837 5 255 12.1634 255 21V469C255 477.837 247.837 485 239 485H21C12.1634 485 5 477.837 5 469V21C5 12.1635 12.1634 5 21 5ZM44 413H215C217.761 413 220 415.239 220 418V434C220 436.761 217.761 439 215 439H44C41.2386 439 39 436.761 39 434V418C39 415.239 41.2386 413 44 413ZM215 403H44C35.7157 403 29 409.716 29 418V434C29 442.284 35.7157 449 44 449H215C223.284 449 230 442.284 230 434V418C230 409.716 223.284 403 215 403Z"
+                      stroke="currentColor" stroke-width="5" />
+
+                    <!-- Seater Path -->
+                    <path *ngIf="seat.seat_type == 1"
+                      d="M18.5 232L17.5 4M452.5 239L451.5 11M19.0138 5.49349L453.014 9.49349M65.5475 367.322L34.5526 243.271C30.2645 226.109 5 229.217 5 246.907V400.993C5 409.278 11.7157 415.993 20 415.993H453C461.284 415.993 468 409.278 468 400.993V251.172C468 233.409 442.583 230.387 438.418 247.655L409.587 367.202C407.963 373.939 401.935 378.686 395.005 378.686H80.1002C73.2164 378.686 67.2162 374 65.5475 367.322Z"
+                      stroke="currentColor" stroke-width="10" />
+                  </svg>
+
+                  <!-- Seat Number -->
+                  <span class="seat-number">
+                    {{ seat.seat_no || allData?.ChartSeats?.Seats[seat.index] }}
+                  </span>
+
+                  <!-- Price -->
+                  <span class="seat-price" *ngIf="seat.status >= 1">
+                    ₹{{ seat.fare }}
+                  </span>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+  </div>
+  <ion-modal #modal [isOpen]="isBook" [backdropDismiss]="false">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary" id="toolbar">
+          <ion-grid>
+            <ion-row>
+              <ion-col size="1" class="content-center" (click)="isBook = false">
+                <ion-icon name="chevron-back-sharp" class="font-extrabold"></ion-icon>
+              </ion-col>
+              <ion-col size="4.5">
+                <ion-text class="font-bold">{{from}},<p class="border-b border-slate-800 pb-2">{{fromState}}</p>
+                </ion-text>
+              </ion-col>
+              <ion-col size="1" class="content-center">
+                <img src="assets\img\Data Transfer.png" class="w-full">
+              </ion-col>
+              <ion-col size="4.5">
+                <ion-text class="font-bold">{{to}},<p class="border-b border-slate-800 pb-2">{{toState}}</p></ion-text>
+              </ion-col>
+              <ion-col size="1">
+                <!-- <ion-icon size="large" name="options-outline" class="pt-2.5"></ion-icon> -->
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <div>
+          <ion-item lines="none" style="--padding-start:10px;">
+            <ion-label style="font-size: 18px !important;" class="font-bold">
+              Passenger Details
+            </ion-label>
+          </ion-item>
+
+          <div class="px-2.5">
+            <ng-container *ngFor="let item of bookedData;let i = index;" class="mb-2">
+              <p class="text-sm font-medium text-black pt-1 mb-1">Passenger {{i+1}} <span class="text-red-600 font-bold"
+                  style="float: right;">{{item.seatNo}}</span></p>
+              <ion-input class="mb-2" id="user-name" type="text" fill="outline" [(ngModel)]="item.name"
+                placeholder="Enter Your Full Name Here">
+              </ion-input>
+              <ion-grid class="p-0">
+                <ion-row class="p-0">
+                  <ion-col class="p-0">
+                    <ion-input class="me-1" id="user-name" type="text" inputmode="numeric" maxlength="3" fill="outline" [(ngModel)]="item.age"
+                      placeholder="Enter Your Age Here" (input)="limitAge($event, item)">
+                    </ion-input>
+                  </ion-col>
+                  <ion-col class="p-0">
+                    <ion-select class="ms-1" id="user-name" [interfaceOptions]="{header: 'Select Gender'}"
+                      [(ngModel)]="item.gender" placeholder="Select Gender">
+                      <ion-select-option value="M">Male</ion-select-option>
+                      <ion-select-option value="F">Female</ion-select-option>
+                    </ion-select>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </ng-container>
+          </div>
+
+          <ion-item lines="none">
+            <ion-checkbox style="vertical-align: text-bottom;" class="text-base me-2 font-medium text-dark" slot="start"
+              [(ngModel)]="isGST"></ion-checkbox>
+            <ion-label>I have a GST number (optional)?</ion-label>
+          </ion-item>
+          <div *ngIf="isGST" class="px-2.5">
+            <ion-input id="user-name" placeholder="Enter GSTN" class="input mt-2" [(ngModel)]="gstNo"></ion-input>
+            <ion-input id="user-name" placeholder="Enter Business Name" class="input mt-2"
+              [(ngModel)]="businessName"></ion-input>
+          </div>
+
+          <div class="px-2.5">
+            <p class="font-16 font-medium text-dark">Contact Information</p>
+            <ion-input placeholder="Enter Name" id="user-name" type="text" class="input mt-2"
+              [(ngModel)]="name"></ion-input>
+            <ion-input placeholder="Enter Email" id="user-name" type="email" class="input mt-2"
+              [(ngModel)]="email"></ion-input>
+            <ion-input placeholder="Enter Mobile" id="user-name" type="text" class="input mt-2"
+              [(ngModel)]="mobile"></ion-input>
+          </div>
+
+
+          <!-- <ion-item lines="none" style="--padding-start:10px;">
+              <ion-label style="font-size: 18px !important;" class="font-bold">
+                Boarding And Dropping Point
+              </ion-label>
+            </ion-item>
+            
+            <ion-segment mode="ios" class="segmentPassenger" [(ngModel)]="segmentData">
+              <ion-segment-button mode="ios" value="Boarding">
+                <ion-label>Boarding</ion-label>
+              </ion-segment-button>
+              <ion-segment-button mode="ios" value="Dropping">
+                <ion-label>Dropping</ion-label>
+              </ion-segment-button>
+            </ion-segment>
+
+            <ion-radio-group *ngIf="segmentData == 'Boarding'" (ionChange)="getBoarding($event)" value="{{pickupPointIndex}}">
+              <ion-item style="--background: #f8f8f8 !important;" *ngFor="let item of pickups;let i =index;">
+                <ion-radio value="{{i}}" class="align-text-bottom" mode="md"></ion-radio>
+                <ion-grid>
+                  <ion-row>
+                      <ion-col size="auto" class="content-center">
+                          <ion-text style="font-weight: bold;">{{item.PickupTime.slice(11,16)}}</ion-text>
+                      </ion-col>
+                      <ion-col >
+                          <ion-text>{{item.PickupName}}
+                              <p>{{item.Address}}</p>
+                          </ion-text>
+                      </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ion-item>
+            </ion-radio-group>
+            <ion-radio-group *ngIf="segmentData == 'Dropping'" (ionChange)="getDropping($event)" value="{{dropoffPointIndex}}">
+              <ion-item style="--background: #f8f8f8 !important;" *ngFor="let item of dropOffs;let i =index;">
+                <ion-radio value="{{i}}" class="align-text-bottom" mode="md"></ion-radio>
+                <ion-grid>
+                  <ion-row>
+                      <ion-col size="auto" class="content-center">
+                          <ion-text style="font-weight: bold;">{{item.DropoffTime.slice(11,16)}}</ion-text>
+                      </ion-col>
+                      <ion-col >
+                          <ion-text>{{item.DropoffName}}
+                              <p>{{item.Address}}</p>
+                          </ion-text>
+                      </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ion-item>
+            </ion-radio-group> -->
+        </div>
+      </ion-content>
+      <ion-footer>
+        <div style="display: grid;grid-template-columns: repeat(2, 1fr);color: black;" class="p-2 bg-[#f8f8f8]">
+          <div class="item" (click)="segmentData = 'Boarding';" id="locationModal" style="border-right:1px solid gray;">
+            <h3 class="font-light">BOARDING</h3>
+            <span class="locationname"
+              *ngIf="pickupPoint != undefined && pickupPoint != '' && pickupPoint != null">{{pickupPoint.PickupName}}</span>
+            <span style="font-size:14px;"
+              *ngIf="pickupPoint == undefined || pickupPoint == '' || pickupPoint == null">Select Location</span>
+          </div>
+          <div class="item" (click)="segmentData = 'Dropping';" id="locationModal1" style="text-align: right;">
+            <h3 class="font-light">DROPPING</h3>
+            <span class="locationname"
+              *ngIf="dropoffPoint != undefined && dropoffPoint != '' && dropoffPoint != null">{{dropoffPoint.DropoffName}}</span>
+            <span style="font-size:14px"
+              *ngIf="dropoffPoint == undefined || dropoffPoint == '' || dropoffPoint == null">Select Location</span>
+          </div>
+          <ion-modal trigger="locationModal" mode="ios" [initialBreakpoint]="0.75">
+            <ng-template>
+              <ion-header color="primary">
+                <ion-toolbar color="primary">
+                  <ion-buttons slot="start">
+                    <ion-button (click)="modalS.dismiss()"><ion-icon name="close-outline"
+                        style="color:white"></ion-icon></ion-button>
+                  </ion-buttons>
+                  <ion-title style="padding: 0px;" *ngIf="segmentData == 'Boarding'">Select Boarding Point </ion-title>
+                  <ion-title style="padding: 0px;" *ngIf="segmentData == 'Dropping'">Select Dropping Point</ion-title>
+                </ion-toolbar>
+              </ion-header>
+              <ion-content style="--backgroound:white;">
+                <ion-segment mode="ios" class="segmentPassenger" [(ngModel)]="segmentData">
+                  <ion-segment-button mode="ios" value="Boarding">
+                    <ion-label>Boarding</ion-label>
+                  </ion-segment-button>
+                  <ion-segment-button mode="ios" value="Dropping">
+                    <ion-label>Dropping</ion-label>
+                  </ion-segment-button>
+                </ion-segment>
+                <div class="blocks">
+                  <ion-radio-group *ngIf="segmentData == 'Boarding'" (ionChange)="getBoarding($event)"
+                    value="{{pickupPointIndex}}">
+                    <ion-item style="--background: #f8f8f8 !important;" *ngFor="let item of pickups;let i =index;">
+                      <ion-radio value="{{i}}" class="align-text-bottom" mode="md"></ion-radio>
+                      <ion-grid>
+                        <ion-row>
+                          <ion-col size="auto" class="content-center">
+                            <ion-text style="font-weight: bold;">{{ item.PickupTime?.length > 5 ?
+                              item.PickupTime.slice(11,16) : item.PickupTime }}</ion-text>
+                          </ion-col>
+                          <ion-col>
+                            <ion-text>
+                              <p
+                                style="font-size: 0.95rem; font-weight: 600; margin: 0; color: #000; line-height: 1.2;">
+                                {{item.PickupName}}</p>
+                              <p *ngIf="item.Address && item.Address !== item.PickupName"
+                                style="font-size: 0.80rem; margin: 4px 0 0; color: #666; line-height: 1.2;">
+                                {{item.Address}}</p>
+                            </ion-text>
+                          </ion-col>
+                        </ion-row>
+                      </ion-grid>
+                    </ion-item>
+                  </ion-radio-group>
+                  <ion-radio-group *ngIf="segmentData == 'Dropping'" (ionChange)="getDropping($event)"
+                    value="{{dropoffPointIndex}}">
+                    <ion-item style="--background: #f8f8f8 !important;" *ngFor="let item of dropOffs;let i =index;">
+                      <ion-radio value="{{i}}" class="align-text-bottom" mode="md"></ion-radio>
+                      <ion-grid>
+                        <ion-row>
+                          <ion-col size="auto" class="content-center">
+                            <ion-text style="font-weight: bold;">{{ item.DropoffTime?.length > 5 ?
+                              item.DropoffTime.slice(11,16) : item.DropoffTime }}</ion-text>
+                          </ion-col>
+                          <ion-col>
+                            <ion-text>
+                              <p
+                                style="font-size: 0.95rem; font-weight: 600; margin: 0; color: #000; line-height: 1.2;">
+                                {{item.DropoffName}}</p>
+                              <p *ngIf="item.Address && item.Address !== item.DropoffName"
+                                style="font-size: 0.80rem; margin: 4px 0 0; color: #666; line-height: 1.2;">
+                                {{item.Address}}</p>
+                            </ion-text>
+                          </ion-col>
+                        </ion-row>
+                      </ion-grid>
+                    </ion-item>
+                  </ion-radio-group>
+                </div>
+              </ion-content>
+            </ng-template>
+          </ion-modal>
+
+          <ion-modal trigger="locationModal1" mode="ios" [initialBreakpoint]="0.75">
+            <ng-template>
+              <ion-header>
+                <ion-toolbar>
+                  <ion-buttons slot="start">
+                    <ion-button (click)="modalS.dismiss()"><ion-icon name="close-outline"
+                        style="color:white"></ion-icon></ion-button>
+                  </ion-buttons>
+                  <ion-title style="padding: 0px;">Select Boarding and Dropping</ion-title>
+                </ion-toolbar>
+              </ion-header>
+              <ion-content style="--backgroound:white;">
+                <ion-segment mode="ios" class="segmentPassenger" [(ngModel)]="segmentData">
+                  <ion-segment-button mode="ios" value="Boarding">
+                    <ion-label>Boarding</ion-label>
+                  </ion-segment-button>
+                  <ion-segment-button mode="ios" value="Dropping">
+                    <ion-label>Dropping</ion-label>
+                  </ion-segment-button>
+                </ion-segment>
+
+                <div class="blocks">
+                  <ion-radio-group *ngIf="segmentData == 'Boarding'" (ionChange)="getBoarding($event)"
+                    value="{{pickupPointIndex}}">
+                    <ion-item style="--background: #f8f8f8 !important;" *ngFor="let item of pickups;let i =index;">
+                      <ion-radio value="{{i}}" class="align-text-bottom" mode="md"></ion-radio>
+                      <ion-grid>
+                        <ion-row>
+                          <ion-col size="auto" class="content-center">
+                            <ion-text style="font-weight: bold;">{{ item.PickupTime?.length > 5 ?
+                              item.PickupTime.slice(11,16) : item.PickupTime }}</ion-text>
+                          </ion-col>
+                          <ion-col>
+                            <ion-text>
+                              <p
+                                style="font-size: 0.95rem; font-weight: 600; margin: 0; color: #000; line-height: 1.2;">
+                                {{item.PickupName}}</p>
+                              <p *ngIf="item.Address && item.Address !== item.PickupName"
+                                style="font-size: 0.80rem; margin: 4px 0 0; color: #666; line-height: 1.2;">
+                                {{item.Address}}</p>
+                            </ion-text>
+                          </ion-col>
+                        </ion-row>
+                      </ion-grid>
+                    </ion-item>
+                  </ion-radio-group>
+                  <ion-radio-group *ngIf="segmentData == 'Dropping'" (ionChange)="getDropping($event)"
+                    value="{{dropoffPointIndex}}">
+                    <ion-item style="--background: #f8f8f8 !important;" *ngFor="let item of dropOffs;let i =index;">
+                      <ion-radio value="{{i}}" class="align-text-bottom" mode="md"></ion-radio>
+                      <ion-grid>
+                        <ion-row>
+                          <ion-col size="auto" class="content-center">
+                            <ion-text style="font-weight: bold;">{{ item.DropoffTime?.length > 5 ?
+                              item.DropoffTime.slice(11,16) : item.DropoffTime }}</ion-text>
+                          </ion-col>
+                          <ion-col>
+                            <ion-text>
+                              <p
+                                style="font-size: 0.95rem; font-weight: 600; margin: 0; color: #000; line-height: 1.2;">
+                                {{item.DropoffName}}</p>
+                              <p *ngIf="item.Address && item.Address !== item.DropoffName"
+                                style="font-size: 0.80rem; margin: 4px 0 0; color: #666; line-height: 1.2;">
+                                {{item.Address}}</p>
+                            </ion-text>
+                          </ion-col>
+                        </ion-row>
+                      </ion-grid>
+                    </ion-item>
+                  </ion-radio-group>
+                </div>
+              </ion-content>
+            </ng-template>
+          </ion-modal>
+        </div>
+        <ion-button class="m-0" expand="full" [disabled]="holdLoader" (click)="holdSeat()"><ion-spinner
+            *ngIf="holdLoader"></ion-spinner>Proceed</ion-button>
+      </ion-footer>
+    </ng-template>
+  </ion-modal>
+</ion-content>
+<ion-footer *ngIf="bookedData.length > 0" class="border-t border-slate-600">
+  <div class="flex">
+    <div class="flex-[2] px-2.5 py-1.5" style="background-color: white; color:black">
+      <ion-label style="white-space: normal;" class="opacity-70">
+        <p style="color:black !important;">Seat No. selected</p>
+        <span *ngFor="let item of bookedData;let i=index">{{item.seatNo}}<span *ngIf="i != (bookedData.length - 1)">,
+          </span></span>
+      </ion-label>
+    </div>
+    <div class="flex-[1.5] px-2.5 py-1.5 text-center" style="background-color: white; color:black">
+      <ion-label style="white-space: normal;" class="opacity-70" (click)="isFareDetails = true;">
+        <p style="color:black !important;">Total Fare <ion-icon name="chevron-down-outline" color="primary"
+            style="vertical-align: initial;" class="font-medium"></ion-icon></p>
+        <span style="font-size: 18px;" slot="end">{{calculateFare()}} ₹</span>
+      </ion-label>
+    </div>
+    <div class="flex-[1.5]">
+      <ion-button class="m-0 h-full" (click)="isBook = true;" color="sky"
+        style="--padding-start:0px; --padding-end: 0px;" slot="end" expand="full">
+        Book
+      </ion-button>
+    </div>
+  </div>
+  <!--<ion-toolbar class="p-0">
+    <hr style="margin: 0 15px 10px;">
+    <div style="display: grid;grid-template-columns: repeat(2, 1fr); margin: 0px 15px 15px;">
+      <div class="item" (click)="locationValue = 'boarding';" id="locationModal" style="border-right:1px solid white;">
+        <h3>BOARDING</h3>
+        <span class="locationname"
+         *ngIf="pickupPoint != undefined && pickupPoint != '' && pickupPoint != null">{{pickupPoint.PickupName}}</span>
+        <span style="font-size:14px;" *ngIf="pickupPoint == undefined || pickupPoint == '' || pickupPoint == null">Select Location</span>
+      </div>
+      <div class="item" (click)="locationValue = 'dropping';" id="locationModal1" style="text-align: right;">
+        <h3>DROPPING</h3>
+        <span class="locationname" *ngIf="dropoffPoint != undefined && dropoffPoint != '' && dropoffPoint != null">{{dropoffPoint.DropoffName}}</span>
+        <span style="font-size:14px" *ngIf="dropoffPoint == undefined || dropoffPoint == '' || dropoffPoint == null">Select Location</span>
+      </div>
+      <ion-modal trigger="locationModal" mode="ios" [initialBreakpoint]="0.75">
+        <ng-template>
+          <ion-header>
+            <ion-toolbar>
+              <ion-buttons slot="start">
+                <ion-button (click)="modalS.dismiss()"><ion-icon name="close-outline" style="color:white"></ion-icon></ion-button>
+              </ion-buttons>
+              <ion-title style="padding: 0px;">Select Boarding and Dropping</ion-title>
+            </ion-toolbar>
+          </ion-header>
+          <ion-content style="--backgroound:white;">
+            <ion-segment class="locationSegment" [(ngModel)]="locationValue" style="border-bottom: 1px solid #bdbdbd;">
+              <ion-segment-button value="boarding" style="border-right: 1px solid #bdbdbd">
+                BOARDING
+              </ion-segment-button>
+              <ion-segment-button value="dropping">
+                DROPPING
+              </ion-segment-button>
+            </ion-segment>
+            <div [ngSwitch]="locationValue" style="background:white !important;" swipeSegment [tabsList]="locationValues" [currentTab]="locationValue" (tabChanged)="onTabChanged($event)" class="swipe-area">
+              <ion-list *ngSwitchCase="'boarding'" >
+                <ion-radio-group (ionChange)="getBoarding($event)" value="{{pickupPointIndex}}">
+                  <ion-item style="--padding-start: 0px;margin-bottom:10px" *ngFor="let item of pickups;let i =index;">
+                    <ion-radio value="{{i}}" slot="start" style="margin-left: 10px; margin-right: 10px;"></ion-radio>
+                    <span  style="padding: 0px 5px; text-align: left;font-size:14px;">{{item.PickupName}}
+                    <p style="font-size:14px;color:#757575">{{item.Address}}</p></span>
+                    <ion-label style="font-size:14px;color:#757575" slot="end">{{item.PickupTime.slice(11,16)}}</ion-label>
+                  </ion-item>              
+                </ion-radio-group>
+              </ion-list>
+          
+              <ion-list *ngSwitchCase="'dropping'">
+                <ion-radio-group (ionChange)="getDropping($event)" value="{{dropoffPointIndex}}">
+                  <ion-item style="--padding-start: 0px;margin-bottom:10px" *ngFor="let item of dropOffs;let i =index;">
+                    <ion-radio value="{{i}}" slot="start" style="margin-left: 10px; margin-right: 10px;"></ion-radio>
+                    <span  style="padding: 0px 5px; text-align: left;font-size:14px;">{{item.DropoffName}}
+                    <p *ngIf="item.Address != undefined" style="font-size:14px;color:#757575">{{item.Address}}</p></span>
+                    <ion-label style="font-size:14px;color:#757575" slot="end">{{item.DropoffTime.slice(11,16)}} ({{item.DropoffTime.slice(8,10)}}-{{months[(item.DropoffTime.includes("0"))?item.DropoffTime.slice(6,7):item.DropoffTime.slice(5,7)]}})</ion-label>
+                  </ion-item>              
+                </ion-radio-group>
+              </ion-list>
+          
+            </div>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+
+      <ion-modal trigger="locationModal1" mode="ios" [initialBreakpoint]="0.75">
+        <ng-template>
+          <ion-header>
+            <ion-toolbar>
+              <ion-buttons slot="start">
+                <ion-button (click)="modalS.dismiss()"><ion-icon name="close-outline" style="color:white"></ion-icon></ion-button>
+              </ion-buttons>
+              <ion-title style="padding: 0px;">Select Boarding and Dropping</ion-title>
+            </ion-toolbar>
+          </ion-header>
+          <ion-content style="--backgroound:white;">
+            <ion-segment class="locationSegment1" [(ngModel)]="locationValue" style="border-bottom: 1px solid #bdbdbd;">
+              <ion-segment-button value="boarding" style="border-right: 1px solid #bdbdbd">
+                BOARDING
+              </ion-segment-button>
+              <ion-segment-button value="dropping">
+                DROPPING
+              </ion-segment-button>
+            </ion-segment>
+            <div [ngSwitch]="locationValue" style="background:white !important;" swipeSegment [tabsList]="locationValues" [currentTab]="locationValue" (tabChanged)="onTabChanged($event)" class="swipe-area">
+              <ion-list *ngSwitchCase="'boarding'" >
+                <ion-radio-group (ionChange)="getBoarding($event)" value="{{pickupPointIndex}}">
+                  <ion-item style="--padding-start: 0px;margin-bottom:10px" *ngFor="let item of pickups;let i =index;">
+                    <ion-radio value="{{i}}" slot="start" style="margin-left: 10px; margin-right: 10px;"></ion-radio>
+                    <span  style="padding: 0px 5px; text-align: left;font-size:14px;">{{item.PickupName}}
+                    <p style="font-size:14px;color:#757575">{{item.Address}}</p></span>
+                    <ion-label style="font-size:14px;color:#757575" slot="end">{{item.PickupTime.slice(11,16)}}</ion-label>
+                  </ion-item>              
+                </ion-radio-group>
+              </ion-list>
+          
+              <ion-list *ngSwitchCase="'dropping'">
+                <ion-radio-group (ionChange)="getDropping($event)" value="{{dropoffPointIndex}}">
+                  <ion-item style="--padding-start: 0px;margin-bottom:10px" *ngFor="let item of dropOffs;let i =index;">
+                    <ion-radio value="{{i}}" slot="start" style="margin-left: 10px; margin-right: 10px;"></ion-radio>
+                    <span  style="padding: 0px 5px; text-align: left;font-size:14px;">{{item.DropoffName}}
+                    <p *ngIf="item.Address != undefined" style="font-size:14px;color:#757575">{{item.Address}}</p></span>
+                    <ion-label style="font-size:14px;color:#757575" slot="end">{{item.DropoffTime.slice(11,16)}} ({{item.DropoffTime.slice(8,10)}}-{{months[(item.DropoffTime.includes("0"))?item.DropoffTime.slice(6,7):item.DropoffTime.slice(5,7)]}})</ion-label>
+                  </ion-item>              
+                </ion-radio-group>
+              </ion-list>
+          
+            </div>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+    </div> 
+  </ion-toolbar>-->
+</ion-footer>
+<!-- <ion-button id="open-modal"  expand="block">Open Sheet Modal213</ion-button> -->
+
+<ion-modal class="modal-fare" [isOpen]="isFareDetails" [backdropDismiss]="false" [initialBreakpoint]="1"
+  [breakpoints]="[0, 1]" (didDismiss)="isFareDetails = false">
+  <ng-template>
+    <div class="block" style="background-color: white; color:black">
+      <ion-grid>
+        <ion-row>
+          <ion-col>
+            <ion-text class="opacity-70">Fare Details</ion-text>
+          </ion-col>
+          <ion-col size="1">
+            <ion-icon (click)="isFareDetails = false;" name="close-outline" class="opacity-80"
+              style="font-size: larger;"></ion-icon>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+      <div class="flex px-2.5">
+        <div class="flex-1 flex">
+          <span class="opacity-70">{{from}}</span>
+          <ion-icon class="self-center mx-1.5 opacity-70" name="arrow-forward-outline"></ion-icon>
+          <span class="opacity-70">{{to}}</span>
+        </div>
+        <div class="flex-1 flex justify-end">
+          <span class="opacity-70">{{busList.DeptTime | date:'hh:mm a'}}</span>
+          <ion-icon class="opacity-70 self-center mx-1.5" name="arrow-forward-outline"></ion-icon>
+          <span class="opacity-70">{{busList.ArrTime | date:'hh:mm a'}}</span>
+        </div>
+      </div>
+      <div class="flex px-2.5">
+        <div class="flex-1">
+          <span class="opacity-70">{{busList?.BusLabel}}</span>
+        </div>
+        <div class="text-right">
+          <span class="opacity-70">{{date |date: 'ccc, dd MMM'}}</span>
+        </div>
+      </div>
+      <div id="prices">
+        <ion-grid style="border-bottom: 1px solid grey;">
+          <ion-row>
+            <ion-col class="opacity-70">
+              <p>Seat fare</p>
+              <p>Gst Amount</p>
+              <p>Total Amount</p>
+            </ion-col>
+            <ion-col size="auto" class="opacity-70">
+              <p class="text-right">{{SeatFare - gstcalculate()}}₹</p>
+              <p class="text-right">{{gstcalculate()}}₹</p>
+              <p class="text-right">{{calculateFare()}} ₹</p>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+      </div>
+    </div>
+    <div class="flex">
+      <div class="flex-[2] px-2.5 py-1.5" style="background-color: white; color:black">
+        <ion-label style="white-space: normal;" class="opacity-70">
+          <p style="color:black !important;">Seats selected</p>
+          <span *ngFor="let item of bookedData;let i=index">{{item.seatNo}}<span *ngIf="i != (bookedData.length - 1)">,
+            </span></span>
+        </ion-label>
+      </div>
+      <div class="flex-[1.5] px-2.5 py-1.5 text-center" style="background-color: white; color:black">
+        <ion-label style="white-space: normal;" class="opacity-70" (click)="isFareDetails = false;">
+          <p style="color:black !important;">Total Fare <ion-icon name="chevron-up-outline" color="primary"
+              style="vertical-align: initial;" class="font-medium"></ion-icon></p>
+          <span style="font-size: 18px;" slot="end">{{calculateFare()}} ₹</span>
+        </ion-label>
+      </div>
+      <div class="flex-[1.5]">
+        <ion-button class="m-0 h-full" (click)="isBook = true;" color="sky"
+          style="--padding-start:0px; --padding-end: 0px;" slot="end" expand="full">
+          Book
+        </ion-button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>
+
+<ion-modal #modal trigger="open-modal-routes" [initialBreakpoint]="0.7" [breakpoints]="[0, 1]" mode="ios">
+  <ng-template>
+    <ion-header style="background-color: white; color:black">
+      <ion-toolbar>
+        <ion-grid>
+          <ion-row class="">
+            <ion-col>
+              <ion-text class="text-black  text-base">Routes -{{busList?.CompanyName}}</ion-text>
+            </ion-col>
+          </ion-row>
+          <ion-row class="pt-2">
+            <ion-col>
+              <ion-text>Stop Name</ion-text>
+              <button>route</button>
+
+            </ion-col>
+            <ion-col size="3">
+              <ion-text class="text-center">Time</ion-text>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <div class="flex h-screen overflow-auto mb-1">
+        <!-- <ion-grid>
+          <div>
+           <ul *ngFor="let item of busList.Pickups">
+            <ion-row class="pt-2">
+              <ion-col>
+                <li style="background-color:#EEEDEB;">{{ item.PickupName }}</li>
+              </ion-col>
+              <ion-col size="3">
+                <li>{{ item.PickupTime | date: 'hh:mm a' }}</li>
+              </ion-col>
+            </ion-row>
+          </ul> 
+              <ul *ngFor="let item of busList.Dropoffs">
+              <ion-row class="pt-2">
+                <ion-col>
+                  <li>{{item.DropoffName}}</li>
+                </ion-col>
+                <ion-col size="3">
+                  <li>{{item.DropoffTime | date: 'hh:mm a' }}</li>
+                  </ion-col>
+                </ion-row>
+            </ul>   
+            </div>
+        </ion-grid>   -->
+        <ion-grid>
+          <ul *ngFor="let item of combinedList">
+            <ion-row class="pt-2" [ngStyle]="{'background-color': item.type === 'pickup' ? '#EEEDEB' : ''}">
+              <ion-col>
+                <li>{{ item.name }}</li>
+              </ion-col>
+              <ion-col size="3">
+                <li>{{ item.time | date: 'hh:mm a' }}</li>
+              </ion-col>
+            </ion-row>
+          </ul>
+        </ion-grid>
+
+
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

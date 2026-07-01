@@ -1,0 +1,81 @@
+// ion-content{
+//     --background: #EEEEEE;
+// }
+
+// .buses{
+//     padding: 10px;
+//     position: absolute;
+//     width: 100%;
+//     top: 25%;
+// }
+
+// .bus-card{
+//     box-shadow: unset;
+//     margin-left: unset;
+//     margin-right: unset;
+// }
+
+
+//my code
+
+.three_buttons{
+    display: flex;
+    border-bottom: 1px solid black;
+}
+.child-1,.child-2,.child-3{
+    flex-grow: 1;
+}
+.child-2{
+    display: flex;
+    justify-content:center;
+}
+.child-3{
+    display: flex;
+    justify-content:end;
+}
+.custom-button-size {
+    width: 85px;  /* Set desired width */
+  }
+ 
+#searchbar{
+    --background: transparent !important;
+    --clear-button-color: #200f0e;
+
+    
+    // --background:rgba(255, 0, 0, 0.2);
+  }
+
+
+.list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+}
+
+.droppinglist {
+    color: #000; /* Set text color to black */
+    list-style-type: none; 
+    font-size: 16px;
+  }
+  
+  .checkbox {
+    height: 20px; /* Size of the checkbox */
+    width: 20px;
+    accent-color: #000; /* Set the checkbox color */
+  }
+  
+
+  .full-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  

@@ -1,0 +1,14 @@
+.bottom-button {
+    position: absolute;
+    bottom: 16px; 
+    left: 0;
+    right: 0;
+    padding: 0 16px;
+}
+
+ion-input.custom {
+    border-radius: 6px;
+  background-color:  rgb(232, 228, 228);
+  --padding-start:10px;
+  --padding-end:10px;
+}

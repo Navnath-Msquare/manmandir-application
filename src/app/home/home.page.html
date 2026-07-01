@@ -1,0 +1,619 @@
+<!--
+
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>
+
+    </ion-title>
+    <ion-avatar class="user-avatar" slot="end" [routerLink]="['/settings']" routerLinkActive="router-link-active" >
+      <img alt="Profile Pic" src="https://ionicframework.com/docs/img/demos/avatar.svg" />
+    </ion-avatar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="main-top">
+
+  
+  <div style="height: 300px;" class="bg-primary"></div>
+
+  <div style="position: absolute; top:0; width: 100%;">
+    <p class="font-24 font-light text-white text-center m-0">Hey {{auth.currentUserValue.name}}!</p>
+    <p class="font-18 font-medium text-white text-center m-0">Where you want to go?</p>
+    <div class="flex justify-center">
+      <img src="assets/icon-bus.png" style="width: 100px">
+    </div>
+  
+    <div class="bg-secondary search-card py-5">
+
+      <div class="py-[10px] px-[10px]" style="position: relative;">
+        <img src="assets/icon/revert.png"
+          style="width: 40px;height: 40px; border-radius: 50%;position: absolute;right:20px; top: 32%;z-index: 3;" (click)="exchangeCity()">
+        <ion-input class="mb-1 city-input font-ubuntu font-20 font-bold" [(ngModel)]="fromCity" (keyup)="searchFromCity();searchBusFromCity(fromCity)" (focusout)="closeSearch()" placeholder="Boarding From"></ion-input>
+        
+        <div id="from-city-search" class="city-card" style="display: none;">
+          <ion-item *ngFor="let item of cityList | filter:fromCity" (click)="selectFromCity(item.CityId,item.City)">
+            <ion-label>
+              <p class="text-dark font-18">{{item.City}}</p>
+              <p class="">{{item.State}}</p>
+            </ion-label>
+          </ion-item>
+        </div>
+
+        <ion-input class="mt-1 city-input font-ubuntu font-20 font-bold" [(ngModel)]="toCity" (keyup)="searchToCity();searchBusToCity(toCity)" (focusout)="closeSearch()" placeholder="Where are you going?"></ion-input>
+        <div id="to-city-search" class="city-card" style="display: none;">
+          <ion-item *ngFor="let item of cityList | filter:toCity" (click)="selectToCity(item.CityId,item.City)">
+            <ion-label>
+              <p class="text-dark font-18">{{item.City}}</p>
+              <p class="">{{item.State}}</p>
+            </ion-label>
+          </ion-item>
+        </div>
+      </div>
+
+  
+      <div class="py-[5px] px-[10px] date-container" *ngIf="!otherDate">
+        <ion-chip class="dates-chips font-12" id="todayChip">
+          <ion-label (click)="selectToday()">Today</ion-label>
+          <ion-icon name="close" id="close-button-today" *ngIf="journeyDate === 'today'" (click)="clearDateSelection()"></ion-icon>
+        </ion-chip>
+        <ion-chip class="dates-chips font-12" id="tomorrowChip">
+          <ion-label (click)="selectTomorrow()">Tomorrow</ion-label>
+          <ion-icon name="close" id="close-button-today" *ngIf="journeyDate === 'tomorrow'" (click)="clearDateSelection()"></ion-icon>
+        </ion-chip>
+        <ion-chip class="dates-chips font-12" (click)="clickTrigger = true;">
+          <img src="assets/icon/calendar.png" class="mx-1" width="18px">Other
+        -->
+
+<!-- allredycomment  <ion-icon name="close" id="close-button-today" (click)="clearDateSelection()"></ion-icon> -->
+<!-- 
+</ion-chip>
+      </div>
+      <div class="py-[5px] px-[10px] date-container" *ngIf="otherDate">
+        <ion-chip class="dates-chips font-12" id="todayChip">
+          <ion-label>{{this.journeyDate | date:'dd MMM yyy'}}</ion-label>
+          <ion-icon name="close" id="close-button-today" (click)="clearDateSelection()"></ion-icon>
+        </ion-chip>
+      </div> -->
+
+<!--  
+      <div class="py-[10px] px-[10px]">
+        <ion-button class="font-20 font-regular" size="small" expand="block" mode="ios" fill="solid" (click)="findBuses()" style="--border-radius:5px;">Find Buses</ion-button>
+      </div>
+      
+
+    </div>
+  </div>
+</div>
+<div class="upcoming-bookings" *ngIf="journeyData.length > 0">
+  <h1 class="font-18 font-bold">Upcoming Bookings</h1>
+  
+  <ion-card mode="ios" class="ticket-card mb-0" *ngFor="let item of journeyData" style="padding: 5px;">
+    <ion-card-header style="padding: 5px;border-bottom: 1px solid #EEEEEE;">
+      <ion-card-title class="font-14 font-medium text-light">Journey Date<br><span class="text-slate-700 font-semibold">{{item.JourneyDate | date:'MMM dd, yyyy'}}</span></ion-card-title>
+    </ion-card-header>
+    <ion-card-header style="padding: 5px;border-bottom: 1px solid #EEEEEE;">
+      <ion-grid class="p-0 m-0">
+        <ion-row class="p-0 m-0">
+          <ion-col class="p-0 m-0">
+            <ion-card-title class="font-14 font-medium text-light">PNR No<br><span class="text-slate-700 font-semibold">{{item.PNRNo}}</span></ion-card-title>    
+          </ion-col>
+          <ion-col class="p-0 m-0">
+            <ion-card-title class="font-14 font-medium text-light">Ticket No<br><span class="text-slate-700 font-semibold">{{item.TicketNo}}</span></ion-card-title>    
+          </ion-col>
+        </ion-row>
+        <ion-row>
+        <ion-col class="p-0 m-0">
+          <ion-card-title class="font-14 font-medium text-light">Seat No<br><span class="text-slate-700 font-semibold"><span *ngFor="let data of item?.Passengers;let ind = index">{{data.SeatNo}}<span *ngIf="ind != item.Passengers.length -1">, </span></span></span></ion-card-title>    
+        </ion-col>
+      </ion-row>
+      </ion-grid>
+    </ion-card-header>
+  
+    <ion-card-content style="padding: 5px;">
+      <ion-grid class="p-0 m-0">
+        <ion-row class="p-0 m-0">
+          <ion-col size="8" class="p-0 m-0">
+            <ion-row class="p-0 m-0">
+              <ion-col class="p-0 m-0">
+                <img src="assets/icon/Iconsax/Broken/login.png" width="30px" height="30px" class="p-0 m-0">
+                
+              </ion-col>
+              <ion-col size="10" class="p-0 m-0">
+                <p class="font-12 font-medium text-light">Boarding Point</p>
+                <p class="font-12 font-medium text-dark" style="line-height: 1.1;">{{item.PickupInfo?.PickupTime | date: 'hh:mm a'}},  {{item.PickupInfo?.PickupName}}{{item.PickupInfo?.Address ? ', ' + item.PickupInfo.Address : ''}}{{item.PickupInfo?.Landmark ? ', ' + item.PickupInfo.Landmark : ''}}</p>
+              </ion-col>
+            </ion-row>
+
+            <ion-row class="p-0 m-0" style="margin-top: 5px !important;">
+              <ion-col class="p-0 m-0">
+                <img src="assets/icon/Iconsax/Broken/logout.png" width="30px" height="30px" class="p-0 m-0">
+                
+              </ion-col>
+              <ion-col size="10" class="p-0 m-0">
+                <p class="font-12 font-medium text-light">Drop Point</p>
+                <p class="font-12 font-medium text-dark" style="line-height: 1.1;">{{item.ArrivalDateTime | date: 'hh:mm a'}}, {{item.ToCityName}}</p>
+              </ion-col>
+            </ion-row>
+          </ion-col>
+          <ion-col>
+            <div style="line-height:1.1;border-left: 1px solid #EEEEEE;">
+              <p class="font-14 font-regular text-center text-light uppercase">{{item.FromCityName}}</p>
+              <p class="font-14 font-medium text-center text-dark">{{item.DepartureDateTime | date: 'hh:mm a'}}</p>
+              <p class="font-10 font-medium text-center text-dark">{{item.DepartureDateTime | date: 'EEE dd, MMM'}}</p>
+
+              <p class="font-10 font-bold text-center text-secondary py-1">TO</p>
+
+              <p class="font-14 font-regular text-center text-light uppercase">{{item.ToCityName}}</p>
+              <p class="font-14 font-medium text-center text-dark">{{item.ArrivalDateTime | date: 'hh:mm a'}}</p>
+              <p class="font-10 font-medium text-center text-dark">{{item.ArrivalDateTime | date: 'EEE dd, MMM'}}</p>
+            </div>
+            
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+
+    <ion-card-header style="padding: 5px;border-top: 1px solid #EEEEEE;">
+      <ion-grid class="p-0 m-0">
+        <ion-row class="p-0 m-0">
+          <ion-col size="8" class="p-0 m-0">
+            <ion-row class="p-0 m-0">
+              <ion-col class="p-0 m-0">
+                <img src="assets/icon/Iconsax/Linear/bus.png" width="30px" height="30px" class="p-0 m-0">
+              </ion-col>
+              <ion-col size="10" class="p-0 m-0">
+                <p class="font-14 font-medium text-dark" style="line-height: 1.1;">{{item.CompanyName}}</p>
+                <p class="font-12 font-medium text-light">{{item.BusTypeName}}</p>
+              </ion-col>
+            </ion-row>
+          </ion-col>
+          <ion-col class="p-0 m-0">
+            <p class="font-14 font-bold text-center text-dark">{{item.TotalSeats}} Seats</p>
+          </ion-col>
+          
+        </ion-row>
+      </ion-grid>
+    </ion-card-header>
+  </ion-card>
+</div>
+
+<div class="upcoming-bookings">
+  <h1 class="font-18 font-bold">Exclusive Banners</h1>
+  <ion-slides [options]="slidesOptions"  #mySlider pager="true" style="padding-bottom:20px;" class="mt-5">
+    <ion-slide *ngFor="let image of banners">
+      <img src="{{baseURL}}comman/retrieve/{{image.image}}" alt="" style="width: 100%; border-radius: 10px;">
+    </ion-slide>
+    <ion-slide *ngFor="let image of banners">
+      <img src="{{baseURL}}comman/retrieve/{{image.image}}" alt="" style="width: 100%; border-radius: 10px;">
+    </ion-slide>
+    <ion-slide *ngFor="let image of banners">
+      <img src="{{baseURL}}comman/retrieve/{{image.image}}" alt="" style="width: 100%; border-radius: 10px;">
+    </ion-slide>
+
+  </ion-slides>
+</div>  -->
+
+<!-- allredy comment <ion-popover trigger="click-trigger" triggerAction="click" mode="ios">
+  <ng-template>
+    
+  </ng-template>
+</ion-popover> -->
+
+<!--  
+ </ion-content>
+
+
+<ion-modal #modal [backdropDismiss]="false" [isOpen]="clickTrigger" [initialBreakpoint]="0.75" mode="ios" [breakpoints]="[0, 0.25, 0.5, 0.75]">
+  <ng-template>
+    <ion-content>
+      <ion-datetime presentation="date" (ionChange)="selectOtherEvent($event)"></ion-datetime>
+      <ion-grid>
+        <ion-row>
+      <ion-col> <ion-button (click)="selectOther()" expand="block"><p>Select Date <br><small>{{this.otherDate | date:'dd MMM yyyy'}}</small></p></ion-button></ion-col>
+      <ion-col size="auto"> <ion-button (click)="clickTrigger = false;">Close</ion-button></ion-col>
+    </ion-row>
+    </ion-grid>
+    </ion-content>
+  </ng-template>
+</ion-modal> -->
+
+<!-- mycode -->
+
+<ion-header>
+  <ion-toolbar color="dark">
+    <img slot="start" class="p-2" id="logo" src="assets\img\whiteLogo.png" alt="logo" />
+    <ion-title mode="ios" class="text-left font-semibold tracking-wide text-sm">
+      KaroBooking.Com
+    </ion-title>
+
+    <ion-text class="text-left" slot="end">
+      <!-- <p class="font-medium leading-4 text-sm">Hello,</p> -->
+      <p class="font-medium leading-4 text-sm" style="text-transform: capitalize">
+        {{auth.currentUserValue.name }}
+      </p>
+    </ion-text>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-item color="primary" class="head-line" lines="none">
+    <ion-label class="my-1 text-xs">
+      This is For The Updates if Any thing Happens...
+    </ion-label>
+  </ion-item>
+
+  <div
+    style="background-image: url('assets/bus123.png'); background-size: cover; background-position: center; padding: 20px 10px; height: 180px;">
+    <div style="display: flex; align-items: center; padding-top: 10px; padding-left: 10px;">
+      <p style="font-size: 1.8rem !important; margin: 0; color: #1a202c;" class="font-extrabold">Bus Tickets</p>
+    </div>
+  </div>
+  <ion-card color="primary" id="search-card"
+    style="margin-top: -40px; position: relative; z-index: 10; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+    <ion-card-header>
+      <ion-item class="mb-0.5 rounded-ss-lg rounded-se-lg" (click)="openSourceModal()">
+        <img slot="start" class="mr-1" alt="img" src="assets\img\Get On Bus.png" />
+        <p class="ion-padding-bottom text-sm text-stone-500">From</p>
+        <ion-label [color]="(fromCity)?'dark':'medium'" style="font-size: 14px" class="ps-2 font-bold">
+          {{ fromCity ? (fromCity.toLowerCase() === 'goa' ? fromCity : fromCity
+          + ', ' + fromState) : 'Enter the City' }}
+        </ion-label>
+      </ion-item>
+      <img id="syncro-logo" src="assets/img/Synchronize.png" alt="" (click)="exchangeCity()" />
+      <ion-item class="mb-0.5" (click)="openDestinationModal()">
+        <img slot="start" class="mr-1" alt="img" src="assets\img\Get Off Bus.png" />
+        <p class="ion-padding-bottom text-sm me-4 text-stone-500">To</p>
+        <ion-label [color]="(toCity)?'dark':'medium'" style="font-size: 14px" class="ps-2 font-bold">
+          {{ toCity ? (toCity.toLowerCase() === 'goa' ? toCity : toCity + ', ' +
+          toState) : 'Enter the Destination' }}
+        </ion-label>
+      </ion-item>
+      <ion-item style="--inner-padding-end: 5px" class="rounded-es-lg rounded-ee-lg">
+        <img slot="start" (click)="clickTrigger = true;" class="mr-1" alt="img"
+          src="assets\img\Tear-Off Calendar.png" />
+        <p class="ion-padding-bottom text-sm text-stone-500" (click)="clickTrigger = true;">
+          Date
+        </p>
+        <ion-label *ngIf="!journeyDate" (click)="clickTrigger = true;" [color]="(journeyDate)?'dark':'medium'"
+          style="font-size: 14px" class="ps-2">Select Date</ion-label>
+        <ion-label *ngIf="journeyDate" (click)="clickTrigger = true;" [color]="(journeyDate)?'dark':'medium'"
+          style="font-size: 14px" class="ps-2 font-extrabold">{{journeyDate | date:'dd MMMM yyyy'}}</ion-label>
+        <div slot="end" class="m-0">
+          <ion-button style="--padding-start: 7px; --padding-end: 7px" class="text-xs shadow-2xl" size="small"
+            shape="round" (click)="selectToday()">
+            <ion-label class="capitalize">Today</ion-label>
+          </ion-button>
+          <ion-button style="--padding-start: 7px; --padding-end: 7px" class="text-xs" size="small" shape="round"
+            (click)="selectTomorrow()">
+            <ion-label class="capitalize">Tomorrow</ion-label>
+          </ion-button>
+        </div>
+      </ion-item>
+      <ion-button class="ion-margin-top" expand="block" id="search_btn" (click)="findBuses()">
+        Search
+      </ion-button>
+    </ion-card-header>
+  </ion-card>
+
+  <p class="font-bold py-2 px-2.5 text-lg" style="font-size: large; display: flex; align-items: center;">
+    <img src="assets/img/whiteLogo.png" alt="logo"
+      style="width: 30px; height: 30px; border-radius: 50%; margin-right: 8px;" />
+    Bus Discounts
+  </p>
+
+  <ion-slides class="homeSlides" [options]="slidesOptions" #mySlider pager="true" style="padding-bottom: 20px">
+    <ion-slide>
+      <img src="assets/bus11.jpeg" alt="" style="width: 100%; border-radius: 10px; object-fit: cover; height: 180px;" />
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/bus12.jpeg" alt="" style="width: 100%; border-radius: 10px; object-fit: cover; height: 180px;" />
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/bus_offer_1.png" alt=""
+        style="width: 100%; border-radius: 10px; object-fit: cover; height: 180px;" />
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/bus_offer_2.png" alt=""
+        style="width: 100%; border-radius: 10px; object-fit: cover; height: 180px;" />
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/bus_offer_3.png" alt=""
+        style="width: 100%; border-radius: 10px; object-fit: cover; height: 180px;" />
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/bus_offer_4.png" alt=""
+        style="width: 100%; border-radius: 10px; object-fit: cover; height: 180px;" />
+    </ion-slide>
+  </ion-slides>
+
+  <p class="font-bold px-2.5 text-lg" style="font-size: large">Services</p>
+  <p class="pl-3 px-2.5" style="font-size: smaller">We are EveryWhere!</p>
+  <p class="pl-3 px-2.5" style="font-size: smaller">On Stop Solution to all</p>
+
+  <ion-grid>
+    <ion-row class="ion-justify-content-around">
+      <ion-col>
+        <div class="flex bg-[#28375a] items-center p-2 rounded-lg">
+          <img width="60px" src="assets\img\Airplane Take Off.png" alt="flight-logo" />
+          <p class="text-white ms-3 text-base font-semibold">Flights</p>
+        </div>
+      </ion-col>
+      <ion-col>
+        <div class="flex bg-[#9b9da0] items-center p-2 rounded-lg">
+          <img width="60px" src="assets\img\Bus.png" alt="bus-logo" />
+          <p class="text-white ms-3 text-base font-semibold">Bus</p>
+        </div>
+      </ion-col>
+    </ion-row>
+    <ion-row class="ion-justify-content-around">
+      <ion-col>
+        <div class="flex bg-[#b43533] items-center p-2 rounded-lg">
+          <img width="60px" src="assets\img\Taxi Service.png" alt="taxi-logo" />
+          <p class="text-white ms-3 text-base font-semibold">Taxi</p>
+        </div>
+      </ion-col>
+      <ion-col>
+        <div class="flex bg-[#69b98b] items-center p-2 rounded-lg">
+          <img width="60px" src="assets\img\Train.png" alt="train-logo" />
+          <p class="text-white ms-3 text-base font-semibold">Train</p>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <!-- <ion-button expand="block" class="mx-2.5">
+    Explore More<ion-icon
+      name="add-outline"
+      class="align-middle text-base ms-1"
+    ></ion-icon>
+  </ion-button> -->
+
+  <p class="font-bold px-2.5 pt-2" style="font-size: 18px">
+    Family and business Trips
+  </p>
+  <p class="px-2.5" style="font-size: smaller">
+    Manmandir Travles is here to help
+  </p>
+
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <img class="mx-auto h-[120px]" src="assets\img\Frame 25.png" />
+        <p style="font-size: small" class="ion-text-center">Wedding</p>
+      </ion-col>
+      <ion-col>
+        <img class="mx-auto h-[120px]" src="assets\img\Frame 27.png" />
+        <p style="font-size: small" class="ion-text-center">School Trips</p>
+      </ion-col>
+      <ion-col>
+        <img class="mx-auto h-[120px]" src="assets\img\Frame 28.png" />
+        <p style="font-size: small" class="ion-text-center">Corporate Trips</p>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <!-- <ion-button expand="block" class="mx-2.5">
+    Explore More<ion-icon
+      name="add-outline"
+      class="align-middle text-base ms-1"
+    ></ion-icon>
+  </ion-button> -->
+
+  <p class="font-bold px-2.5 py-2" style="font-size: large">Why Us?</p>
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <img src="assets\img\Laptop with cursor.png" class="mx-auto" />
+        <p style="font-size: 10px" class="font-ubuntu mt-1 ion-text-center">
+          24/7 booking
+        </p>
+      </ion-col>
+      <ion-col>
+        <img src="assets\img\Barber Chair.png" class="mx-auto" />
+        <p style="font-size: 10px" class="font-ubuntu mt-1 ion-text-center">
+          Premium Seats
+        </p>
+      </ion-col>
+      <ion-col>
+        <img src="assets\img\Aircraft Seat Middle.png" class="mx-auto" />
+        <p style="font-size: 10px" class="font-ubuntu mt-1 ion-text-center">
+          Comfortable Journey
+        </p>
+      </ion-col>
+      <ion-col>
+        <img src="assets\img\Bus Station-1.png" class="mx-auto" />
+        <p style="font-size: 10px" class="font-ubuntu mt-1 ion-text-center">
+          More Routes
+        </p>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <img src="assets\img\Checked Identification Documents.png" class="mx-auto" />
+        <p style="font-size: 10px" class="font-ubuntu mt-1 ion-text-center">
+          Trusted Drivers
+        </p>
+      </ion-col>
+      <ion-col>
+        <img src="assets\img\Bus Station-1.png" class="mx-auto" />
+        <p style="font-size: 10px" class="font-ubuntu mt-1 ion-text-center">
+          More Bus Partnership
+        </p>
+      </ion-col>
+      <ion-col>
+        <img src="assets\img\Security Time.png" class="mx-auto" />
+        <p style="font-size: 10px" class="font-ubuntu mt-1 ion-text-center">
+          Saftey
+        </p>
+      </ion-col>
+      <ion-col>
+        <img src="assets\img\Handshake.png" class="mx-auto" />
+        <p style="font-size: 10px" class="font-ubuntu mt-1 ion-text-center">
+          Trust
+        </p>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <p class="font-bold px-2.5 py-2" style="font-size: large">What's New ✨</p>
+
+  <ion-slides [options]="slidesOptions" #mySlider pager="false">
+    <ion-slide>
+      <img src="assets/bus11.jpeg" alt="" style="width: 100%; border-radius: 10px; object-fit: cover; height: 180px;" />
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/bus12.jpeg" alt="" style="width: 100%; border-radius: 10px; object-fit: cover; height: 180px;" />
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/bus_offer_1.png" alt=""
+        style="width: 100%; border-radius: 10px; object-fit: cover; height: 180px;" />
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/bus_offer_2.png" alt=""
+        style="width: 100%; border-radius: 10px; object-fit: cover; height: 180px;" />
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/bus_offer_3.png" alt=""
+        style="width: 100%; border-radius: 10px; object-fit: cover; height: 180px;" />
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/bus_offer_4.png" alt=""
+        style="width: 100%; border-radius: 10px; object-fit: cover; height: 180px;" />
+    </ion-slide>
+  </ion-slides>
+
+  <p class="font-bold px-2.5 py-2 text-sm">Quick Links 🚀</p>
+
+  <div class="px-2.5 py-2 flex">
+    <ion-badge class="me-3 shadow-lg" style="--background: #eba69d; font-size: 9px; border-radius: 10px">
+      <div class="flex">
+        <span class="content-center me-1 text-black text-[10px]">Most popular sites to visit</span>
+        <img class="align-middle w-full h-auto" src="assets\img\Circled Up Right.png" />
+      </div>
+    </ion-badge>
+    <ion-badge class="me-3 shadow-lg" style="--background: #eba69d; font-size: 9px; border-radius: 10px">
+      <div class="flex">
+        <span class="content-center me-1 text-black text-[10px]">Travel Advisiory</span>
+        <img class="align-middle" src="assets\img\Circled Up Right.png" />
+      </div>
+    </ion-badge>
+    <ion-badge class="shadow-lg" style="--background: #eba69d; font-size: 9px; border-radius: 10px">
+      <div class="flex">
+        <span class="content-center me-1 text-black text-[10px]">Top Places in Mumbai</span>
+        <img class="align-middle" src="assets\img\Circled Up Right.png" />
+      </div>
+    </ion-badge>
+  </div>
+
+  <!-- for the boarding point -->
+
+  <ion-modal [keepContentsMounted]="true" [isOpen]="sourceModal" #modal>
+    <ng-template>
+      <ion-content>
+        <ion-toolbar class="m-2.5 w-auto rounded-full" style="--background: #f8f3f2">
+          <ion-buttons slot="start" class="h-[55px]" style="align-items: center">
+            <ion-button (click)="clearFromCity();">
+              <ion-icon name="arrow-back-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+          <ion-searchbar clear-icon="close" id="searchbar" mode="ios" shape="round" [(ngModel)]="fromCity"
+            (ionInput)="searchFromCity();searchBusFromCity($event)" search-icon="none" (focusout)="closeSearch()"
+            show-clear-button="always" shape="round" placeholder="Enter The City">
+          </ion-searchbar>
+        </ion-toolbar>
+        <ion-list>
+          <div *ngIf="!fromCity">
+            <ion-item lines="none">
+              <span>Recent Searches</span>
+            </ion-item>
+            <ion-item *ngFor="let item of recentSearches" class="border-b" (click)="selectFromCity(item)" lines="none">
+              <ion-icon name="timer-outline" color="primary" slot="start"></ion-icon>
+
+              <p class="ion-margin-start">
+                {{ item.City?.toLowerCase() === 'goa'
+                ? item.City
+                : item.City + (item.State ? ', ' + item.State : '') }}
+
+              </p>
+            </ion-item>
+          </div>
+          <div *ngIf="fromCity">
+            <ion-item *ngFor="let item of fromCityList" (click)="selectFromCity(item)">
+              <p class="ion-margin-start">
+                {{ item.City?.toLowerCase() === 'goa'
+                ? item.City
+                : item.City + (item.State ? ', ' + item.State : '') }}
+
+              </p>
+            </ion-item>
+          </div>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [keepContentsMounted]="true" [isOpen]="destinationModal" #modal>
+    <ng-template>
+      <ion-content>
+        <ion-toolbar class="m-2.5 w-auto rounded-full" style="--background: #f8f3f2">
+          <ion-buttons slot="start" class="h-[55px]" style="align-items: center">
+            <ion-button (click)="clearToCity();">
+              <ion-icon name="arrow-back-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+          <ion-searchbar clear-icon="close" id="searchbar" mode="ios" shape="round" [(ngModel)]="toCity"
+            (ionInput)="searchToCity();searchBusToCity($event)" search-icon="none" (focusout)="closeSearch()"
+            show-clear-button="always" shape="round" placeholder="Enter The  Destination">
+          </ion-searchbar>
+        </ion-toolbar>
+        <ion-list>
+          <div *ngIf="!toCity">
+            <ion-item lines="none">
+              <span>Recent Searches</span>
+            </ion-item>
+            <ion-item *ngFor="let item of recentSearches" class="border-b" (click)="selectToCity(item)" lines="none">
+              <ion-icon name="timer-outline" color="primary" slot="start"></ion-icon>
+              <p class="ion-margin-start">
+                {{ item.City?.toLowerCase() === 'goa'
+                ? item.City
+                : item.City + (item.State ? ', ' + item.State : '') }}
+
+              </p>
+            </ion-item>
+          </div>
+          <div *ngIf="toCity">
+            <ion-item *ngFor="let item of toCityList" (click)="selectToCity(item)">
+              <p class="ion-margin-start">
+                {{ item.City?.toLowerCase() === 'goa'
+                ? item.City
+                : item.City + (item.State ? ', ' + item.State : '') }}
+
+              </p>
+            </ion-item>
+          </div>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- calender date -->
+  <ion-modal #modal [backdropDismiss]="false" [isOpen]="clickTrigger" [initialBreakpoint]="0.75" mode="ios"
+    [breakpoints]="[0, 0.25, 0.5, 0.75]" (didDismiss)="clickTrigger = false">
+    <ng-template>
+      <ion-content>
+        <div>
+          <ion-datetime class="mx-auto rounded-md" presentation="date"
+            (ionChange)="selectOtherEvent($event)"></ion-datetime>
+        </div>
+        <!-- <ion-grid>
+          <ion-row>
+            <ion-col> <ion-button (click)="selectOther()" expand="block">
+                <p>Select Date <br><small>{{this.otherDate | date:'dd MMM yyyy'}}</small></p>
+              </ion-button></ion-col>
+            <ion-col size="auto"> <ion-button (click)="clickTrigger = false;">Close</ion-button></ion-col>
+          </ion-row>
+        </ion-grid> -->
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

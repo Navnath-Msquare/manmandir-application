@@ -1,0 +1,141 @@
+// ion-content{
+//     --background: #EEEEEE;
+// }
+
+// .main-top{
+//     height: 450px;
+// }
+
+// .user-avatar{
+//     width: 40px;
+//     height: 40px;
+//     margin-right: 10px;
+// }
+
+// .search-card{
+//     margin: 0 auto;
+//     width: 90%;
+//     border-radius: 15px;
+//     box-shadow: 0px 0px 5px rgb(0 0 0 / 25%);
+//     display: block;
+// }
+
+// .city-input{
+//     border-radius: 5px;
+//     background: #F3EEFF;
+//     color: #9775e7;
+// }
+
+// .dates-chips{
+//     background: unset;
+//     border: 1px solid #F5F5F5;
+//     color: #F5F5F5;
+//     border-radius: 10px;
+// }
+
+// .find-buses{
+//     --border-radius:5px;
+// }
+
+// .upcoming-bookings{
+//     padding: 10px;
+// }
+
+// .ticket-card{
+    
+//     margin-left: unset;
+//     margin-right: unset;
+    
+// }
+
+
+// .city-card{
+//     position: absolute;
+//     z-index: 9999;
+//     background: #fff;
+//     width: 95%;
+//     border-radius: 10px;
+//     max-height: 150px;
+//     overflow: auto;
+//     display: none;
+    
+// }
+
+
+// .date-container{
+//     display: flex;
+//     flex-wrap: nowrap;
+//     align-items: stretch;
+// }
+
+
+// my code
+#logo{
+  width: 60px;
+  border-radius: 50%;   
+}
+
+ion-title{
+padding: 3px 75px !important;
+}
+
+.head-line{
+--min-height: 15px;
+--padding-start: 10px;
+ion-label{
+  font-size: 0.85rem !important;
+}
+}
+
+ion-input{
+height: 50px;
+border:1px black solid;
+background-color: white;
+color: black;
+}
+#source{
+border-radius: 10px 10px 0px 0px ;
+}
+#destination{}
+#date{
+height: 50px;
+border:1px solid black;
+text-align: justify;
+background-color: white;
+color: black;
+display: flex;
+border-radius: 0px 0px 10px 10px  ;
+
+}
+#search_btn{
+border: 2px white solid;
+border-radius: 5px;
+box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+background-color: #ef233c;
+}
+#search-card{
+margin: 0px 10px 10px 10px;
+border-radius: 20px;
+}
+ion-slide{
+margin: 5px;
+}
+#explore{
+height: 60%;
+
+}
+#syncro-logo{
+background-color: lightgrey;
+width: 30px;
+height: 30px; 
+border-radius: 50%;
+position: absolute;
+top: 21%;
+right:35px;
+z-index: 3;
+}
+
+
+#searchbar{
+  --background: unset !important;
+}

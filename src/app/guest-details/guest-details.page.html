@@ -1,0 +1,71 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="back()">
+        <img src="assets/icon/Iconsax/Linear/arrowleft2.png" width="24px" height="24px" >
+      </ion-button>
+    </ion-buttons>
+    <ion-title style="font-size: unset;">
+      <p class="p-0 m-0 font-18 font-regular">{{busDetails.CompanyName}}</p>
+      <p class="p-0 m-0 font-16 font-light">{{busDetails.BusLabel}} | {{busDetails.ArrTime | date:'hh:mm a'}}</p>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-card class="no-shadow">
+    <p class="font-16 font-medium text-dark" style="margin: 10px 15px 0px;">Traveller Information</p>
+    <ion-card-content class="pt-0">
+      <ng-container *ngFor="let item of bookedData;let i = index;">
+        <p class="font-14 font-regular text-dark pt-3">Passenger {{i+1}} <span class="text-secondary font-bold" style="float: right;">{{item.seatNo}}</span></p>
+        <ion-input placeholder="Full Name" [(ngModel)]="item.name" class="input"></ion-input>
+        <ion-row class="p-0 mt-1">
+            <ion-input placeholder="Age" type="number" [(ngModel)]="item.age" class="input"></ion-input>
+        </ion-row>
+          <ion-row class="p-0 m-0">
+          <ion-col class="ml-0 pl-0">
+            <div style="display: flex;flex-wrap: wrap;align-items: start;justify-content: start;">
+              <p class="py-2 px-2 font-14 font-regular">
+                <input type="radio" id="male{{i}}" style="vertical-align: text-bottom;" [(ngModel)]="item.gender" name="age{{i}}" value="M">&nbsp;
+                <label class="font-14 font-regular" for="male{{i}}">Male</label><br>
+              </p>
+              <p class="py-2 px-2">
+                <input type="radio" id="female{{i}}" style="vertical-align: text-bottom;" [(ngModel)]="item.gender" name="age{{i}}" value="F">&nbsp;
+                <label for="female{{i}}">Female</label><br>  
+              </p>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ng-container>
+     
+    </ion-card-content>
+  </ion-card>
+
+
+  <ion-card class="no-shadow">
+    <ion-card-content>
+        <p><ion-checkbox style="vertical-align: text-bottom;" labelPlacement="end" class="font-16 me-2 font-medium text-dark" [(ngModel)]="isGST"></ion-checkbox> I have a GST number (optional)?</p>
+        <div *ngIf="isGST">
+          <ion-input placeholder="GSTN" class="input mt-2" [(ngModel)]="gstNo"></ion-input>
+          <ion-input placeholder="Business Name" class="input mt-2" [(ngModel)]="businessName"></ion-input>
+        </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="no-shadow">
+    <ion-card-content>
+      <p class="font-16 font-medium text-dark">Contact Information</p>
+      <ion-input placeholder="Name"  type="text" class="input mt-2" [(ngModel)]="name"></ion-input>
+      <ion-input placeholder="Email" type="email" class="input mt-2" [(ngModel)]="email"></ion-input>
+      <ion-input placeholder="Mobile" type="text" class="input mt-2" [(ngModel)]="mobile"></ion-input>
+      
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>
+<ion-footer mode="ios">
+  <ion-toolbar (click)="holdSeat()">
+    <ion-title>Proceed to Book</ion-title>
+  </ion-toolbar>
+</ion-footer> 
+
+

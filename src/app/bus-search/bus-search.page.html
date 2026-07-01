@@ -1,0 +1,726 @@
+<!--<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button icon="chevron-back-outline"></ion-back-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button>
+        <img src="assets/icon/Iconsax/Linear/filter.png" width="24px" height="24px">
+      </ion-button>
+    </ion-buttons>
+    
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <div style="height: 300px;" class="bg-primary">
+    <p class=" pt-6 text-white font-regular text-center font-18">Select your bus!</p>
+    <div style="display: flex;flex-wrap: wrap;align-items: center;justify-content: center;">
+      <div class="text-white font-medium font-24 text-right flex-1 leading-7">
+        {{from}}
+      </div>
+        <img src="assets/icon/Iconsax/Broken/arrowswapvertical.png" class="my-auto mx-4" width="24px" height="24px">
+        <div class="text-white font-medium text-left font-24 flex-1 leading-7">
+        {{to}}
+      </div>
+    </div>
+    <p class="pt-2 text-white font-regular text-center font-18">{{date | date: 'dd - MMM - yyyy | EEEE'}}</p>
+    <img src="assets/bus.png" class="pt-2" width="100px" style="margin: 0 auto;">
+  </div>
+
+  <div class="buses">
+    <ion-card mode="ios" class="bus-card" *ngFor="let item of busList;" (click)="selectBus(item.RouteBusId)"> 
+      <ion-card-content style="padding:5px;">
+        <ion-grid >
+          <ion-row class="p-0 m-0">
+            <ion-col size="8" class="p-0 m-0">
+              <p class="font-18 font-regular" style="line-height: 1.1;color: #585656;">{{item.CompanyName}}</p>
+              <p class="font-14 font-light" style="color: #616161;">{{item.BusLabel}}</p>
+            </ion-col>
+            <ion-col class="p-0 m-0">
+                <p class="font-18 font-medium text-right text-secondary">₹ {{item.BusStatus.BaseFares[0]}}</p>
+            </ion-col>
+          </ion-row>
+          <ion-row class="p-0 m-0">
+            <ion-col size="8" class="p-0 m-0">
+              <p class="font-12 font-regular"><span class="text-dark">{{item.DeptTime | date:'hh:mm a'}}</span><span> - {{item.ArrTime | date:'hh:mm a'}}</span></p>
+            </ion-col>
+            <ion-col class="p-0 m-0">
+              <p class="font-14 font-regular text-right text-dark">{{item.Duration}}h</p>
+            </ion-col>
+          </ion-row>
+          <ion-row class="p-0 m-0">
+              <ion-col class="p-0 m-0">
+                <p class="font-14 font-regular text-success">{{item.BusStatus.Availability}} Seats Available</p>  
+              </ion-col>
+              <ion-col class="p-0 m-0">
+                <div style="display: flex;float: right;">
+                  <img class="mx-1" src="assets/icon/Iconsax/Linear/gps.png" width="18px" height="18px">
+                  <img class="mx-1" src="assets/icon/Iconsax/Linear/ticket.png" width="18px" height="18px">
+                  <img class="mx-1" src="assets/icon/Iconsax/Linear/batterycharging.png" width="18px" height="18px">
+                  <img class="mx-1" src="assets/icon/Iconsax/Linear/logoutcurve.png" width="18px" height="18px">
+                </div>
+                
+              </ion-col>
+
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+</ion-content>
+
+<!--my code-->
+
+<ion-header>
+  <ion-toolbar color="primary" id="toolbar">
+    <ion-grid>
+      <ion-row>
+        <ion-col size="1" class="content-center" [routerLink]="routerLinkVariable">
+          <ion-icon name="chevron-back-sharp" class="font-extrabold"></ion-icon>
+        </ion-col>
+        <ion-col size="4.4">
+          <ion-text class="font-bold">{{from}},<p class="border-b border-slate-800 pb-2">{{fromState}}</p></ion-text>
+        </ion-col>
+        <ion-col size="1" class="content-center">
+          <img src="assets\img\Data Transfer.png" class="w-full" (click)="exchangeCity()">
+        </ion-col>
+        <ion-col size="4.4">
+          <ion-text class="font-bold">{{to}},<p class="border-b border-slate-800 pb-2">{{toState}}</p></ion-text>
+        </ion-col>
+        <ion-col size="1.2">
+          <ion-icon size="large" id="open-modal-filter" (click)="filterbusmodel=true" name="options-outline"
+            class="pt-2.5"></ion-icon>
+        </ion-col>
+      </ion-row>
+      <div class="ion-text-center leading-3">
+        <ion-text class="ion-text-center text-sm font-medium leading-3">{{busList.length}} Buses Available</ion-text>
+      </div>
+    </ion-grid>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <!-- <div id="next_prev" class="three_buttons px-2.5 py-1">
+    <div class="flex flex-row   justify-center">
+      <div class="basis-0.5 ">
+        <ion-button color="faint" [disabled]="currentDate >= date" (click)="prev()" class="h-9" shape="round">
+          <ion-icon slot="start" class="text-lg" name="arrow-back-outline"></ion-icon>
+          <span class="font-bold text-base">Prev</span>
+        </ion-button>
+      </div>
+      <div class="basis-1">
+        <ion-button color="faint" disabled="" size="small" class="h-9 opacity-100" shape="round">
+          <ion-icon slot="start" class="text-lg text-black" name="calendar-clear-outline"></ion-icon>
+          <span class="font-bold text-base">{{date | date: 'dd - MMM'}}</span>
+        </ion-button>
+      </div>
+      <div class="basis-0.5">
+        <ion-button color="faint" (click)="next()" class="h-9" shape="round">
+          <span class="font-bold text-base">Next</span>
+          <ion-icon slot="end" class="text-lg" name="arrow-forward-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </div>
+  </div> -->
+
+  <div id="next_prev" class="three_buttons px-2.5  ">
+    <div class="child-1">
+      <ion-button color="faint" [disabled]="currentDate >= date" (click)="prev()"
+        class="custom-button-size h-9 max-sm:py-1.5 " shape="round">
+        <ion-icon slot="start" class="text-lg max-sm:text-xs" name="arrow-back-outline"></ion-icon>
+        <span class="font-bold text-base max-sm:text-xs">Prev</span>
+      </ion-button>
+    </div>
+    <div class="child-2" (click)="clickTrigger = true;">
+      <ion-button color="faint" disabled="" class="h-9 opacity-100 max-sm:py-1.5  " shape="round">
+        <ion-icon slot="start" class="text-lg max-sm:text-xs text-black" name="calendar-clear-outline"></ion-icon>
+        <span class="font-bold text-base max-sm:text-xs">{{date | date: 'dd - MMM'}}</span>
+      </ion-button>
+    </div>
+    <div class="child-3 ">
+      <ion-button color="faint" (click)="next()" class=" custom-button-size h-9 max-sm:py-1.5 " shape="round">
+        <span class="font-bold text-base max-sm:text-xs">Next</span>
+        <ion-icon slot="end" class=" custom-icon-size text-lg max-sm:text-[10px]"
+          name="arrow-forward-outline"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+
+  <div class="flex justify-center gap-4 mt-1">
+
+    <ion-button size="small" [fill]="activeFilter === 'AM' ? 'solid' : 'outline'"
+      [color]="activeFilter === 'AM' ? 'danger' : 'medium'" (click)="filterAMDeparture()" shape="round">
+      AM
+    </ion-button>
+
+    <ion-button size="small" [fill]="activeFilter === 'PM' ? 'solid' : 'outline'"
+      [color]="activeFilter === 'PM' ? 'danger' : 'medium'" (click)="filterPMDeparture()" shape="round">
+      PM
+    </ion-button>
+
+    <ion-button size="small" fill="clear" color="medium" (click)="clearAll()" shape="round">
+      Reset
+    </ion-button>
+
+  </div>
+
+
+  <ion-card style="border-radius: 15px;" class="mx-2.5 my-2" *ngFor="let item of busList;">
+    <ion-grid>
+      <ion-row style="border-bottom: 1px solid black;" class="p-0 m-0">
+        <ion-col size="11" style="display: flex; justify-content: space-between; align-items: center;">
+          <ion-label color="dark" class="font-black ">
+            {{ item.CompanyName || item.BusName || 'Travels'}}
+             <!-- <span style="font-size: 10px;">
+              <ion-icon *ngFor="let star of [1,2,3]" name="star" color="warning"></ion-icon>
+            </span> -->
+             <span style="font-size: 10px;">
+              <ng-container *ngIf="item.source === 'NEW_API'">
+                <ion-icon *ngFor="let star of [1,2,3]" name="star" color="warning"></ion-icon>
+              </ng-container>
+            </span>
+          </ion-label>
+        </ion-col>
+        <ion-col size="1" class="flex justify-center items-center">
+          <img src=".\assets\img\Map Pinpoint.png" alt="routes" style="cursor: pointer;" (click)="openRoutesModal(item, $event)">
+        </ion-col>
+      </ion-row>
+      <div (click)="selectBus(item.RouteBusId, item.source)">
+        <ion-row>
+          <ion-col size="3.5">
+            <p class="mb-0.5" style="color: black; font-weight: bolder;">{{item.DeptTime | date:'hh:mm a'}}</p>
+            <p class="leading-4">{{from}}</p>
+            <p class="leading-4"> {{fromState}}</p>
+          </ion-col>
+          <ion-col size="5" class="ion-text-center">
+            <p><ion-icon class="align-middle" name="remove-sharp"></ion-icon> {{item.Duration}}h <ion-icon
+                class="align-middle" name="remove-sharp"></ion-icon></p>
+            <p style="color: black; font-weight: bolder;">Available Seats: <span
+                class="text-[#b43533]">{{item.BusStatus.Availability}}</span></p>
+          </ion-col>
+          <ion-col size="3.5" class="ion-text-end">
+            <p class="mb-0.5" style="color: black; font-weight: bolder;">{{item.ArrTime | date:'hh:mm a'}}</p>
+            <p class="leading-4">{{to}}</p>
+            <p class="leading-4"> {{toState}}</p>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="7">
+            <ion-badge color="success" class="shadow-lg py-1.5 px-3 me-2 rounded-full text-black max-sm:text-[10px]"
+              shape="round">{{item.BusType?.IsAC.replace('_', ' ')}}</ion-badge>
+            <ion-badge color="success" class="shadow-lg py-1.5 px-3 me-2 rounded-full text-black max-sm:text-[10px]"
+              shape="round">{{item.BusType?.Seating.replace('_', ' ')}}</ion-badge>
+          </ion-col>
+          <ion-col size="5" class="">
+            <ion-button expand="full" class="font-extrabold m-0  max-sm:text-[10px] " size="small">From :&nbsp;&nbsp;
+              &nbsp;₹{{item.BusStatus.BaseFares[0] | number:'1.0-0'}}
+            </ion-button>
+          </ion-col>
+
+        </ion-row>
+      </div>
+    </ion-grid>
+  </ion-card>
+
+
+
+
+
+  <!-- filter modal -->
+  <ion-modal #modal trigger="open-modal-filter" [initialBreakpoint]="1" mode="ios">
+    <ng-template>
+      <ion-header style="background-color: white; color:black">
+        <ion-toolbar>
+          <ion-grid>
+            <ion-row class="">
+              <ion-col>
+                <ion-text class="text-black font-bold text-2xl ">Filter Buses</ion-text>
+              </ion-col>
+              <ion-col size="1">
+                <ion-icon name="close-outline" class="font-extrabold text-2xl text-black mt-2 mr-10"
+                  (click)="modal.dismiss()"></ion-icon>
+                <ion-buttons slot="end">
+                  <ion-button>Close</ion-button>
+                </ion-buttons>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-toolbar>
+      </ion-header>
+
+      <!-- Sidebar -->
+      <ion-content>
+        <div class="flex">
+          <div class="w-1/3 bg-gray-100 h-screen overflow-auto">
+            <ul>
+              <li class="py-2 text-black border-y-2 cursor-pointer"
+                [ngClass]="{'text-red-500 bg-white': selectedItem === 'Sort by'}" (click)="selectItem('Sort by')">
+                <p class="p-3">Sort by</p>
+              </li>
+              <li class="py-2 text-black border-y-2 cursor-pointer"
+                [ngClass]="{'text-red-500 bg-white': selectedItem === 'Departure time from source'}"
+                (click)="selectItem('Departure time from source')">
+                <p class="p-3">Departure time from source</p>
+              </li>
+              <li class="py-2 text-black border-y-2 cursor-pointer"
+                [ngClass]="{'text-red-500 bg-white': selectedItem === 'Bus Type'}" (click)="selectItem('Bus Type')">
+                <p class="p-3">Bus Type</p>
+              </li>
+              <!-- <li class="py-2 text-black border-y-2 cursor-pointer"
+                [ngClass]="{'text-red-500 bg-white': selectedItem === 'Single Window Sleeper/Seater'}"
+                (click)="selectItem('Single Window Sleeper/Seater')">
+                <p class="p-3">Single Window Sleeper/Seater</p>
+              </li> -->
+              <li class="py-2 text-black border-y-2 cursor-pointer"
+                [ngClass]="{'text-red-500 bg-white': selectedItem === 'Boarding Points'}"
+                (click)="selectItem('Boarding Points')">
+                <p class="p-3">Boarding Points</p>
+              </li>
+              <li class="py-2 text-black border-y-2 cursor-pointer"
+                [ngClass]="{'text-red-500 bg-white': selectedItem === 'Dropping Points'}"
+                (click)="selectItem('Dropping Points')">
+                <p class="p-3">Dropping Points</p>
+              </li>
+              <li class="py-2 text-black border-y-2 cursor-pointer"
+                [ngClass]="{'text-red-500 bg-white': selectedItem === 'Bus Operator'}"
+                (click)="selectItem('Bus Operator')">
+                <p class="p-3">Bus Details</p>
+              </li>
+              <li class="py-2 text-black border-y-2 cursor-pointer"
+                [ngClass]="{'text-red-500 bg-white': selectedItem === 'Amenities'}" (click)="selectItem('Amenities')">
+                <p class="p-3">Amenities</p>
+              </li>
+              <!-- <li class="py-2 text-black border-y-2 cursor-pointer"
+                [ngClass]="{'text-red-500 bg-white': selectedItem === 'Bus Features'}"
+                (click)="selectItem('Bus Features')">
+                <p class="p-3">Bus Features</p>
+              </li> -->
+              <li class="py-2 text-black border-y-2 cursor-pointer"
+                [ngClass]="{'text-red-500 bg-white': selectedItem === 'Arrival time at destination'}"
+                (click)="selectItem('Arrival time at destination')">
+                <p class="p-3">Arrival time at destination</p>
+              </li>
+            </ul>
+          </div>
+
+
+          <!-- sort by -->
+          <div *ngIf="selectedItem === 'Sort by'"
+            class="w-2/3 bg-white p-4 h-screen overflow-auto flex flex-col justify-between">
+            <div>
+              <ul class="space-y-10 ">
+                <li class="flex items-center">
+                  <label class="flex-grow">Relevance</label>
+                  <input type="radio" name="sort" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                </li>
+                <li class="flex items-center">
+                  <label class="flex-grow">Price - Low to high</label>
+                  <input type="radio" (click)="busfarelowtohigh()" name="sort"
+                    class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                </li>
+                <li class="flex items-center">
+                  <label class="flex-grow">Early departure</label>
+                  <input type="radio" name="sort" (click)="earlydeparture()"
+                    class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                </li>
+                <li class="flex items-center">
+                  <label class="flex-grow">Late departure</label>
+                  <input type="radio" name="sort" (click)="latedeprature()"
+                    class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                </li>
+                <li class="flex items-center">
+                  <label class="flex-grow">AM Departure</label>
+                  <input type="radio" name="sort" (click)="filterAMDeparture()"
+                    class="form-radio h-5 w-5 accent-red-500">
+                </li>
+
+                <li class="flex items-center">
+                  <label class="flex-grow">PM Departure</label>
+                  <input type="radio" name="sort" (click)="filterPMDeparture()"
+                    class="form-radio h-5 w-5 accent-red-500">
+                </li>
+
+              </ul>
+            </div>
+          </div>
+
+          <!-- departure time -->
+          <div *ngIf="selectedItem === 'Departure time from source'"
+            class="w-2/3 bg-white p-4 flex flex-col h-screen overflow-auto justify-between">
+            <div>
+              <ul class="space-y-10 ">
+                <li class="flex items-center">
+                  <ion-icon name="sunny-outline" class="p-2 text-2xl"></ion-icon>
+                  <label class="flex-grow text-black">06:00 - 12:00<br>Morning</label>
+                  <input type="checkbox" name="DeptTime" value="Morning" (click)="depraturetime()"
+                    [(ngModel)]="DeptSelections.Morning" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                </li>
+                <li class="flex items-center">
+                  <ion-icon name="sunny-outline" class="p-2 text-2xl"></ion-icon>
+                  <label class="flex-grow text-black">12:00 - 18:00<br>Afternoon</label>
+                  <input type="checkbox" name="DeptTime" value="Afternoon" (click)="depraturetime()"
+                    [(ngModel)]="DeptSelections.Afternoon"
+                    class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                </li>
+                <li class="flex items-center">
+                  <ion-icon name="sunny-outline" class="p-2 text-2xl"></ion-icon>
+                  <label class="flex-grow text-black">18:00 - 24:00<br>Evening</label>
+                  <input type="checkbox" name="DeptTime" value="Evening" (click)="depraturetime()"
+                    [(ngModel)]="DeptSelections.Evening" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                </li>
+                <li class="flex items-center">
+                  <ion-icon name="moon-outline" class="p-2 text-2xl"></ion-icon>
+                  <label class="flex-grow text-black">00:00 - 06:00<br>Night</label>
+                  <input type="checkbox" name="DeptTime" value="Night" (click)="depraturetime()"
+                    [(ngModel)]="DeptSelections.Night" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                </li>
+                <li>
+                  <button (click)="getValue()" class="bg-red-300">Get Value</button>
+
+                </li>
+                <li>
+                  <p *ngIf="selectedDept.length">You have selected: {{ selectedDept.join(', ') }}</p>
+                </li>
+
+              </ul>
+            </div>
+          </div>
+
+          <!-- bus type -->
+          <div *ngIf="selectedItem === 'Bus Type'"
+            class="w-2/3 bg-white p-4 h-screen overflow-auto flex flex-col justify-between">
+            <div>
+              <ul class="space-y-10 " *ngFor="let item of uniqueSeatTypesandIsAC;">
+                <li class="flex items-center py-6">
+                  <label class="flex-grow text-black" for="{{item}}">{{item}}</label>
+                  <input type="checkbox" value="{{item}}" id="{{item}}" (change)="checkSeatType($event)"
+                    class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                </li>
+              </ul>
+            </div>
+          </div>
+
+
+
+
+          <!-- boarding Points -->
+          <div *ngIf="selectedItem === 'Boarding Points'"
+            class="w-2/3 bg-white p-4 h-screen overflow-auto flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between p-2 rounded-full bg-slate-200">
+                <ion-searchbar clear-icon="close" id="searchbar" type="text" name="search" mode="ios" shape="round"
+                  search-icon="none" [(ngModel)]="toCity" (ionInput)="searchFromCity();searchBusFromPoint($event)"
+                  search-icon="none" (focusout)="closeSearch()" class="px-2 " shape="round"
+                  placeholder="Enter your Boarding Point">
+                </ion-searchbar>
+              </div>
+              <ul class="space-y-10 mt-6" id='list' *ngFor="let item of uniquePickupPoints;">
+                <li class="animals" class="flex items-center">
+                  <ion-grid>
+                    <ion-row>
+                      <ion-col size="10">
+                        <label class="flex-grow text-black" for="{{item}}">{{item}}</label>
+                      </ion-col>
+                      <ion-col size="2" class="my-auto" style="display: flex;
+                      align-items: center;
+                      justify-content: center;">
+                        <input type="checkbox" name="sort" value="{{item}}" id="{{item}}" (change)="checkPickup($event)"
+                          class="form-radio h-5 w-5  accent-red-500 focus:accent-red-500">
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+
+
+
+          <!-- droping Points -->
+
+          <div *ngIf="selectedItem === 'Dropping Points'"
+            class="w-2/3 bg-white p-4 h-screen overflow-auto flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between p-2 rounded-full bg-slate-200">
+                <ion-searchbar clear-icon="close" id="searchbar" (keydown)="searchName()" mode="ios" shape="round"
+                  search-icon="none" class=" px-2 " shape="round" placeholder="Enter your Dropping Point">
+                </ion-searchbar>
+              </div>
+              <div *ngFor="let item of uniqueDropoffPoints;">
+                <!--
+                    <ion-grid>
+                       <ion-row class="list-item">
+                        <li class="droppinglist" style="list-style-type: none;">
+                          <ion-col size="10">
+                            <label class="  flex-grow text-black" for="{{item}}">{{item}}</label>
+                          </ion-col>
+                          <ion-col size="2" style="display: flex;
+                      align-items: center;
+                      justify-content: center;">
+                        <input type="checkbox" value="{{item}}" id="{{item}}" (change)="checkDropoff($event)"
+                        class=" form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                      </ion-col>
+                    </li>
+                    </ion-row>
+                    </ion-grid> -->
+                <div class="list-item flex items-center justify-between p-2">
+                  <li class="droppinglist flex items-center justify-between p-0 m-0 w-full">
+                    <label for="{{item}}" class="text-black">
+                      {{item}}
+                    </label>
+                    <input type="checkbox" value="{{item}}" id="{{item}}" (change)="checkDropoff($event)"
+                      class="form-checkbox h-5 w-5 text-red-500 focus:text-red-500">
+                  </li>
+                </div>
+
+
+              </div>
+            </div>
+          </div>
+
+          <!-- bus Operator -->
+          <div *ngIf="selectedItem === 'Bus Operator'"
+            class="w-2/3 h-screen overflow-auto bg-white p-4 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between p-2 rounded-full bg-slate-200">
+                <ion-searchbar clear-icon="close" id="searchbar" mode="ios" shape="round" search-icon="none"
+                  class="px-2" shape="round" placeholder="Search Bus Name" (ionInput)="filterBusOperators($event)">
+                </ion-searchbar>
+              </div>
+              <ul class="space-y-3 ">
+                <li class="flex items-center" *ngFor="let item of filteredBusList">
+                  <ion-grid>
+                    <ion-row>
+                      <ion-col size="10">
+                        <label class="flex-grow text-black">{{item.CompanyName}}</label>
+                      </ion-col>
+                      <ion-col size="2" style="display: flex;
+                      align-items: center;
+                      justify-content: center;">
+                        <input type="checkbox" value="{{item.CompanyName}}" id="{{item}}"
+                          (change)="checkBusOperator($event)"
+                          class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+
+          <!-- Amenities  -->
+          <div *ngIf="selectedItem ==='Amenities'"
+            class="w-2/3 h-screen overflow-auto bg-white p-4 flex flex-col justify-between">
+            <div>
+              <ul class="space-y-10 ">
+                <li class="flex items-center" *ngFor=" let Amenities of AllAmenities">
+                  <ion-grid>
+                    <ion-row>
+                      <ion-col size="10">
+                        <label class="flex-grow text-black">{{Amenities}}</label>
+                      </ion-col>
+                      <ion-col size="2" style="display: flex;
+                      align-items: center;
+                      justify-content: center;">
+                        <input type="checkbox" name="sort" value="{{Amenities}}" id="{{Amenities}}"
+                          (change)="checkAmenities($event)"
+                          class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- bus Features -->
+          <!-- <div *ngIf="selectedItem==='Bus Features'" class="w-2/3 bg-white p-4 h-screen overflow-auto flex flex-col justify-between">
+            <div>
+              <ul class="space-y-10 ">
+                <li class="flex items-center">
+                  <label class="flex-grow text-black">Live Tracking</label>
+                  <input type="checkbox" name="sort" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                </li>
+                <li class="flex items-center">
+                  <label class="flex-grow text-black">Special price</label>
+                  <input type="checkbox" name="sort" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                </li>
+                <li class="flex items-center">
+                  <label class="flex-grow text-black">High rated Buses</label>
+                  <input type="checkbox" name="sort" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                </li>
+              </ul>
+            </div>
+          </div> -->
+
+          <!-- Arrival time at destination -->
+          <div *ngIf="selectedItem==='Arrival time at destination'"
+            class="w-2/3 bg-white p-4 flex flex-col justify-between h-screen overflow-auto">
+            <div>
+              <ul class="space-y-10 ">
+                <li class="flex items-center">
+
+                  <ion-icon name="sunny-outline" class="p-2 text-2xl"></ion-icon>
+                  <label class="flex-grow text-black">06:00 - 12:00<br>Morning</label>
+                  <input type="checkbox" name="Arrivaltime" value="Morning" (click)="Arrivaltime()"
+                    [(ngModel)]="ArrivalTime.Morning" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                </li>
+                <li class="flex items-center">
+                  <ion-icon name="sunny-outline" class="p-2 text-2xl"></ion-icon>
+                  <label class="flex-grow text-black">12:00 - 18:00<br>Afternoon</label>
+                  <input type="checkbox" name="Arrivaltime" value="Afternoon" (click)="Arrivaltime()"
+                    [(ngModel)]="ArrivalTime.Afternoon" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                </li>
+                <li class="flex items-center">
+                  <ion-icon name="sunny-outline" class="p-2 text-2xl"></ion-icon>
+                  <label class="flex-grow text-black">18:00 - 24:00<br>Evening</label>
+                  <input type="checkbox" name="Arrivaltime" value="Evening" (click)="Arrivaltime()"
+                    [(ngModel)]="ArrivalTime.Evening" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                </li>
+                <li class="flex items-center">
+                  <ion-icon name="moon-outline" class="p-2 text-2xl"></ion-icon>
+                  <label class="flex-grow text-black">00:00 - 06:00<br>Night</label>
+                  <input type="checkbox" name="Arrivaltime" value="Night" (click)="Arrivaltime()"
+                    [(ngModel)]="ArrivalTime.Night" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                </li>
+                <li>
+                  <button (click)="getValue()" class="bg-red-300">Get Value</button>
+
+                </li>
+                <li>
+                  <p *ngIf="selectedDept.length">You have selected: {{ selectedDept.join(', ') }}</p>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </ion-content>
+
+      <!-- Buttons -->
+      <ion-footer>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="4">
+              <ion-button shape="round" fill="outline" class="w-full text-center text-black rounded-full black-outline"
+                style="--border-color: black;" (click)="clearAll()">
+                Clear All
+              </ion-button> </ion-col>
+            <ion-col size="8">
+              <ion-button shape="round" class="w-full text-center text-white rounded-full black-outline"
+                style="--background:red" (click)="clearModel()"> Apply</ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-footer>
+
+    </ng-template>
+  </ion-modal>
+
+
+  <!-- routesmodel -->
+
+  <div *ngIf="isLoadingBuses" class="full-loader">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+  </div>
+
+  <span *ngIf="isSearchCompleted && !isLoadingBuses && busList.length === 0" style="background: white;
+         box-shadow: 0 0 10px rgba(0,0,0,.1);
+         border-radius: 10px;
+         color: #333;
+         font-weight: 600;
+         padding: 1rem;
+         font-size: .90rem;
+         display: inline-block;
+         margin-top: 8rem;
+         margin-left: 8rem;">
+    Buses Not Available
+  </span>
+
+
+  <ion-modal [isOpen]="isRoutesModalOpen" (didDismiss)="isRoutesModalOpen = false" [initialBreakpoint]="0.8" [breakpoints]="[0, 0.8, 1]" mode="ios">
+    <ng-template>
+      <ion-header class="ion-no-border" style="background-color: white; color:black">
+        <ion-toolbar>
+          <div class="flex justify-center pt-2">
+            <div class="w-12 h-1.5 bg-gray-300 rounded-full mb-2"></div>
+          </div>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding" style="--background: #fff;">
+        <h2 class="text-2xl font-bold mb-1 text-black">Boarding point</h2>
+        <p class="text-gray-500 mb-6 text-sm">{{from}} <span *ngIf="fromState">({{fromState}})</span></p>
+        
+        <div class="relative pl-1 mb-8">
+          <!-- Vertical line -->
+          <div class="absolute left-[4.5rem] top-3 bottom-0 w-1.5 bg-gray-200"></div>
+          
+          <div class="flex mb-6 relative" *ngFor="let item of selectedBusForRoutes?.Pickups">
+            <!-- Time -->
+            <div class="w-[4rem] text-center pr-2 z-10 bg-white">
+              <p class="font-bold text-base text-black leading-tight">{{(item.PickupTime || item.time) | date:'HH:mm'}}</p>
+              <p class="text-xs text-gray-500 mt-0.5">{{date | date:'dd MMM'}}</p>
+            </div>
+            <!-- Dot -->
+            <div class="w-3.5 h-3.5 bg-gray-500 rounded-full absolute left-[4.05rem] top-1 z-10 mt-0.5"></div>
+            <!-- Info -->
+            <div class="pl-8 flex-1">
+              <p class="font-bold text-[15px] text-black leading-tight">{{item.PickupName || item.name}}</p>
+              <p class="text-[13px] text-gray-500 mt-1 leading-snug">{{item.Address || item.Landmark || 'Boarding Point'}}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="w-full h-3 bg-gray-50 my-6 -mx-4" style="width: calc(100% + 2rem);"></div>
+
+        <h2 class="text-2xl font-bold mb-1 mt-4 text-black">Dropping point</h2>
+        <p class="text-gray-500 mb-6 text-sm">{{to}} <span *ngIf="toState">({{toState}})</span></p>
+        
+        <div class="relative pl-1 pb-8">
+          <!-- Vertical line -->
+          <div class="absolute left-[4.5rem] top-3 bottom-0 w-1.5 bg-gray-200"></div>
+          
+          <div class="flex mb-6 relative" *ngFor="let item of selectedBusForRoutes?.Dropoffs">
+            <!-- Time -->
+            <div class="w-[4rem] text-center pr-2 z-10 bg-white">
+              <p class="font-bold text-base text-black leading-tight">{{(item.DropoffTime || item.time) | date:'HH:mm'}}</p>
+              <p class="text-xs text-gray-500 mt-0.5">{{date | date:'dd MMM'}}</p>
+            </div>
+            <!-- Dot -->
+            <div class="w-3.5 h-3.5 bg-gray-500 rounded-full absolute left-[4.05rem] top-1 z-10 mt-0.5"></div>
+            <!-- Info -->
+            <div class="pl-8 flex-1">
+              <p class="font-bold text-[15px] text-black leading-tight">{{item.DropoffName || item.name}}</p>
+              <p class="text-[13px] text-gray-500 mt-1 leading-snug">{{item.Address || item.Landmark || 'Dropping Point'}}</p>
+            </div>
+          </div>
+        </div>
+        
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+
+
+  <!-- calender date -->
+  <ion-modal #modal [backdropDismiss]="false" [isOpen]="clickTrigger" [initialBreakpoint]="0.75" mode="ios"
+    [breakpoints]="[0, 0.25, 0.5, 0.75]">
+    <ng-template>
+      <ion-content>
+        <div>
+          <ion-datetime class="mx-auto rounded-md" presentation="date"
+            (ionChange)="selectOtherEvent($event)"></ion-datetime>
+        </div>
+        <!-- <ion-grid>
+          <ion-row>
+            <ion-col> <ion-button (click)="selectOther()" expand="block">
+                <p>Select Date <br><small>{{this.otherDate | date:'dd MMM yyyy'}}</small></p>
+              </ion-button></ion-col>
+            <ion-col size="auto"> <ion-button (click)="clickTrigger = false;">Close</ion-button></ion-col>
+          </ion-row>
+        </ion-grid> -->
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

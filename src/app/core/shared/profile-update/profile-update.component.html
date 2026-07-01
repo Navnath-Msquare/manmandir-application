@@ -1,0 +1,29 @@
+<ion-header mode="ios" class="ion-no-border">
+  <ion-toolbar color="dark">
+    <ion-title>
+      Your Attention Needed
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <div class="p-4">
+    <h1 class="text-light">Please update your profile</h1>
+    <div class="container mt-2">
+
+      <label for="mobile-number" class="text-dark">Name <span class="text-primary">*</span></label>
+      <input type="text" [(ngModel)]="name" style="text-transform: capitalize; background-color: white;">
+
+      <label for="mobile-number" class="text-dark">Email <span class="text-primary">*</span></label>
+      <input type="text" [(ngModel)]="email" style="background-color: white;">
+
+      <label for="mobile-number" class="text-dark">Mobile <span class="text-primary">*</span></label>
+      <input type="text" [(ngModel)]="mobile" disabled="">
+    </div>
+
+    <div class="m-4">
+      <ion-button expand="block" mode="ios" (click)="saveProfile()">Submit</ion-button>
+    </div>
+  </div>
+
+
+</ion-content>

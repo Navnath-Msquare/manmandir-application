@@ -1,0 +1,41 @@
+ion-input.custom {
+    border-radius: 10px 0px 0px 10px;
+    border: 1px solid black;
+    border-right: unset;
+    --placeholder-color: #bdbdbd;
+    --placeholder-opacity: 0.8;
+    --padding-bottom: 8px;
+    --padding-end: 10px;
+    --padding-start: 10px;
+    --padding-top: 8px;
+    font-size: 15px;
+}
+  
+
+ion-button{
+    font-size: 14px !important;
+    font-weight: unset !important;
+    --border-radius: 0px 10px 10px 0px !important;
+    margin: unset;
+    height: 41px;
+}
+
+ion-radio {
+    --border-radius: 4px;
+    --inner-border-radius: 4px;
+  
+    --color: #ddd;
+    --color-checked: #F9A600;
+  }
+  
+  ion-radio.ios::part(container) {
+    width: 20px;
+    height: 20px;
+  
+    border: 2px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .radio-checked.ios::part(container) {
+    border-color: #F9A600;
+  }
