@@ -1201,6 +1201,7 @@ export class BusLayoutPage implements OnInit {
       console.log(res)
       const pnr = res?.result?.ticket_details?.pnr_number;
 
+
       if (!pnr) {
         this.presentToast("GDS seat hold failed", "danger");
         this.holdLoader = false;

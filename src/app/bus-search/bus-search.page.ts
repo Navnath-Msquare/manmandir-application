@@ -1514,32 +1514,95 @@ export class BusSearchPage implements OnInit, OnDestroy {
       .tz('Asia/Kolkata')
       .format('YYYY-MM-DD');
 
-    // const newApiUrl =
-    //   `https://gds-stg.ticketsimply.co.in/gds/api/schedules/` +
-    //   `${this.fromNewCityId}/${this.toNewCityId}/${journeyDate}.json` +
-    //   `?api_key=TSYAJMAPI86883462`;
-
     const oldApiUrl =
       environment.busApi +
       "Search?fromCityId=" + this.fromOldCityId +
       "&toCityId=" + this.toOldCityId +
       "&journeyDate=" + this.date;
 
+    let fromIds: any[] = [this.fromNewCityId];
+    if (this.fromNewCityId == 24852 || this.fromNewCityId == 97 || this.fromNewCityId === '24852' || this.fromNewCityId === '97') {
+      fromIds = [24852, 97];
+    }
+    
+    let toIds: any[] = [this.toNewCityId];
+    if (this.toNewCityId == 24852 || this.toNewCityId == 97 || this.toNewCityId === '24852' || this.toNewCityId === '97') {
+      toIds = [24852, 97];
+    }
+
+    // Workaround for Seoni (Madhya Pradesh) since its newCityId is null in database cityMaster
+    if (this.toOldCityId == 7114 || this.toOldCityId === '7114' || this.toNewCityId == 3923 || this.toNewCityId == 18556) {
+      toIds = [3923, 18556];
+    }
+
+    // Workaround for Katni (Madhya Pradesh) since its newCityId is null in database cityMaster
+    if (this.toOldCityId == 5568 || this.toOldCityId === '5568' || this.toNewCityId == 7320 || this.toNewCityId === '7320') {
+      toIds = [7320];
+    }
+
+    // Workaround for Maihar (Madhya Pradesh) since its newCityId is null in database cityMaster
+    if (this.toOldCityId == 5992 || this.toOldCityId === '5992' || this.toNewCityId == 7322 || this.toNewCityId === '7322') {
+      toIds = [7322];
+    }
+
+    // Workaround for Rewa (Madhya Pradesh) since its newCityId is null in database cityMaster
+    if (this.toOldCityId == 6936 || this.toOldCityId === '6936' || this.toNewCityId == 7323 || this.toNewCityId === '7323') {
+      toIds = [7323];
+    }
+
+    // Workaround for Prayagraj / Allahabad since its newCityId is null in database cityMaster
+    if (this.toOldCityId == 3937 || this.toOldCityId === '3937' || this.toNewCityId == 17161 || this.toNewCityId == 2781) {
+      toIds = [17161, 2781];
+    }
+
+    // Workaround for Sultanpur (Uttar Pradesh) since its newCityId is null in database cityMaster
+    if (this.toOldCityId == 7306 || this.toOldCityId === '7306' || this.toNewCityId == 1399 || this.toNewCityId == 18066) {
+      toIds = [1399, 18066];
+    }
+
+    // Workaround for Ayodhya since its newCityId is null in database cityMaster
+    if (this.toOldCityId == 4075 || this.toOldCityId === '4075' || this.toNewCityId == 2960 || this.toNewCityId === '2960') {
+      toIds = [2960];
+    }
+
+    // Workaround for Basti (Uttar Pradesh) since its newCityId is null in database cityMaster
+    if (this.toOldCityId == 4260 || this.toOldCityId === '4260' || this.toNewCityId == 3489 || this.toNewCityId === '3489') {
+      toIds = [3489];
+    }
+
+    // Workaround for Khalilabad (Uttar Pradesh) since its newCityId is null in database cityMaster
+    if (this.toOldCityId == 5622 || this.toOldCityId === '5622' || this.toNewCityId == 10209 || this.toNewCityId === '10209') {
+      toIds = [10209];
+    }
+
+    // Workaround for Gorakhpur since its newCityId is null/incorrect in database cityMaster
+    if (this.toOldCityId == 5074 || this.toOldCityId === '5074' || this.toNewCityId == 2286 || this.toNewCityId == 2957 || this.toNewCityId == 18354) {
+      toIds = [2957, 18354];
+    }
+
+
+    const gdsRequests: any[] = [];
+    for (const fId of fromIds) {
+      for (const tId of toIds) {
+        gdsRequests.push(
+          this.api.serverRequestGds('POST', '/gds', {
+            method: 'GET',
+            endpoint: `schedules/${fId}/${tId}/${journeyDate}.json`,
+            query: {
+              api_key: environment.newApikey
+            }
+          }).pipe(
+            catchError(err => {
+              console.warn(`NEW API FAILED for schedules/${fId}/${tId}`, err);
+              return of(null);
+            })
+          )
+        );
+      }
+    }
+
     forkJoin({
-      newApi: this.api.serverRequestGds('POST', '/gds', {
-        method: 'GET',
-        endpoint: `schedules/${this.fromNewCityId}/${this.toNewCityId}/${journeyDate}.json`,
-        query: {
-          api_key: environment.newApikey
-        }
-      }).pipe(
-        catchError(err => {
-          console.warn('NEW API FAILED (via backend)', err);
-          return of(null);
-        })
-      ),
-
-
+      newApiResults: forkJoin(gdsRequests),
       oldApi: this.api.serverRequest("GET", oldApiUrl, "").pipe(
         catchError(err => {
           console.error('OLD API FAILED', err);
@@ -1547,22 +1610,32 @@ export class BusSearchPage implements OnInit, OnDestroy {
         })
       )
 
-    }).subscribe(({ newApi, oldApi }) => {
+    }).subscribe(({ newApiResults, oldApi }) => {
+      console.log('DEBUG [Seoni Route Check] - newApiResults raw:', newApiResults);
+      console.log('DEBUG [Seoni Route Check] - oldApi raw:', oldApi);
 
       let newBusList: any[] = [];
       let oldBusList: any[] = [];
-      console.log("new api1", newApi)
 
-
-      if (newApi?.data?.result?.length > 0) {
-        localStorage.setItem('stageNames', JSON.stringify(newApi.data.stage_names || {}));
-        newBusList = this.mapNewApiResponseAndReturn(
-          newApi.data.result,
-          newApi.data.stage_names
-        );
-
-        console.log("new api2", newBusList);
+      for (const newApi of newApiResults) {
+        if (newApi?.data?.result?.length > 0) {
+          localStorage.setItem('stageNames', JSON.stringify(newApi.data.stage_names || {}));
+          const mapped = this.mapNewApiResponseAndReturn(
+            newApi.data.result,
+            newApi.data.stage_names
+          );
+          newBusList.push(...mapped);
+        }
       }
+
+      // Deduplicate newBusList by RouteBusId
+      const uniqueNewBusMap = new Map<string, any>();
+      for (const bus of newBusList) {
+        if (bus.RouteBusId) {
+          uniqueNewBusMap.set(bus.RouteBusId.toString(), bus);
+        }
+      }
+      newBusList = Array.from(uniqueNewBusMap.values());
       // ---------------- OLD API DATA ----------------
       if (oldApi?.body) {
         const data = JSON.parse(oldApi.body).data;
@@ -1661,6 +1734,8 @@ export class BusSearchPage implements OnInit, OnDestroy {
 
       return {
         RouteBusId: row[this.NEW_API_INDEX.id],
+        origin_id: row[this.NEW_API_INDEX.origin_id],
+        destination_id: row[this.NEW_API_INDEX.destination_id],
 
         BusName:
           row[this.NEW_API_INDEX.name] ||
@@ -1779,10 +1854,22 @@ export class BusSearchPage implements OnInit, OnDestroy {
     const depB = this.getFormattedTime(b.DeptTime);
     if (!depA || !depB) return false;
 
-    // 1. Departure times must be within 15 minutes
-    if (this.getDiffInMinutes(depA, depB) > 15) return false;
+    // 1. Departure times must be within 2 minutes
+    if (this.getDiffInMinutes(depA, depB) > 2) return false;
 
-    // 2. Company Names must share at least one significant word
+    // 2. AC status must match
+    const acA = (a.BusType?.IsAC || '').replace(/[^a-zA-Z]/g, '').toLowerCase();
+    const acB = (b.BusType?.IsAC || '').replace(/[^a-zA-Z]/g, '').toLowerCase();
+    if (acA !== acB) return false;
+
+    // 3. Seating type must match (Sleeper vs Seater)
+    const seatA = (a.BusType?.Seating || '').toLowerCase();
+    const seatB = (b.BusType?.Seating || '').toLowerCase();
+    const isSleeperA = seatA.includes('sleeper');
+    const isSleeperB = seatB.includes('sleeper');
+    if (isSleeperA !== isSleeperB) return false;
+
+    // 4. Company Names must share at least one significant word
     const cleanName = (name: string) => {
       return (name || '')
         .toLowerCase()
@@ -1801,6 +1888,7 @@ export class BusSearchPage implements OnInit, OnDestroy {
 
     return true;
   }
+
 
   Seating(Seating: any) {
     throw new Error('Method not implemented.');
@@ -1830,17 +1918,17 @@ export class BusSearchPage implements OnInit, OnDestroy {
   // }
 
   selectBus(busId: any, source: string) {
-    // console.log(source)
+    const selectedBus = this.busList.find((b: any) => b.RouteBusId === busId);
     this.router.navigate(['/bus-layout'], {
       queryParams: {
         fromCity: this.from,
         fromState: this.fromState,
-        fromNewCityId: this.fromNewCityId,
+        fromNewCityId: selectedBus?.origin_id || this.fromNewCityId,
         fromOldCityId: this.fromOldCityId,
 
         toCity: this.to,
         toState: this.toState,
-        toNewCityId: this.toNewCityId,
+        toNewCityId: selectedBus?.destination_id || this.toNewCityId,
         toOldCityId: this.toOldCityId,
 
         date: this.date,

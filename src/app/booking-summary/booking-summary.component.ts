@@ -280,7 +280,6 @@ export class BookingSummaryComponent implements OnInit {
     }).subscribe(res => {
 
       const ticket = res?.result?.ticket_details;
-
       if (!ticket || ticket.ticket_status !== "Confirmed") {
         this.presentToast("Booking Failed", "danger");
         this.loading = false;

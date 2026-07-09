@@ -14,30 +14,30 @@ import { environment } from 'src/environments/environment';
 })
 export class GuestDetailsPage implements OnInit {
   isGST = false;
-  bookedData:any=[];
-  pickups:any;
-  dropoffs:any;
-  busDetails:any;
-  journeyDetails:any;
-  fare:any;
+  bookedData: any = [];
+  pickups: any;
+  dropoffs: any;
+  busDetails: any;
+  journeyDetails: any;
+  fare: any;
 
-  gstNo:any="";
-  businessName:any="";
-  email:any="";
-  mobile:any="";
-  name:any="";
+  gstNo: any = "";
+  businessName: any = "";
+  email: any = "";
+  mobile: any = "";
+  name: any = "";
 
   from = "";
   fromId = "";
   to = "";
   toId = "";
-  date:any;
+  date: any;
   busId = "";
 
   holdId = "";
 
-  constructor(public api:ApiService,public authS:AuthenticationService,public toast:ToastController,public router:Router, public location: Location,
-    public modal:ModalController,public datePipe: DatePipe) { 
+  constructor(public api: ApiService, public authS: AuthenticationService, public toast: ToastController, public router: Router, public location: Location,
+    public modal: ModalController, public datePipe: DatePipe) {
 
     this.name = this.authS.currentUserValue.name;
     this.email = this.authS.currentUserValue.email;
@@ -60,21 +60,23 @@ export class GuestDetailsPage implements OnInit {
     this.toId = tempTo.split("-")[1];
 
     this.date = this.datePipe.transform(new Date(this.journeyDetails['date']), "yyyy-MM-dd");
-    
+
     this.busId = this.journeyDetails['bus'];
-    
+
   }
 
   ngOnInit() {
-    
+
   }
 
-  holdSeat(){
-    let passengers:any = [];
-    for(let i=0;i<this.bookedData.length;i++){
-      passengers.push({"Name":this.bookedData[i].name,"Age":parseInt(this.bookedData[i].age),"Gender":this.bookedData[i].gender,
-      "SeatNo":this.bookedData[i].seatNo.toString(),"Fare":this.bookedData[i].fare,"SeatTypeId":this.bookedData[i].seat_type,
-      "IsAcSeat":false})
+  holdSeat() {
+    let passengers: any = [];
+    for (let i = 0; i < this.bookedData.length; i++) {
+      passengers.push({
+        "Name": this.bookedData[i].name, "Age": parseInt(this.bookedData[i].age), "Gender": this.bookedData[i].gender,
+        "SeatNo": this.bookedData[i].seatNo.toString(), "Fare": this.bookedData[i].fare, "SeatTypeId": this.bookedData[i].seat_type,
+        "IsAcSeat": false
+      })
     }
     let data = {
       "FromCityId": parseInt(this.fromId),
@@ -95,77 +97,79 @@ export class GuestDetailsPage implements OnInit {
       },
       "Passengers": passengers
     }
-    
 
-    this.api.serverRequest("POST",environment.busTranApi+"HoldSeats",data).subscribe(async res=>{
-        console.log(res);
-        let body = JSON.parse(res.body);
-        let status = body.success;
-        
-        if(!status){
-          this.presentToast(body?.Error.Msg,"danger");
-          return;
-        }
-        
-        let data = body.data;
-        this.holdId = data.HoldId;
 
-        let passengersData:any = [];
-        for(let i=0;i<this.bookedData.length;i++){
-          passengersData.push({"Seat":this.bookedData[i].seat,"Name":this.bookedData[i].name,"Age":parseInt(this.bookedData[i].age),"Gender":this.bookedData[i].gender,
-          "SeatNo":this.bookedData[i].seatNo.toString(),"Fare":this.bookedData[i].fare,"SeatTypeId":this.bookedData[i].seat_type,
-          "IsAcSeat":false})
-        }
-        let dbData = {
-          "FromCityId": parseInt(this.fromId),
-          "ToCityId": parseInt(this.toId),
-          "JourneyDate": this.date,
-          "BusId": parseInt(this.busId),
-          "PickUpID": this.pickups.PickupCode,
-          "DropOffID": this.dropoffs.DropoffCode,
-          "FromCityName": this.from,
-          "ToCityName": this.to,
-          "ContactInfo": {
-            "CustomerName": this.name,
-            "Email": this.email,
-            "Phone": this.mobile.toString(),
-            "Mobile": this.mobile.toString()
-          },
-          "GSTDetails": {
-            "Gstin": this.gstNo,
-            "GstCompany": this.businessName
-          },
-          "Passengers": passengersData,
-          "HoldId":this.holdId,
-          "user":this.authS.currentUserValue._id,
-          "status":"Pending"
-        }
+    this.api.serverRequest("POST", environment.busTranApi + "HoldSeats", data).subscribe(async res => {
+      console.log(res);
+      let body = JSON.parse(res.body);
+      let status = body.success;
 
-        console.log(dbData);
-        this.api.createBookings(dbData).subscribe(async res=>{
+      if (!status) {
+        this.presentToast(body?.Error.Msg, "danger");
+        return;
+      }
 
-          const modal = await this.modal.create({
-            component: PaymentComponent,
-            componentProps:{
-              holdId: this.holdId,
-              fare: this.fare,
-              busDetails:this.busDetails,
-              pickups: this.pickups,
-              dropoffs: this.dropoffs,
-              passengers:passengersData
-            }
-          });
-        
-          await modal.present();
-        },error=>{
-          console.log(error);
-          this.presentToast("Something went wrong!","danger");
+      let data = body.data;
+      this.holdId = data.HoldId;
+
+      let passengersData: any = [];
+      for (let i = 0; i < this.bookedData.length; i++) {
+        passengersData.push({
+          "Seat": this.bookedData[i].seat, "Name": this.bookedData[i].name, "Age": parseInt(this.bookedData[i].age), "Gender": this.bookedData[i].gender,
+          "SeatNo": this.bookedData[i].seatNo.toString(), "Fare": this.bookedData[i].fare, "SeatTypeId": this.bookedData[i].seat_type,
+          "IsAcSeat": false
+        })
+      }
+      let dbData = {
+        "FromCityId": parseInt(this.fromId),
+        "ToCityId": parseInt(this.toId),
+        "JourneyDate": this.date,
+        "BusId": parseInt(this.busId),
+        "PickUpID": this.pickups.PickupCode,
+        "DropOffID": this.dropoffs.DropoffCode,
+        "FromCityName": this.from,
+        "ToCityName": this.to,
+        "ContactInfo": {
+          "CustomerName": this.name,
+          "Email": this.email,
+          "Phone": this.mobile.toString(),
+          "Mobile": this.mobile.toString()
+        },
+        "GSTDetails": {
+          "Gstin": this.gstNo,
+          "GstCompany": this.businessName
+        },
+        "Passengers": passengersData,
+        "HoldId": this.holdId,
+        "user": this.authS.currentUserValue._id,
+        "status": "Pending"
+      }
+
+      console.log(dbData);
+      this.api.createBookings(dbData).subscribe(async res => {
+
+        const modal = await this.modal.create({
+          component: PaymentComponent,
+          componentProps: {
+            holdId: this.holdId,
+            fare: this.fare,
+            busDetails: this.busDetails,
+            pickups: this.pickups,
+            dropoffs: this.dropoffs,
+            passengers: passengersData
+          }
         });
+
+        await modal.present();
+      }, error => {
+        console.log(error);
+        this.presentToast("Something went wrong!", "danger");
+      });
 
     });
   }
 
-  async presentToast(message:string,color:string) {
+  async presentToast(message: string, color: string) {
     const toast = await this.toast.create({
       message: message,
       color: color,
@@ -177,7 +181,7 @@ export class GuestDetailsPage implements OnInit {
   }
 
 
-  back(){
+  back() {
     this.location.back();
   }
 }

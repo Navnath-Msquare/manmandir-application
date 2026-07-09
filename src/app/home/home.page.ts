@@ -584,12 +584,38 @@ export class HomePage implements OnInit {
     const rawData = recentSearch ? JSON.parse(recentSearch) : [];
     this.recentSearches = rawData
       .filter((c: any) => c.city || c.City)
-      .map((c: any) => ({
-        City: c.City || c.city,
-        State: c.State || c.state || '',
-        newCityId: c.newCityId,
-        oldCityId: c.oldCityId
-      }));
+      .map((c: any) => {
+        let city = c.City || c.city;
+        let state = c.State || c.state || '';
+        let newCityId = c.newCityId;
+        let oldCityId = c.oldCityId;
+        
+        const cityLower = city.toLowerCase().trim();
+        const stateLower = state.toLowerCase().trim();
+        if ((cityLower === 'aurangabad' || cityLower.includes('sambhajinagar') || cityLower.includes('sambhaji')) && stateLower === 'maharashtra') {
+          city = 'Chhatrapati Sambhajinagar (Aurangabad)';
+          newCityId = 24852;
+          oldCityId = 4068;
+        }
+
+        return {
+          City: city,
+          State: state,
+          newCityId: newCityId,
+          oldCityId: oldCityId
+        };
+      });
+
+    const uniqueRecent: any[] = [];
+    const seen = new Set();
+    for (const item of this.recentSearches) {
+      const key = `${item.City.toLowerCase()}_${item.State.toLowerCase()}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueRecent.push(item);
+      }
+    }
+    this.recentSearches = uniqueRecent;
  
     console.log(this.recentSearches)
     // Save back cleaned data
@@ -645,11 +671,44 @@ export class HomePage implements OnInit {
   }
  
  
+  preprocessCities(cities: any[], searchTerm: string): any[] {
+    const val = (searchTerm || '').toLowerCase().trim();
+    
+    // 1. Filter out any raw Aurangabad (Maharashtra) or Chatrapati SambhajiNagar (Maharashtra)
+    let list = (cities || []).filter((c: any) => {
+      const cityLower = (c.City || '').toLowerCase().trim();
+      const stateLower = (c.State || '').toLowerCase().trim();
+      const isTarget = (cityLower === 'aurangabad' || cityLower.includes('sambhajinagar') || cityLower.includes('sambhaji')) && stateLower === 'maharashtra';
+      return !isTarget;
+    });
+
+    // 2. Check if search term is relevant to Aurangabad or Sambhajinagar
+    const matchesTarget = 
+      val.includes('aurang') || 
+      val.includes('sambh') || 
+      val.includes('chhatra') || 
+      val.includes('chatra');
+
+    if (matchesTarget) {
+      const mergedCity = {
+        oldCityId: 4068,
+        newCityId: 24852,
+        City: 'Chhatrapati Sambhajinagar (Aurangabad)',
+        State: 'Maharashtra'
+      };
+      
+      // Prepend to list
+      list = [mergedCity, ...list];
+    }
+
+    return list;
+  }
+
   searchBusFromCity(city: any) {
     if (city.target.value.length >= 1) {
- 
+
       let search: any = { City: { $regex: '^' + city.target.value, $options: 'i' } };
- 
+
       if (city.target.value.toLowerCase() === 'goa') {
         search = { State: { $regex: '.*' + city.target.value + '.*', $options: 'i' } };
       }
@@ -659,7 +718,7 @@ export class HomePage implements OnInit {
       else if (city.target.value.toLowerCase() === 'chandigarh') {
         search = { State: { $regex: '.*' + city.target.value + '.*', $options: 'i' } };
       }
- 
+
       this.api.getAllBuslist(search, 1, 50, '').subscribe(data => {
         let filteredCities = data.data.filter((c: any) =>
           c.CityId !== 13975 && c.CityId !== 13605
@@ -668,33 +727,35 @@ export class HomePage implements OnInit {
           const goaCity = { oldCityId: 6578, newCityId: 428, City: 'Goa', State: 'Goa' };
           filteredCities = [goaCity, ...filteredCities];
         }
+        
+        let preprocessed = this.preprocessCities(filteredCities, city.target.value);
         // FIX: merge duplicate city entries (same City+State) into one,
         // combining oldCityId & newCityId so both APIs always get valid IDs.
-        this.fromCityList = this.mergeDuplicateCities(filteredCities);
+        this.fromCityList = this.mergeDuplicateCities(preprocessed);
       });
     } else {
       this.fromCityList = [];
     }
   }
- 
+
   // { $regex: '.*' + city.target.value + '.*', $options: 'i' }  all search
   searchBusToCity(city: any) {
     if (city.target.value.length >= 1) {
       let search: any = { City: { $regex: '^' + city.target.value, $options: 'i' } };
- 
+
       if (city.target.value.toLowerCase() === 'goa') {
         search = { State: { $regex: '.*' + city.target.value + '.*', $options: 'i' } };
       }
- 
+
       else if (city.target.value.toLowerCase() === 'chennai') {
         search = { City: { $regex: '.*' + city.target.value + '.*', $options: 'i' } };
       }
- 
+
       else if (city.target.value.toLowerCase() === 'chandigarh') {
         search = { State: { $regex: '.*' + city.target.value + '.*', $options: 'i' } };
       }
- 
- 
+
+
       this.api.getAllBuslist(search, 1, 50, '').subscribe(data => {
         let filteredCities = data.data.filter((c: any) =>
           c.CityId !== 13975 && c.CityId !== 13605
@@ -703,14 +764,16 @@ export class HomePage implements OnInit {
           const goaCity = { oldCityId: 6578, newCityId: 428, City: 'Goa', State: 'Goa' };
           filteredCities = [goaCity, ...filteredCities];
         }
+        
+        let preprocessed = this.preprocessCities(filteredCities, city.target.value);
         // FIX: merge duplicate city entries (same City+State) into one,
         // combining oldCityId & newCityId so both APIs always get valid IDs.
-        this.toCityList = this.mergeDuplicateCities(filteredCities);
+        this.toCityList = this.mergeDuplicateCities(preprocessed);
       })
     } else {
       this.toCityList = [];
     }
- 
+
   }
  
  

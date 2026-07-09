@@ -73,7 +73,6 @@ export class TicketDetailsComponent implements OnInit {
 
 
         const result = res?.result?.is_ticket_cancellable;
-
         if (result?.is_cancellable) {
           this.ticketDetails = {
             RefundAmount: result.refund_amount,
@@ -156,7 +155,7 @@ export class TicketDetailsComponent implements OnInit {
             }
           })
         );
-        const cancelData = cancelRes?.result?.cancel_ticket;
+        const cancelData = cancelRes?.data?.result?.cancel_ticket;
         if (!cancelData) throw "Cancel Failed";
 
         const seatDetail =
