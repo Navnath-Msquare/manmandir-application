@@ -1193,7 +1193,6 @@ export class BusSearchPage implements OnInit, OnDestroy {
   boarding: any = [];
   dropping: any = [];
   AllAmenities: any = [];
-  filteredBusList: any = [];
   checkedPickup: any = [];
   checkedDroping: any = [];
   checkedSeatType: any = [];
@@ -1209,6 +1208,8 @@ export class BusSearchPage implements OnInit, OnDestroy {
   uniqueSeatTypesandIsAC: any = [];
   selectBusOpt: any = [];
   searchTerm: string = '';
+  boardingSearchTerm: string = '';
+  droppingSearchTerm: string = '';
   filterbusprice: any;
   busfare: any;
   IsAC: any;
@@ -1478,10 +1479,7 @@ export class BusSearchPage implements OnInit, OnDestroy {
 
 
   filterBusOperators(event: any) {
-    const searchTerm = event.target.value?.toLowerCase() || '';
-    this.filteredBusList = this.busList.filter((item: any) =>
-      item.CompanyName.toLowerCase().includes(searchTerm)
-    );
+    this.operatorSearchTerm = event.target.value || '';
   }
 
   getData() {
@@ -1705,7 +1703,6 @@ export class BusSearchPage implements OnInit, OnDestroy {
       this.boarding = this.busList[0]?.Pickups;
 
       this.extractUniquePoints();
-      this.filteredBusList = this.filterUniqueCompanies(this.busList);
 
       this.isLoadingBuses = false;
       this.isSearchCompleted = true;
@@ -1911,6 +1908,39 @@ export class BusSearchPage implements OnInit, OnDestroy {
     this.uniquedeparature = [...new Set(deparature)]
   }
 
+  operatorSearchTerm: string = '';
+
+  get filteredBusList() {
+    const uniqueBuses = this.filterUniqueCompanies(this.OriginalbusList || []);
+    if (!this.operatorSearchTerm) {
+      return uniqueBuses;
+    }
+    const term = this.operatorSearchTerm.toLowerCase().trim();
+    return uniqueBuses.filter((item: any) =>
+      item.CompanyName?.toLowerCase().includes(term)
+    );
+  }
+
+  get filteredPickupPoints() {
+    if (!this.boardingSearchTerm) {
+      return this.uniquePickupPoints;
+    }
+    const term = this.boardingSearchTerm.toLowerCase();
+    return this.uniquePickupPoints.filter((point: any) =>
+      point?.toLowerCase().includes(term)
+    );
+  }
+
+  get filteredDropoffPoints() {
+    if (!this.droppingSearchTerm) {
+      return this.uniqueDropoffPoints;
+    }
+    const term = this.droppingSearchTerm.toLowerCase();
+    return this.uniqueDropoffPoints.filter((point: any) =>
+      point?.toLowerCase().includes(term)
+    );
+  }
+
 
 
   // selectBus(busId: any) {
@@ -1964,113 +1994,147 @@ export class BusSearchPage implements OnInit, OnDestroy {
 
   checkSeatType(event: any) {
     const seatType = event.target.value;
+    const isChecked = event.target.checked;
     const index = this.checkedSeatType.indexOf(seatType);
 
-    if (index === -1) {
-      this.checkedSeatType.push(seatType);
+    if (isChecked) {
+      if (index === -1) {
+        this.checkedSeatType.push(seatType);
+      }
     } else {
-      this.checkedSeatType.splice(index, 1);
+      if (index !== -1) {
+        this.checkedSeatType.splice(index, 1);
+      }
     }
 
     this.filterBusLists();
   }
 
   filterBusLists() {
+    // 1. Departure ranges
+    const selectedDeptRanges: { start: number; end: number }[] = [];
+    if (this.DeptSelections.Morning) selectedDeptRanges.push({ start: 6, end: 12 });
+    if (this.DeptSelections.Afternoon) selectedDeptRanges.push({ start: 12, end: 18 });
+    if (this.DeptSelections.Evening) selectedDeptRanges.push({ start: 18, end: 24 });
+    if (this.DeptSelections.Night) selectedDeptRanges.push({ start: 0, end: 6 });
+
+    // 2. Arrival ranges
+    const selectedArrRanges: { start: number; end: number }[] = [];
+    if (this.ArrivalTime.Morning) selectedArrRanges.push({ start: 6, end: 12 });
+    if (this.ArrivalTime.Afternoon) selectedArrRanges.push({ start: 12, end: 18 });
+    if (this.ArrivalTime.Evening) selectedArrRanges.push({ start: 18, end: 24 });
+    if (this.ArrivalTime.Night) selectedArrRanges.push({ start: 0, end: 6 });
+
+    // 3. Amenity indexes
+    const selectedAmenityIndexes = this.checkeAmenties.map((name: any) => this.AllAmenities.indexOf(name));
+
     this.busList = this.OriginalbusList.filter((bus: any) => {
+      // Operator
+      const matchesOperator = !this.selectBusOpt.length || this.selectBusOpt.includes(bus.CompanyName.toLowerCase().trim());
+
+      // Pickup
       const matchesPickup = !this.checkedPickup.length || bus.Pickups.some((p: any) => this.checkedPickup.includes(p.PickupName));
+
+      // Dropoff
       const matchesDropoff = !this.checkedDroping.length || bus.Dropoffs.some((d: any) => this.checkedDroping.includes(d.DropoffName));
-      const matchesIsAC = this.checkedSeatType.includes(bus.BusType.IsAC);
-      return matchesPickup && matchesDropoff && matchesIsAC;
+
+      // Seat Type / AC
+      const matchesSeatType = !this.checkedSeatType.length || 
+        this.checkedSeatType.includes(bus.BusType.IsAC) || 
+        this.checkedSeatType.includes(bus.BusType.Seating);
+
+      // Amenities
+      const matchesAmenities = !selectedAmenityIndexes.length || bus.Amenities.some((amt: any) => selectedAmenityIndexes.includes(amt));
+
+      // Departure Time
+      const matchesDeptTime = !selectedDeptRanges.length || (() => {
+        const hour = parseInt(bus.DeptTime.slice(11, 13), 10);
+        return selectedDeptRanges.some(range => hour >= range.start && hour < range.end);
+      })();
+
+      // Arrival Time
+      const matchesArrTime = !selectedArrRanges.length || (() => {
+        const hour = parseInt(bus.ArrTime.slice(11, 13), 10);
+        return selectedArrRanges.some(range => hour >= range.start && hour < range.end);
+      })();
+
+      return matchesOperator && matchesPickup && matchesDropoff && matchesSeatType && matchesAmenities && matchesDeptTime && matchesArrTime;
     });
+
+    this.busAvailable = this.busList.length;
   }
 
   checkPickup(event: any) {
-    let index = this.checkedPickup.findIndex((res: any) => { return res == event.target.value });
-    if (index == -1) {
-      this.checkedPickup.push(event.target.value)
+    const pickupVal = event.target.value;
+    const isChecked = event.target.checked;
+    const index = this.checkedPickup.indexOf(pickupVal);
+    if (isChecked) {
+      if (index === -1) {
+        this.checkedPickup.push(pickupVal);
+      }
     } else {
-      this.checkedPickup.splice(index, 1);
+      if (index !== -1) {
+        this.checkedPickup.splice(index, 1);
+      }
     }
-    const filteredBusList = this.OriginalbusList.filter((bus: any) => {
-      return (bus.Pickups.some((pickup: any) => this.checkedPickup.includes(pickup.PickupName)) ||
-        bus.Dropoffs.some((pickup: any) => this.checkedDroping.includes(pickup.DropoffName)) ||
-        this.checkedSeatType.includes(bus.BusType.IsAC));
-    });
-    if (filteredBusList.length == 0) {
-      this.busList = this.busList;
-    } else {
-      this.busList = filteredBusList;
-    }
+    this.filterBusLists();
   }
 
   checkDropoff(event: any) {
-    let index = this.checkedDroping.findIndex((res: any) => { return res == event.target.value });
-    if (index == -1) {
-      this.checkedDroping.push(event.target.value)
+    const dropoffVal = event.target.value;
+    const isChecked = event.target.checked;
+    const index = this.checkedDroping.indexOf(dropoffVal);
+    if (isChecked) {
+      if (index === -1) {
+        this.checkedDroping.push(dropoffVal);
+      }
     } else {
-      this.checkedDroping.splice(index, 1);
+      if (index !== -1) {
+        this.checkedDroping.splice(index, 1);
+      }
     }
-    const filteredBusList = this.OriginalbusList.filter((bus: any) => {
-      return (bus.Pickups.some((pickup: any) => this.checkedPickup.includes(pickup.PickupName)) ||
-        bus.Dropoffs.some((pickup: any) => this.checkedDroping.includes(pickup.DropoffName)) ||
-        this.checkedSeatType.includes(bus.BusType.IsAC));
-    });
-    if (filteredBusList.length == 0) {
-      this.busList = this.busList;
-    } else {
-      this.busList = filteredBusList;
-    }
+    this.filterBusLists();
   }
 
   checkBusOperator(event: any) {
     const selectedOperator = event.target.value;
-    const selectedOperatorLower = selectedOperator.toLowerCase();
+    const selectedOperatorLower = selectedOperator.toLowerCase().trim();
+    const isChecked = event.target.checked;
 
-    const index = this.selectBusOpt.findIndex((op: string) => op === selectedOperatorLower);
+    const index = this.selectBusOpt.indexOf(selectedOperatorLower);
 
-    if (index === -1) {
-      this.selectBusOpt.push(selectedOperatorLower);
+    if (isChecked) {
+      if (index === -1) {
+        this.selectBusOpt.push(selectedOperatorLower);
+      }
     } else {
-      this.selectBusOpt.splice(index, 1);
+      if (index !== -1) {
+        this.selectBusOpt.splice(index, 1);
+      }
     }
 
-    console.log(this.selectBusOpt);
-
-    const filteredBusList = this.OriginalbusList.filter((bus: any) => {
-      return this.selectBusOpt.length === 0 ||
-        this.selectBusOpt.includes(bus.CompanyName.toLowerCase());
-    });
-
-    this.busList = filteredBusList;
+    this.filterBusLists();
   }
 
   checkAmenities(event: any) {
-
     const amenityName = event.target.value;
+    const isChecked = event.target.checked;
     const amenityIndex = this.AllAmenities.findIndex((res: any) => res === amenityName);
 
     if (amenityIndex === -1) return;
 
     const exists = this.checkeAmenties.includes(amenityName);
-    if (!exists) {
-      this.checkeAmenties.push(amenityName);
+    if (isChecked) {
+      if (!exists) {
+        this.checkeAmenties.push(amenityName);
+      }
     } else {
-      this.checkeAmenties = this.checkeAmenties.filter((item: any) => item !== amenityName);
+      if (exists) {
+        this.checkeAmenties = this.checkeAmenties.filter((item: any) => item !== amenityName);
+      }
     }
 
-    const selectedAmenityIndexes = this.checkeAmenties.map((name: any) => { return this.AllAmenities.indexOf(name) });
-
-    console.log(selectedAmenityIndexes)
-    const filteredBusList = this.OriginalbusList.filter((bus: any) =>
-      bus.Amenities.some((amt: number) => selectedAmenityIndexes.includes(amt))
-    );
-
-
-    if (filteredBusList.length == 0) {
-      this.busList = this.busList;
-    } else {
-      this.busList = filteredBusList;
-    }
+    this.filterBusLists();
   }
 
   busfarelowtohigh() {
@@ -2175,52 +2239,11 @@ export class BusSearchPage implements OnInit, OnDestroy {
 
 
   depraturetime() {
-    const selectedRanges: { start: number; end: number }[] = [];
-
-    if (this.DeptSelections.Morning) {
-      selectedRanges.push({ start: 6, end: 12 });
-    }
-    if (this.DeptSelections.Afternoon) {
-
-      selectedRanges.push({ start: 12, end: 18 });
-    }
-    if (this.DeptSelections.Evening) {
-      selectedRanges.push({ start: 18, end: 24 });
-    }
-    if (this.DeptSelections.Night) {
-      selectedRanges.push({ start: 0, end: 6 });
-    }
-
-    this.busList = this.OriginalbusList.filter((bus: any) => {
-      const hour = parseInt(bus.DeptTime.slice(11, 13), 10); // Extract hour from 'YYYY-MM-DDTHH:mm:ss'
-
-      return selectedRanges.some(range => hour >= range.start && hour < range.end);
-    });
-    // For debugging
+    this.filterBusLists();
   }
 
   Arrivaltime() {
-    const selectedRanges: { start: number; end: number }[] = [];
-
-    if (this.DeptSelections.Morning) {
-      selectedRanges.push({ start: 6, end: 12 });
-    }
-    if (this.DeptSelections.Afternoon) {
-
-      selectedRanges.push({ start: 12, end: 18 });
-    }
-    if (this.DeptSelections.Evening) {
-      selectedRanges.push({ start: 18, end: 24 });
-    }
-    if (this.DeptSelections.Night) {
-      selectedRanges.push({ start: 0, end: 6 });
-    }
-
-    this.busList = this.OriginalbusList.filter((bus: any) => {
-      const hour = parseInt(bus.DeptTime.slice(11, 13), 10); // Extract hour from 'YYYY-MM-DDTHH:mm:ss'
-
-      return selectedRanges.some(range => hour >= range.start && hour < range.end);
-    });
+    this.filterBusLists();
   }
 
 
@@ -2250,24 +2273,7 @@ export class BusSearchPage implements OnInit, OnDestroy {
   //   }         
 
 
-  searchName(): void {
-    const inputElement = document.getElementById('searchbar') as HTMLInputElement;
-    const searchTerm = inputElement.value.toLowerCase();
 
-    const listItems = document.getElementsByClassName('droppinglist') as HTMLCollectionOf<HTMLElement>;
-
-    for (let i = 0; i < listItems.length; i++) {
-      const listItem = listItems[i];
-      const listItemText = listItem.innerHTML.toLowerCase();
-
-      if (!listItemText.includes(searchTerm)) {
-        listItem.style.display = "none";
-
-      } else {
-        listItem.style.display = "list-item";
-      }
-    }
-  }
 
   clearModel() {
     this.modal.dismiss();

@@ -352,26 +352,26 @@
                 <li class="flex items-center">
                   <ion-icon name="sunny-outline" class="p-2 text-2xl"></ion-icon>
                   <label class="flex-grow text-black">06:00 - 12:00<br>Morning</label>
-                  <input type="checkbox" name="DeptTime" value="Morning" (click)="depraturetime()"
+                  <input type="checkbox" name="DeptTime" value="Morning" (change)="depraturetime()"
                     [(ngModel)]="DeptSelections.Morning" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
                 </li>
                 <li class="flex items-center">
                   <ion-icon name="sunny-outline" class="p-2 text-2xl"></ion-icon>
                   <label class="flex-grow text-black">12:00 - 18:00<br>Afternoon</label>
-                  <input type="checkbox" name="DeptTime" value="Afternoon" (click)="depraturetime()"
+                  <input type="checkbox" name="DeptTime" value="Afternoon" (change)="depraturetime()"
                     [(ngModel)]="DeptSelections.Afternoon"
                     class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
                 </li>
                 <li class="flex items-center">
                   <ion-icon name="sunny-outline" class="p-2 text-2xl"></ion-icon>
                   <label class="flex-grow text-black">18:00 - 24:00<br>Evening</label>
-                  <input type="checkbox" name="DeptTime" value="Evening" (click)="depraturetime()"
+                  <input type="checkbox" name="DeptTime" value="Evening" (change)="depraturetime()"
                     [(ngModel)]="DeptSelections.Evening" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
                 </li>
                 <li class="flex items-center">
                   <ion-icon name="moon-outline" class="p-2 text-2xl"></ion-icon>
                   <label class="flex-grow text-black">00:00 - 06:00<br>Night</label>
-                  <input type="checkbox" name="DeptTime" value="Night" (click)="depraturetime()"
+                  <input type="checkbox" name="DeptTime" value="Night" (change)="depraturetime()"
                     [(ngModel)]="DeptSelections.Night" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
                 </li>
                 <li>
@@ -392,9 +392,10 @@
             <div>
               <ul class="space-y-10 " *ngFor="let item of uniqueSeatTypesandIsAC;">
                 <li class="flex items-center py-6">
-                  <label class="flex-grow text-black" for="{{item}}">{{item}}</label>
+                  <label class="flex-grow text-black cursor-pointer select-none" [htmlFor]="item">{{item}}</label>
                   <input type="checkbox" value="{{item}}" id="{{item}}" (change)="checkSeatType($event)"
-                    class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                    [checked]="checkedSeatType.includes(item)"
+                    class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500 cursor-pointer">
                 </li>
               </ul>
             </div>
@@ -408,27 +409,19 @@
             class="w-2/3 bg-white p-4 h-screen overflow-auto flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between p-2 rounded-full bg-slate-200">
-                <ion-searchbar clear-icon="close" id="searchbar" type="text" name="search" mode="ios" shape="round"
-                  search-icon="none" [(ngModel)]="toCity" (ionInput)="searchFromCity();searchBusFromPoint($event)"
-                  search-icon="none" (focusout)="closeSearch()" class="px-2 " shape="round"
+                <ion-searchbar clear-icon="close" id="boarding-searchbar" type="text" name="boardingSearch" mode="ios" shape="round"
+                  search-icon="none" [(ngModel)]="boardingSearchTerm" class="px-2"
                   placeholder="Enter your Boarding Point">
                 </ion-searchbar>
               </div>
-              <ul class="space-y-10 mt-6" id='list' *ngFor="let item of uniquePickupPoints;">
-                <li class="animals" class="flex items-center">
-                  <ion-grid>
-                    <ion-row>
-                      <ion-col size="10">
-                        <label class="flex-grow text-black" for="{{item}}">{{item}}</label>
-                      </ion-col>
-                      <ion-col size="2" class="my-auto" style="display: flex;
-                      align-items: center;
-                      justify-content: center;">
-                        <input type="checkbox" name="sort" value="{{item}}" id="{{item}}" (change)="checkPickup($event)"
-                          class="form-radio h-5 w-5  accent-red-500 focus:accent-red-500">
-                      </ion-col>
-                    </ion-row>
-                  </ion-grid>
+              <ul class="mt-4 px-2" id="boarding-list">
+                <li *ngFor="let item of filteredPickupPoints;" class="flex items-center justify-between py-3 border-b border-gray-100">
+                  <label class="text-black text-sm flex-grow pr-2 cursor-pointer select-none" [htmlFor]="item + '_board'">
+                    {{item}}
+                  </label>
+                  <input type="checkbox" name="boarding" [value]="item" [id]="item + '_board'" (change)="checkPickup($event)"
+                    [checked]="checkedPickup.includes(item)"
+                    class="h-5 w-5 accent-red-500 focus:accent-red-500 cursor-pointer">
                 </li>
               </ul>
             </div>
@@ -443,39 +436,21 @@
             class="w-2/3 bg-white p-4 h-screen overflow-auto flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between p-2 rounded-full bg-slate-200">
-                <ion-searchbar clear-icon="close" id="searchbar" (keydown)="searchName()" mode="ios" shape="round"
-                  search-icon="none" class=" px-2 " shape="round" placeholder="Enter your Dropping Point">
+                <ion-searchbar clear-icon="close" id="dropping-searchbar" type="text" name="droppingSearch" mode="ios" shape="round"
+                  search-icon="none" [(ngModel)]="droppingSearchTerm" class="px-2"
+                  placeholder="Enter your Dropping Point">
                 </ion-searchbar>
               </div>
-              <div *ngFor="let item of uniqueDropoffPoints;">
-                <!--
-                    <ion-grid>
-                       <ion-row class="list-item">
-                        <li class="droppinglist" style="list-style-type: none;">
-                          <ion-col size="10">
-                            <label class="  flex-grow text-black" for="{{item}}">{{item}}</label>
-                          </ion-col>
-                          <ion-col size="2" style="display: flex;
-                      align-items: center;
-                      justify-content: center;">
-                        <input type="checkbox" value="{{item}}" id="{{item}}" (change)="checkDropoff($event)"
-                        class=" form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
-                      </ion-col>
-                    </li>
-                    </ion-row>
-                    </ion-grid> -->
-                <div class="list-item flex items-center justify-between p-2">
-                  <li class="droppinglist flex items-center justify-between p-0 m-0 w-full">
-                    <label for="{{item}}" class="text-black">
-                      {{item}}
-                    </label>
-                    <input type="checkbox" value="{{item}}" id="{{item}}" (change)="checkDropoff($event)"
-                      class="form-checkbox h-5 w-5 text-red-500 focus:text-red-500">
-                  </li>
-                </div>
-
-
-              </div>
+              <ul class="mt-4 px-2" id="dropping-list">
+                <li *ngFor="let item of filteredDropoffPoints;" class="flex items-center justify-between py-3 border-b border-gray-100">
+                  <label class="text-black text-sm flex-grow pr-2 cursor-pointer select-none" [htmlFor]="item + '_drop'">
+                    {{item}}
+                  </label>
+                  <input type="checkbox" name="dropping" [value]="item" [id]="item + '_drop'" (change)="checkDropoff($event)"
+                    [checked]="checkedDroping.includes(item)"
+                    class="h-5 w-5 accent-red-500 focus:accent-red-500 cursor-pointer">
+                </li>
+              </ul>
             </div>
           </div>
 
@@ -493,14 +468,15 @@
                   <ion-grid>
                     <ion-row>
                       <ion-col size="10">
-                        <label class="flex-grow text-black">{{item.CompanyName}}</label>
+                        <label [htmlFor]="item.CompanyName" class="flex-grow text-black cursor-pointer select-none">{{item.CompanyName}}</label>
                       </ion-col>
                       <ion-col size="2" style="display: flex;
                       align-items: center;
                       justify-content: center;">
-                        <input type="checkbox" value="{{item.CompanyName}}" id="{{item}}"
+                        <input type="checkbox" value="{{item.CompanyName}}" id="{{item.CompanyName}}"
                           (change)="checkBusOperator($event)"
-                          class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                          [checked]="selectBusOpt.includes(item.CompanyName.toLowerCase().trim())"
+                          class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500 cursor-pointer">
                       </ion-col>
                     </ion-row>
                   </ion-grid>
@@ -519,14 +495,15 @@
                   <ion-grid>
                     <ion-row>
                       <ion-col size="10">
-                        <label class="flex-grow text-black">{{Amenities}}</label>
+                        <label [htmlFor]="Amenities" class="flex-grow text-black cursor-pointer select-none">{{Amenities}}</label>
                       </ion-col>
                       <ion-col size="2" style="display: flex;
                       align-items: center;
                       justify-content: center;">
                         <input type="checkbox" name="sort" value="{{Amenities}}" id="{{Amenities}}"
                           (change)="checkAmenities($event)"
-                          class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
+                          [checked]="checkeAmenties.includes(Amenities)"
+                          class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500 cursor-pointer">
                       </ion-col>
                     </ion-row>
                   </ion-grid>
@@ -564,25 +541,25 @@
 
                   <ion-icon name="sunny-outline" class="p-2 text-2xl"></ion-icon>
                   <label class="flex-grow text-black">06:00 - 12:00<br>Morning</label>
-                  <input type="checkbox" name="Arrivaltime" value="Morning" (click)="Arrivaltime()"
+                  <input type="checkbox" name="Arrivaltime" value="Morning" (change)="Arrivaltime()"
                     [(ngModel)]="ArrivalTime.Morning" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
                 </li>
                 <li class="flex items-center">
                   <ion-icon name="sunny-outline" class="p-2 text-2xl"></ion-icon>
                   <label class="flex-grow text-black">12:00 - 18:00<br>Afternoon</label>
-                  <input type="checkbox" name="Arrivaltime" value="Afternoon" (click)="Arrivaltime()"
+                  <input type="checkbox" name="Arrivaltime" value="Afternoon" (change)="Arrivaltime()"
                     [(ngModel)]="ArrivalTime.Afternoon" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
                 </li>
                 <li class="flex items-center">
                   <ion-icon name="sunny-outline" class="p-2 text-2xl"></ion-icon>
                   <label class="flex-grow text-black">18:00 - 24:00<br>Evening</label>
-                  <input type="checkbox" name="Arrivaltime" value="Evening" (click)="Arrivaltime()"
+                  <input type="checkbox" name="Arrivaltime" value="Evening" (change)="Arrivaltime()"
                     [(ngModel)]="ArrivalTime.Evening" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
                 </li>
                 <li class="flex items-center">
                   <ion-icon name="moon-outline" class="p-2 text-2xl"></ion-icon>
                   <label class="flex-grow text-black">00:00 - 06:00<br>Night</label>
-                  <input type="checkbox" name="Arrivaltime" value="Night" (click)="Arrivaltime()"
+                  <input type="checkbox" name="Arrivaltime" value="Night" (change)="Arrivaltime()"
                     [(ngModel)]="ArrivalTime.Night" class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500">
                 </li>
                 <li>
