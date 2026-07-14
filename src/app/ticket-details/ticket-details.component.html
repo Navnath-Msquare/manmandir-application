@@ -10,6 +10,36 @@
 </ion-header>
 
 <ion-content>
+  <!-- Cancellation Details Banner -->
+  <div *ngIf="journeyData?.status === 'Cancel' || journeyData?.IsCancelled" 
+       style="margin: 16px; padding: 16px; background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); border-radius: 12px; border-left: 5px solid #d32f2f; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+      <span style="font-size: 16px; font-weight: bold; color: #b71c1c;">Ticket Cancelled</span>
+    </div>
+    <p style="font-size: 13px; color: #5c3838; margin: 4px 0 12px 0; line-height: 1.4;">
+      This booking has been cancelled successfully. The refund is being processed as per the policy.
+    </p>
+    
+    <div style="background-color: rgba(255, 255, 255, 0.7); border-radius: 8px; padding: 12px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px;">
+        <span style="color: #666;">Total Fare Paid:</span>
+        <span style="font-weight: 600; color: #333;">₹{{journeyData?.TotalFare || 0}}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px;">
+        <span style="color: #666;">Cancellation Charges:</span>
+        <span style="font-weight: 600; color: #d32f2f;">₹{{journeyData?.ChargeAmt || 0}}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; padding-top: 6px; border-top: 1px dashed #ccc; font-size: 13px; font-weight: bold;">
+        <span style="color: #333;">Refund Processed:</span>
+        <span style="color: #2e7d32;">₹{{journeyData?.RefundAmount || 0}}</span>
+      </div>
+    </div>
+    
+    <div *ngIf="journeyData?.cancellationPolicy" style="margin-top: 12px; font-size: 11px; color: #7f5f5f; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 8px;">
+      <strong>Applied Policy:</strong> {{journeyData?.cancellationPolicy}}
+    </div>
+  </div>
+
   <ion-card mode="ios" class="ticket-card" style="padding: 0px;box-shadow: unset;">
     <ion-card-header style="padding: 5px;border-bottom: 1px solid #EEEEEE;">
       <ion-card-title class="text-sm font-medium text-light">Journey Date<br><span
@@ -125,6 +155,44 @@
           {{journeyData?.TotalFare}}</ion-label>
       </ion-item>
     </ion-card-header>
+
+    <!-- Cancellation Policy Section -->
+    <div style="padding: 10px 16px; border-top: 1px solid #EEEEEE;" *ngIf="!journeyData?.IsCancelled && journeyData?.status !== 'Cancel'">
+      <h6 style="margin: 0 0 6px 0; font-size: 12px; font-weight: bold; color: #666; letter-spacing: 0.5px;">CANCELLATION POLICY</h6>
+      
+      <!-- If text policy is available -->
+      <p *ngIf="cancellationPolicyText" style="margin: 0; font-size: 12px; color: #444; line-height: 1.4; white-space: pre-line;">
+        {{cancellationPolicyText}}
+      </p>
+      
+      <!-- If slabs table is available -->
+      <div *ngIf="cancellationPolicySlabs && cancellationPolicySlabs.length > 0" style="overflow-x: auto; margin-top: 4px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+          <thead>
+            <tr style="background-color: #f9f9f9; text-align: left; border-bottom: 1px solid #eee;">
+              <th style="padding: 6px 4px; font-weight: 600; color: #666;">Time Frame</th>
+              <th style="padding: 6px 4px; font-weight: 600; color: #666; text-align: right;">Deduction</th>
+              <th style="padding: 6px 4px; font-weight: 600; color: #666; text-align: right;">Refund</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let slab of cancellationPolicySlabs" style="border-bottom: 1px solid #f5f5f5;">
+              <td style="padding: 6px 4px; color: #333;">{{slab.timeFrame}}</td>
+              <td style="padding: 6px 4px; color: #d32f2f; text-align: right; font-weight: 500;">{{slab.deduction}}</td>
+              <td style="padding: 6px 4px; color: #2e7d32; text-align: right; font-weight: 500;">{{slab.refund}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Default state if fetching or not available -->
+      <div *ngIf="!cancellationPolicyText && (!cancellationPolicySlabs || cancellationPolicySlabs.length === 0)">
+        <p style="margin: 0; font-size: 12px; color: #888; font-style: italic;">
+          No cancellation policy details returned from API.
+        </p>
+      </div>
+    </div>
+
     <ion-card-header class="text-center p-0" *ngIf="ticketDetails.IsCancellable">
       <ion-button fill="clear" class="text-sm font-bold" size="small" (click)="presentAlert()" [disabled]="loader">
         <ion-spinner *ngIf="loader"></ion-spinner>Cancel Ticket</ion-button>
