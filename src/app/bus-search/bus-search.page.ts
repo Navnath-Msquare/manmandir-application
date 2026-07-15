@@ -1846,7 +1846,6 @@ export class BusSearchPage implements OnInit, OnDestroy {
   }
 
   areBusesDuplicate(a: any, b: any): boolean {
-    if (a.source === b.source) return false;
     const depA = this.getFormattedTime(a.DeptTime);
     const depB = this.getFormattedTime(b.DeptTime);
     if (!depA || !depB) return false;
@@ -1854,17 +1853,7 @@ export class BusSearchPage implements OnInit, OnDestroy {
     // 1. Departure times must be within 2 minutes
     if (this.getDiffInMinutes(depA, depB) > 2) return false;
 
-    // 2. AC status must match
-    const acA = (a.BusType?.IsAC || '').replace(/[^a-zA-Z]/g, '').toLowerCase();
-    const acB = (b.BusType?.IsAC || '').replace(/[^a-zA-Z]/g, '').toLowerCase();
-    if (acA !== acB) return false;
-
-    // 3. Seating type must match (Sleeper vs Seater)
-    const seatA = (a.BusType?.Seating || '').toLowerCase();
-    const seatB = (b.BusType?.Seating || '').toLowerCase();
-    const isSleeperA = seatA.includes('sleeper');
-    const isSleeperB = seatB.includes('sleeper');
-    if (isSleeperA !== isSleeperB) return false;
+    // 2. We are ignoring AC and Sleeper string mismatch because different APIs send different tags for the exact same bus.
 
     // 4. Company Names must share at least one significant word
     const cleanName = (name: string) => {
@@ -1880,8 +1869,15 @@ export class BusSearchPage implements OnInit, OnDestroy {
     const wordsA = cleanName(a.CompanyName || a.BusName);
     const wordsB = cleanName(b.CompanyName || b.BusName);
 
-    const hasSharedWord = wordsA.some(w => wordsB.includes(w));
-    if (!hasSharedWord) return false;
+    if (wordsA.length === 0 || wordsB.length === 0) {
+      // Fallback for small names (e.g., "HK Travels", "Om", "M B")
+      const rawA = (a.CompanyName || a.BusName || '').toLowerCase().replace(/\s/g, '');
+      const rawB = (b.CompanyName || b.BusName || '').toLowerCase().replace(/\s/g, '');
+      if (rawA !== rawB) return false;
+    } else {
+      const hasSharedWord = wordsA.some(w => wordsB.includes(w));
+      if (!hasSharedWord) return false;
+    }
 
     return true;
   }
