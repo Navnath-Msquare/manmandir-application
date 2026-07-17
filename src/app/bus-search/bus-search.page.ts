@@ -1522,7 +1522,7 @@ export class BusSearchPage implements OnInit, OnDestroy {
     if (this.fromNewCityId == 24852 || this.fromNewCityId == 97 || this.fromNewCityId === '24852' || this.fromNewCityId === '97') {
       fromIds = [24852, 97];
     }
-    
+
     let toIds: any[] = [this.toNewCityId];
     if (this.toNewCityId == 24852 || this.toNewCityId == 97 || this.toNewCityId === '24852' || this.toNewCityId === '97') {
       toIds = [24852, 97];
@@ -1662,7 +1662,7 @@ export class BusSearchPage implements OnInit, OnDestroy {
 
       // ---------------- MERGE & DEDUPLICATE ----------------
       const mergedList = [...newBusList, ...oldBusList];
-      
+
       const now = moment().tz('Asia/Kolkata');
       const todayStr = now.format('YYYY-MM-DD');
       const isToday = (journeyDate === todayStr);
@@ -1685,7 +1685,7 @@ export class BusSearchPage implements OnInit, OnDestroy {
         }
       });
       this.busList = uniqueBuses;
-      
+
       // Sort chronologically by departure time (Time Serial)
       this.busList.sort((a: any, b: any) => {
         const timeA = new Date(a.DeptTime).getTime();
@@ -1851,7 +1851,7 @@ export class BusSearchPage implements OnInit, OnDestroy {
     if (!depA || !depB) return false;
 
     // 1. Departure times must be within 2 minutes
-    if (this.getDiffInMinutes(depA, depB) > 2) return false;
+    if (this.getDiffInMinutes(depA, depB) > 5) return false;
 
     // 2. We are ignoring AC and Sleeper string mismatch because different APIs send different tags for the exact same bus.
 
@@ -2035,8 +2035,8 @@ export class BusSearchPage implements OnInit, OnDestroy {
       const matchesDropoff = !this.checkedDroping.length || bus.Dropoffs.some((d: any) => this.checkedDroping.includes(d.DropoffName));
 
       // Seat Type / AC
-      const matchesSeatType = !this.checkedSeatType.length || 
-        this.checkedSeatType.includes(bus.BusType.IsAC) || 
+      const matchesSeatType = !this.checkedSeatType.length ||
+        this.checkedSeatType.includes(bus.BusType.IsAC) ||
         this.checkedSeatType.includes(bus.BusType.Seating);
 
       // Amenities
@@ -2163,12 +2163,12 @@ export class BusSearchPage implements OnInit, OnDestroy {
       this.clearAll();
       return;
     }
-  
+
     this.activeFilter = type;
     this.isLoading = true;
-  
+
     setTimeout(() => {
-  
+
       this.busList = this.OriginalbusList
         .filter((bus: any) => {
           const hour = parseInt(bus.DeptTime.slice(11, 13));
@@ -2177,21 +2177,21 @@ export class BusSearchPage implements OnInit, OnDestroy {
         .sort((a: any, b: any) =>
           a.DeptTime.localeCompare(b.DeptTime)
         );
-  
+
       this.isLoading = false;
-  
+
     }, 500); // small delay for loader effect
   }
-  
+
 
   filterAMDeparture() {
     this.applyTimeFilter(0, 12, 'AM');
   }
-  
+
   filterPMDeparture() {
     this.applyTimeFilter(12, 24, 'PM');
   }
-  
+
 
 
   closeSearch() {

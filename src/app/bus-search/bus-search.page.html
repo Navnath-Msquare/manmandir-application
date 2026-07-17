@@ -206,7 +206,7 @@
         </ion-row>
         <ion-row>
           <ion-col size="7">
-            <ion-badge color="success" class="shadow-lg py-1.5 px-3 me-2 rounded-full text-black max-sm:text-[10px]"
+            <ion-badge *ngIf="!(item.source === 'NEW_API' && item.BusType?.IsAC === 'NON_AC')" color="success" class="shadow-lg py-1.5 px-3 me-2 rounded-full text-black max-sm:text-[10px]"
               shape="round">{{item.BusType?.IsAC.replace('_', ' ')}}</ion-badge>
             <ion-badge color="success" class="shadow-lg py-1.5 px-3 me-2 rounded-full text-black max-sm:text-[10px]"
               shape="round">{{item.BusType?.Seating.replace('_', ' ')}}</ion-badge>
