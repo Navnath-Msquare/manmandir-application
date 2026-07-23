@@ -84,10 +84,10 @@ export class ApiService {
       data: data
     });
 
-    console.log("SDatata balaji ---> ",sData)
+    console.log("SDatata balaji ---> ", sData)
 
     return this.http.post<any>("https://api.karobooking.com/server/create-server-request", sData, { headers: { 'Content-Type': 'application/json' } })
-    //return this.http.post<any>(`${environment.baseURL}server/create-server-request`, sData, { headers: { 'Content-Type': 'application/json' } })
+      //return this.http.post<any>(`${environment.baseURL}server/create-server-request`, sData, { headers: { 'Content-Type': 'application/json' } })
       .pipe(map(data => {
         return data;
       }));

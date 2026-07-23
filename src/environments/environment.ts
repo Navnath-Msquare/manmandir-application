@@ -7,12 +7,12 @@ export const environment = {
 //baseURL: 'http://localhost:4000/',
   baseURL: 'https://api.zerofollowup.com/',
   // baseURL: 'https://api.karobooking.com/',
-  //   razorpayKey: 'rzp_test_WNng1yL47JloKB',
-  //  razorpayKeySecret: 'gN0Or2S0qTDYCwDmtznovjAE',
+   razorpayKey: 'rzp_test_WNng1yL47JloKB',
+    razorpayKeySecret: 'gN0Or2S0qTDYCwDmtznovjAE',
 
   // Razorpay test key and secret key
-  razorpayKey: 'rzp_test_TDG1MR7TQnALrl',
-  razorpayKeySecret: 'MF3Ui389lxw5K63Zkx0SQakX',
+  //razorpayKey: 'rzp_test_TDG1MR7TQnALrl',
+  //razorpayKeySecret: 'MF3Ui389lxw5K63Zkx0SQakX',
   busApi: 'https://partnerapi.iamgds.com/ota/',
   busTranApi: 'https://partnertranapi.iamgds.com/ota/',
   newApi: 'http://apistaging.ticketsimply.com',
