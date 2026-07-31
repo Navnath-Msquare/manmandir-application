@@ -12,5 +12,6 @@ export const environment = {
   
   busApi: 'https://partnerapi.iamgds.com/ota/',
   busTranApi: 'https://partnertranapi.iamgds.com/ota/',
+  newApi: 'http://apistaging.ticketsimply.com',
   newApikey: 'TSHSPFAPI58368531'
 };
