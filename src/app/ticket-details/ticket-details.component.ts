@@ -6,6 +6,8 @@ import { environment } from 'src/environments/environment';
 import { firstValueFrom } from 'rxjs';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 
 @Component({
   selector: 'app-ticket-details',
@@ -366,9 +368,19 @@ export class TicketDetailsComponent implements OnInit {
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       
       const fileName = this.journeyData?.PNRNo ? `Ticket_${this.journeyData.PNRNo}.pdf` : 'Ticket.pdf';
-      pdf.save(fileName);
       
-      this.presentToast('Ticket downloaded successfully', 'success');
+      if (Capacitor.isNativePlatform()) {
+        const base64Data = pdf.output('datauristring').split(',')[1];
+        await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: Directory.Documents
+        });
+        this.presentToast(`Ticket saved to Documents folder as ${fileName}`, 'success');
+      } else {
+        pdf.save(fileName);
+        this.presentToast('Ticket downloaded successfully', 'success');
+      }
     } catch (error) {
       console.error('Error generating PDF:', error);
       this.presentToast('Failed to generate PDF', 'danger');
