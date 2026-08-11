@@ -4,6 +4,8 @@ import { ApiService } from '../core/services/api.service';
 import { AlertController, ToastController } from '@ionic/angular';
 import { environment } from 'src/environments/environment';
 import { firstValueFrom } from 'rxjs';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-ticket-details',
@@ -336,6 +338,43 @@ export class TicketDetailsComponent implements OnInit {
       position: "bottom"
     });
     await toast.present();
+  }
+
+  async downloadTicketPDF() {
+    const element = document.getElementById('ticket-pdf-content');
+    if (!element) {
+      this.presentToast('Ticket content not found', 'danger');
+      return;
+    }
+    
+    this.loader = true;
+    this.presentToast('Generating PDF...', 'success');
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2, // Higher scale for better resolution
+        useCORS: true, // Allow cross-origin images to be rendered
+        backgroundColor: '#ffffff'
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      
+      const fileName = this.journeyData?.PNRNo ? `Ticket_${this.journeyData.PNRNo}.pdf` : 'Ticket.pdf';
+      pdf.save(fileName);
+      
+      this.presentToast('Ticket downloaded successfully', 'success');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      this.presentToast('Failed to generate PDF', 'danger');
+    } finally {
+      this.loader = false;
+    }
   }
 }
 

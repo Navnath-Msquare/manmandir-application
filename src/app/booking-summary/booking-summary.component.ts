@@ -144,7 +144,7 @@ export class BookingSummaryComponent implements OnInit {
 
           let transData = JSON.parse(JSON.stringify(initPayment.response))
           if (this.walletPaidAmount == 0) {
-            this.bookASeat();
+            this.bookASeat(transData?.razorpay_payment_id);
           } else {
             let wData = JSON.stringify({
               description: "For Ticket Booking",
@@ -153,7 +153,7 @@ export class BookingSummaryComponent implements OnInit {
               user: this.auth.currentUserValue._id
             })
             this.api.createWallet(wData).subscribe(res => {
-              this.bookASeat();
+              this.bookASeat(transData?.razorpay_payment_id);
             }, error => {
               console.error(error);
               this.presentToast("Something went wrong!", "danger")
@@ -175,16 +175,16 @@ export class BookingSummaryComponent implements OnInit {
 
 
 
-  bookASeat() {
+  bookASeat(paymentId?: string) {
 
     if (this.source === "OLD_API") {
-      this.bookSeatOldApi();
+      this.bookSeatOldApi(paymentId);
     } else {
-      this.bookSeatNewApi();
+      this.bookSeatNewApi(paymentId);
     }
   }
 
-  bookSeatOldApi() {
+  bookSeatOldApi(paymentId?: string) {
     const data = {
       "HoldId": this.holdId
     }
@@ -209,8 +209,7 @@ export class BookingSummaryComponent implements OnInit {
       let TicketNo = data.TicketNo;
       let PNRNo = data.PNRNo;
 
-      console.log("TicketNo", TicketNo);
-      console.log("PNRNo", PNRNo);
+      
       this.api.serverRequest("GET", environment.busTranApi + "BookingDetails?PNR=" + PNRNo + "&TicketNo=" + TicketNo, {}).subscribe(async res => {
         console.log(res);
         let body = JSON.parse(res.body);
@@ -249,6 +248,7 @@ export class BookingSummaryComponent implements OnInit {
           },
           "TotalSeats": data.TotalSeats,
           "TotalFare": data.TotalFare,
+          "PaymentId": paymentId,
           "status": "Success"
         }
 
@@ -266,7 +266,7 @@ export class BookingSummaryComponent implements OnInit {
     });
   }
 
-  bookSeatNewApi() {
+  bookSeatNewApi(paymentId?: string) {
 
     this.loading = true;
 
@@ -279,9 +279,15 @@ export class BookingSummaryComponent implements OnInit {
       }
     }).subscribe(res => {
 
-      const ticket = res?.result?.ticket_details;
-      if (!ticket || ticket.ticket_status !== "Confirmed") {
-        this.presentToast("Booking Failed", "danger");
+      const ticket = res?.data?.result?.ticket_details || res?.result?.ticket_details;
+      if (!ticket) {
+        this.presentToast("Booking Failed: No ticket details found", "danger");
+        this.loading = false;
+        return;
+      }
+
+      if (ticket.ticket_status !== "Confirmed" && !ticket.pnr_number) {
+        this.presentToast("Booking Failed: Ticket not confirmed", "danger");
         this.loading = false;
         return;
       }
@@ -317,6 +323,7 @@ export class BookingSummaryComponent implements OnInit {
         Commission: ticket.commission,
         ServiceTaxPercent: ticket.service_tax_percent,
         ConvenienceChargePercent: ticket.convenience_charge_percent,
+        PaymentId: paymentId,
 
         status: "Success",
         source: this.source

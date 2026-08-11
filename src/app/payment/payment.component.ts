@@ -105,7 +105,7 @@ export class PaymentComponent implements OnInit {
           
           let transData = JSON.parse(JSON.stringify(initPayment.response))
           if(this.walletPaidAmount == 0){
-            this.bookASeat();
+            this.bookASeat(transData?.razorpay_payment_id);
             this.loading = false;
           }else{
             let wData = JSON.stringify({
@@ -115,7 +115,7 @@ export class PaymentComponent implements OnInit {
               user:this.auth.currentUserValue._id
             })
             this.api.createWallet(wData).subscribe(res=>{
-              this.bookASeat();
+              this.bookASeat(transData?.razorpay_payment_id);
               this.loading = false;
             },error=>{
               console.error(error);
@@ -136,7 +136,7 @@ export class PaymentComponent implements OnInit {
 
 
 
-  bookASeat(){
+  bookASeat(paymentId?: string){
     const data = {
       "HoldId": this.holdId
     }
@@ -188,6 +188,7 @@ export class PaymentComponent implements OnInit {
             },
             "TotalSeats":data.TotalSeats,
             "TotalFare":data.TotalFare,
+            "PaymentId": paymentId,
             "status": "Success"
           }
 

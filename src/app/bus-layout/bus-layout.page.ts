@@ -1199,7 +1199,7 @@ export class BusLayoutPage implements OnInit {
       body
     }).subscribe(res => {
       console.log(res)
-      const pnr = res?.result?.ticket_details?.pnr_number;
+      const pnr = res?.data?.result?.ticket_details?.pnr_number || res?.result?.ticket_details?.pnr_number;
 
 
       if (!pnr) {
