@@ -62,7 +62,7 @@ export class TicketDetailsComponent implements OnInit {
           })
         );
 
-        const result = res?.result?.is_ticket_cancellable;
+        const result = res?.data?.result?.is_ticket_cancellable || res?.result?.is_ticket_cancellable;
         if (result?.is_cancellable) {
           this.ticketDetails = {
             IsCancellable: true,
