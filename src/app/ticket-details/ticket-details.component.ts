@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { ApiService } from '../core/services/api.service';
 import { AlertController, ToastController } from '@ionic/angular';
 import { environment } from 'src/environments/environment';
@@ -23,7 +24,7 @@ export class TicketDetailsComponent implements OnInit {
   cancellationPolicySlabs: any[] = [];
 
   constructor(public route: ActivatedRoute, public api: ApiService, public toast: ToastController, private alertController: AlertController,
-    public router: Router
+    public router: Router, private location: Location
   ) { }
 
   async ngOnInit() {
@@ -36,7 +37,44 @@ export class TicketDetailsComponent implements OnInit {
       this.journeyData = res.data[0];
 
       await this.getCancellationDetails();
+
+      const action = params.action;
+      if (action === 'notify-booking' || action === 'notify-cancellation') {
+        // Remove action from URL so it doesn't fire again on reload
+        this.location.replaceState(`/ticket-details?id=${params.id}`);
+        setTimeout(() => {
+          this.generateAndSendPDF(action === 'notify-cancellation' ? 'cancellation' : 'booking');
+        }, 1500);
+      }
     });
+  }
+
+  async generateAndSendPDF(type: string) {
+    const element = document.getElementById('ticket-pdf-content');
+    if (!element) return;
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      const base64Data = pdf.output('datauristring'); // data:application/pdf;base64,...
+
+      await firstValueFrom(
+        this.api.sendNotifications(this.journeyData._id, {
+          type: type,
+          pdfBase64: base64Data
+        })
+      );
+      console.log('Notifications sent successfully with PDF');
+    } catch (e) {
+      console.error('Failed to generate and send PDF', e);
+    }
   }
 
   async getCancellationDetails() {
@@ -314,7 +352,7 @@ export class TicketDetailsComponent implements OnInit {
       );
 
       this.presentToast("Booking Cancelled Successfully", "success");
-      this.router.navigateByUrl("/tickets");
+      this.router.navigate(['/ticket-details'], { queryParams: { id: this.journeyData._id, action: 'notify-cancellation' } });
 
     } catch (error) {
       console.error(error);

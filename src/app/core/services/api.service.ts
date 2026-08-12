@@ -245,6 +245,14 @@ export class ApiService {
       }));
   }
 
+  // Send Notifications
+  sendNotifications(id: any, data: any) {
+    return this.http.post<any>(`${environment.baseURL}bookings/${id}/send-notifications`, data, { headers: { 'Content-Type': 'application/json' } })
+      .pipe(map((data, re) => {
+        return data;
+      }));
+  }
+
 
   getSubscriptions(condition: any, page: number = 1, limit: number = 25, searchTerm: any) {
     return this.http.post<any>(`${environment.baseURL}/subscription/get?page=` + page + '&limit=' + limit + '&searchTerm=' + searchTerm, JSON.stringify(condition), { headers: { 'Content-Type': 'application/json' } })

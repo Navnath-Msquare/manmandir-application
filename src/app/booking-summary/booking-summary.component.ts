@@ -254,7 +254,7 @@ export class BookingSummaryComponent implements OnInit {
 
         this.api.updateBookings(dbData, this.holdData._id).subscribe(res => {
           this.presentToast("Booking Successful", "success");
-          this.router.navigateByUrl("/tickets");
+          this.router.navigate(['/ticket-details'], { queryParams: { id: this.holdData._id, action: 'notify-booking' } });
           this.modalCtrl.dismiss();
           this.loading = false;
         }, error => {
@@ -339,7 +339,7 @@ export class BookingSummaryComponent implements OnInit {
 
       this.api.updateBookings(dbData, this.holdData._id).subscribe(() => {
         this.presentToast("Booking Successful", "success");
-        this.router.navigateByUrl("/tickets");
+        this.router.navigate(['/ticket-details'], { queryParams: { id: this.holdData._id, action: 'notify-booking' } });
         this.modalCtrl.dismiss();
         this.loading = false;
       }, err => {
