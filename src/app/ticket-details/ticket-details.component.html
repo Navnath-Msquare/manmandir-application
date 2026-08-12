@@ -3,16 +3,131 @@
     <ion-buttons>
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-buttons slot="end">
-      <ion-button (click)="downloadTicketPDF()">
-        <ion-icon slot="icon-only" name="download-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
     <ion-title>
       Ticket Details
     </ion-title>
   </ion-toolbar>
 </ion-header>
+
+<!-- Hidden Layout for PDF Generation -->
+<div style="position: absolute; top: 0; left: 0; width: 800px; background: white; z-index: -9999;" id="ticket-pdf-content">
+  <div style="padding: 20px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333;">
+    
+    <!-- PDF Header -->
+    <div style="border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px;">
+      <table style="width: 100%;">
+        <tr>
+          <td style="width: 70px; vertical-align: middle;">
+            <img src="assets/img/logo.png" style="height: 40px; width: auto;" alt="KaroBooking">
+          </td>
+          <td style="vertical-align: middle;">
+            <h1 style="margin: 0; font-size: 22px; color: #111;">{{journeyData?.CompanyName}}</h1>
+            <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;">{{journeyData?.BusTypeName}}</p>
+          </td>
+          <td style="text-align: right; vertical-align: middle;">
+            <h2 style="margin: 0 0 5px 0; font-size: 20px; color: #111;">E-Ticket</h2>
+            <div *ngIf="journeyData?.status === 'Cancel' || journeyData?.IsCancelled" style="color: #d32f2f; font-weight: bold; font-size: 14px; border: 2px solid #d32f2f; padding: 4px; border-radius: 4px; display: inline-block;">CANCELLED</div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- PNR and Ticket Info -->
+    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+      <table style="width: 100%;">
+        <tr>
+          <td style="width: 25%; vertical-align: top;">
+            <p style="margin: 0 0 5px 0; font-size: 12px; color: #666; text-transform: uppercase;">PNR No</p>
+            <p style="margin: 0; font-size: 16px; font-weight: bold;">{{journeyData?.PNRNo}}</p>
+          </td>
+          <td style="width: 25%; vertical-align: top;">
+            <p style="margin: 0 0 5px 0; font-size: 12px; color: #666; text-transform: uppercase;">Ticket No</p>
+            <p style="margin: 0; font-size: 16px; font-weight: bold;">{{journeyData?.TicketNo}}</p>
+          </td>
+          <td style="width: 25%; vertical-align: top;">
+            <p style="margin: 0 0 5px 0; font-size: 12px; color: #666; text-transform: uppercase;">Journey Date</p>
+            <p style="margin: 0; font-size: 16px; font-weight: bold;">{{journeyData?.JourneyDate | date:'MMM dd, yyyy'}}</p>
+          </td>
+          <td style="width: 25%; vertical-align: top;">
+            <p style="margin: 0 0 5px 0; font-size: 12px; color: #666; text-transform: uppercase;">Seats</p>
+            <p style="margin: 0; font-size: 16px; font-weight: bold;">{{journeyData?.TotalSeats}} Seat{{journeyData?.TotalSeats > 1 ? 's' : ''}}</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Boarding / Drop -->
+    <div style="border: 1px solid #eee; border-radius: 8px; margin-bottom: 25px;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="width: 50%; padding: 15px; border-right: 1px solid #eee; vertical-align: top;">
+            <h3 style="margin: 0 0 10px 0; font-size: 14px; color: #666; text-transform: uppercase;">Boarding Point ({{journeyData?.FromCityName}})</h3>
+            <p style="margin: 0 0 5px 0; font-size: 18px; font-weight: bold;">{{journeyData?.DepartureDateTime | date: 'hh:mm a, EEE dd MMM'}}</p>
+            <p style="margin: 0; font-size: 14px; line-height: 1.4;">{{journeyData?.PickupInfo?.PickupName}}{{journeyData?.PickupInfo?.Address ? ', ' + journeyData.PickupInfo.Address : ''}}{{journeyData?.PickupInfo?.Landmark ? ', ' + journeyData.PickupInfo.Landmark : ''}}</p>
+          </td>
+          <td style="width: 50%; padding: 15px; vertical-align: top;">
+            <h3 style="margin: 0 0 10px 0; font-size: 14px; color: #666; text-transform: uppercase;">Dropping Point ({{journeyData?.ToCityName}})</h3>
+            <p style="margin: 0 0 5px 0; font-size: 18px; font-weight: bold;">{{journeyData?.ArrivalDateTime | date: 'hh:mm a, EEE dd MMM'}}</p>
+            <p style="margin: 0; font-size: 14px; line-height: 1.4;">{{journeyData?.DropoffInfo?.DropoffName || journeyData?.ToCityName}}</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Passengers -->
+    <h3 style="margin: 0 0 10px 0; font-size: 14px; color: #666; text-transform: uppercase;">Passenger Details</h3>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+      <thead>
+        <tr>
+          <th style="background: #f5f5f5; border-bottom: 2px solid #ddd; padding: 10px; text-align: left; font-size: 13px; color: #333; vertical-align: middle;">Name</th>
+          <th style="background: #f5f5f5; border-bottom: 2px solid #ddd; padding: 10px; text-align: left; font-size: 13px; color: #333; vertical-align: middle;">Age/Gender</th>
+          <th style="background: #f5f5f5; border-bottom: 2px solid #ddd; padding: 10px; text-align: right; font-size: 13px; color: #333; vertical-align: middle;">Seat No</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of journeyData?.Passengers" style="border-bottom: 1px solid #eee;">
+          <td style="padding: 10px; font-size: 14px; font-weight: bold;">{{item.Name}}</td>
+          <td style="padding: 10px; font-size: 14px;">{{item.Age}} yrs, {{item.Gender}}</td>
+          <td style="padding: 10px; font-size: 14px; text-align: right; font-weight: bold;">{{item.SeatNo}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Total Fare -->
+    <table style="width: 100%; margin-bottom: 30px;">
+      <tr>
+        <td style="text-align: right;">
+          <div style="background: #f9f9f9; padding: 15px 25px; border-radius: 8px; display: inline-block;">
+            <p style="margin: 0 0 5px 0; font-size: 12px; color: #666; text-transform: uppercase;">Total Fare</p>
+            <p style="margin: 0; font-size: 24px; font-weight: bold; color: #111;">₹{{journeyData?.TotalFare}}</p>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Cancellation details if cancelled -->
+    <div *ngIf="journeyData?.status === 'Cancel' || journeyData?.IsCancelled" style="border: 1px solid #ffcdd2; background: #ffebee; border-radius: 8px; margin-bottom: 20px;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td colspan="2" style="padding: 15px 15px 5px 15px;">
+            <h3 style="margin: 0; font-size: 14px; color: #b71c1c; text-transform: uppercase;">Cancellation Details</h3>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 5px 15px 15px 15px; width: 50%; vertical-align: top;">
+            <p style="margin: 0 0 4px 0; font-size: 12px; color: #5c3838;">Cancelled On: <strong>{{journeyData?.cancellationDate | date:'MMM dd, yyyy hh:mm a'}}</strong></p>
+            <p style="margin: 0; font-size: 12px; color: #5c3838;">Status: <strong>{{journeyData?.cancellationStatus || 'Cancelled'}}</strong></p>
+          </td>
+          <td style="padding: 5px 15px 15px 15px; width: 50%; text-align: right; vertical-align: top;">
+            <p style="margin: 0 0 4px 0; font-size: 12px; color: #5c3838;">Cancellation Charges: <strong>₹{{journeyData?.ChargeAmt || 0}}</strong></p>
+            <p style="margin: 0; font-size: 14px; color: #2e7d32; font-weight: bold;">Refund Amount: ₹{{journeyData?.RefundAmount || 0}}</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+    
+  </div>
+</div>
 
 <ion-content>
   <!-- Cancellation Details Banner -->
@@ -35,17 +150,35 @@
         <span style="font-weight: 600; color: #d32f2f;">₹{{journeyData?.ChargeAmt || 0}}</span>
       </div>
       <div style="display: flex; justify-content: space-between; padding-top: 6px; border-top: 1px dashed #ccc; font-size: 13px; font-weight: bold;">
-        <span style="color: #333;">Refund Processed:</span>
+        <span style="color: #333;">Refund Status ({{journeyData?.cancellationStatus || 'Processed'}}):</span>
         <span style="color: #2e7d32;">₹{{journeyData?.RefundAmount || 0}}</span>
       </div>
     </div>
     
-    <div *ngIf="journeyData?.cancellationPolicy" style="margin-top: 12px; font-size: 11px; color: #7f5f5f; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 8px;">
-      <strong>Applied Policy:</strong> {{journeyData?.cancellationPolicy}}
+    <div style="margin-top: 12px; font-size: 11px; color: #7f5f5f; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 8px;">
+      <div *ngIf="journeyData?.cancellationDate" style="margin-bottom: 4px;">
+        <strong>Cancelled On:</strong> {{journeyData?.cancellationDate | date:'MMM dd, yyyy hh:mm a'}}
+      </div>
+      <div *ngIf="journeyData?.cancellationPolicy">
+        <strong>Applied Policy:</strong> {{journeyData?.cancellationPolicy}}
+      </div>
     </div>
   </div>
 
-  <ion-card id="ticket-pdf-content" mode="ios" class="ticket-card" style="padding: 0px;box-shadow: unset;">
+  <ion-card mode="ios" class="ticket-card" style="padding: 0px;box-shadow: unset; position: relative; overflow: hidden;">
+    <!-- Top Logo Header -->
+    <ion-card-header style="padding: 10px; border-bottom: 1px solid #EEEEEE; display: flex; justify-content: space-between; align-items: center; background: #fff;">
+      <img src="assets/img/logo.png" style="max-height: 25px;" alt="KaroBooking">
+      <span style="font-size: 12px; font-weight: bold; color: #666; text-transform: uppercase;">E-Ticket</span>
+    </ion-card-header>
+
+    <!-- Watermark for Cancelled Tickets -->
+    <div *ngIf="journeyData?.status === 'Cancel' || journeyData?.IsCancelled" 
+         style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); 
+                font-size: 60px; font-weight: 900; color: rgba(211, 47, 47, 0.15); 
+                white-space: nowrap; pointer-events: none; z-index: 0; letter-spacing: 10px;">
+      CANCELLED
+    </div>
     <ion-card-header style="padding: 5px;border-bottom: 1px solid #EEEEEE;">
       <ion-card-title class="text-sm font-medium text-light">Journey Date<br><span
           class="text-slate-700 font-semibold">{{journeyData?.JourneyDate |
@@ -75,39 +208,39 @@
                 <img src="assets/icon/Iconsax/Broken/login.png" width="30px" height="30px" class="p-0 m-0">
 
               </ion-col>
-              <ion-col size="10" class="p-0 m-0">
-                <p class="text-xs font-medium text-light">Boarding Point</p>
-                <p class="text-xs font-medium text-dark" style="line-height: 1.1;">{{journeyData?.PickupInfo?.PickupTime
+              <ion-col size="10" class="p-0 m-0 text-left">
+                <p class="text-xs font-medium text-light text-left" style="margin: 0; display: block;">Boarding Point</p>
+                <p class="text-xs font-medium text-dark text-left" style="line-height: 1.2; margin: 0; display: block;">{{journeyData?.PickupInfo?.PickupTime
                   | date: 'hh:mm a'}}, {{journeyData?.PickupInfo?.PickupName}}{{journeyData?.PickupInfo?.Address ? ', ' + journeyData.PickupInfo.Address : ''}}{{journeyData?.PickupInfo?.Landmark ? ', ' + journeyData.PickupInfo.Landmark : ''}}</p>
               </ion-col>
             </ion-row>
 
-            <ion-row class="p-0 m-0" style="margin-top: 5px !important;">
+            <ion-row class="p-0 m-0" style="margin-top: 10px !important;">
               <ion-col class="p-0 m-0">
                 <img src="assets/icon/Iconsax/Broken/logout.png" width="30px" height="30px" class="p-0 m-0">
 
               </ion-col>
-              <ion-col size="10" class="p-0 m-0">
-                <p class="text-xs font-medium text-light">Drop Point</p>
-                <p class="text-xs font-medium text-dark" style="line-height: 1.1;">{{journeyData?.ArrivalDateTime |
+              <ion-col size="10" class="p-0 m-0 text-left">
+                <p class="text-xs font-medium text-light text-left" style="margin: 0; display: block;">Dropping Point</p>
+                <p class="text-xs font-medium text-dark text-left" style="line-height: 1.2; margin: 0; display: block;">{{journeyData?.ArrivalDateTime |
                   date: 'hh:mm a'}}, {{journeyData?.ToCityName}}</p>
               </ion-col>
             </ion-row>
           </ion-col>
           <ion-col>
-            <div style="line-height:1.1;border-left: 1px solid #EEEEEE;">
-              <p class="text-sm font-regular text-center text-light uppercase">{{journeyData?.FromCityName}}</p>
-              <p class="text-sm font-medium text-center text-dark">{{journeyData?.DepartureDateTime | date: 'hh:mm a'}}
+            <div style="line-height:1.1;border-left: 1px solid #EEEEEE; padding-left: 10px;">
+              <p class="text-sm font-regular text-left text-light uppercase" style="margin: 0 0 2px 0;">{{journeyData?.FromCityName}}</p>
+              <p class="text-sm font-medium text-left text-dark" style="margin: 0 0 2px 0;">{{journeyData?.DepartureDateTime | date: 'hh:mm a'}}
               </p>
-              <p class="text-[10px] font-medium text-center text-dark">{{journeyData?.DepartureDateTime
+              <p class="text-[10px] font-medium text-left text-dark" style="margin: 0;">{{journeyData?.DepartureDateTime
                 | date: 'EEE dd, MMM'}}</p>
 
-              <p class="text-[10px] font-bold text-center text-secondary py-1">TO</p>
+              <p class="text-[10px] font-bold text-left text-secondary py-1" style="margin: 4px 0;">TO</p>
 
-              <p class="text-sm font-regular text-center text-light uppercase">{{journeyData?.ToCityName}}</p>
-              <p class="text-sm font-medium text-center text-dark">{{journeyData?.ArrivalDateTime | date: 'hh:mm a'}}
+              <p class="text-sm font-regular text-left text-light uppercase" style="margin: 0 0 2px 0;">{{journeyData?.ToCityName}}</p>
+              <p class="text-sm font-medium text-left text-dark" style="margin: 0 0 2px 0;">{{journeyData?.ArrivalDateTime | date: 'hh:mm a'}}
               </p>
-              <p class="text-[10px] font-medium text-center text-dark">{{journeyData?.ArrivalDateTime |
+              <p class="text-[10px] font-medium text-left text-dark" style="margin: 0;">{{journeyData?.ArrivalDateTime |
                 date: 'EEE dd, MMM'}}</p>
             </div>
 
@@ -131,7 +264,7 @@
             </ion-row>
           </ion-col>
           <ion-col class="p-0 m-0">
-            <p class="text-sm font-bold text-center text-dark">{{journeyData?.TotalSeats}} Seats</p>
+            <p class="text-sm font-bold text-center text-dark">{{journeyData?.TotalSeats}} Seat{{journeyData?.TotalSeats > 1 ? 's' : ''}}</p>
           </ion-col>
 
         </ion-row>
@@ -205,3 +338,12 @@
   </ion-card>
 
 </ion-content>
+
+<ion-footer class="ion-no-border">
+  <div style="padding: 16px; background: white; box-shadow: 0 -4px 10px rgba(0,0,0,0.05);">
+    <ion-button expand="block" shape="round" color="primary" (click)="downloadTicketPDF()">
+      <ion-icon slot="start" name="download-outline"></ion-icon>
+      Download Ticket
+    </ion-button>
+  </div>
+</ion-footer>

@@ -270,7 +270,8 @@ export class TicketDetailsComponent implements OnInit {
           GstAmount: cancelData.operator_gst_details?.igst_amount || 0,
           cancellationPolicy: this.cancellationPolicyText || JSON.stringify(this.cancellationPolicySlabs) || '',
           cancellationStatus: "Cancelled",
-          cancellationRef: cancelData.ticket_number || cancelData.pnr_number || this.journeyData.TicketNo
+          cancellationRef: cancelData.ticket_number || cancelData.pnr_number || this.journeyData.TicketNo,
+          cancellationDate: new Date().toISOString()
         };
       }
       else {
@@ -303,7 +304,8 @@ export class TicketDetailsComponent implements OnInit {
           NewPNRNo: data.NewPNRNo,
           cancellationPolicy: this.cancellationPolicyText || JSON.stringify(this.cancellationPolicySlabs) || '',
           cancellationStatus: "Cancelled",
-          cancellationRef: data.NewHoldId || data.NewTicketNo || data.NewPNRNo || this.journeyData.TicketNo
+          cancellationRef: data.NewHoldId || data.NewTicketNo || data.NewPNRNo || this.journeyData.TicketNo,
+          cancellationDate: new Date().toISOString()
         };
       }
 
@@ -371,12 +373,12 @@ export class TicketDetailsComponent implements OnInit {
       
       if (Capacitor.isNativePlatform()) {
         const base64Data = pdf.output('datauristring').split(',')[1];
-        await Filesystem.writeFile({
+        const result = await Filesystem.writeFile({
           path: fileName,
           data: base64Data,
           directory: Directory.Documents
         });
-        this.presentToast(`Ticket saved to Documents folder as ${fileName}`, 'success');
+        this.presentToast(`Ticket saved to: ${result.uri}`, 'success');
       } else {
         pdf.save(fileName);
         this.presentToast('Ticket downloaded successfully', 'success');
