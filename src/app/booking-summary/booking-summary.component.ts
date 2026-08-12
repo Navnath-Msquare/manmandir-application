@@ -292,27 +292,35 @@ export class BookingSummaryComponent implements OnInit {
         return;
       }
 
-      const dbData = {
+        let travelDate = ticket.travel_date || this.date;
+        let depTime = ticket.boarding_point_details?.dep_time || ticket.dep_time || "00:00:00";
+        let pickupTimeDate = new Date(`${travelDate} ${depTime}`);
+        if(isNaN(pickupTimeDate.getTime())) {
+          pickupTimeDate = new Date(travelDate);
+        }
+        let dropoffTimeDate = new Date(pickupTimeDate.getTime() + (12 * 60 * 60 * 1000)); // Estimated 12 hours later
 
-        TicketNo: ticket.ticket_number,
-        PNRNo: ticket.operator_pnr,
-        BusTypeName: ticket.bus_type,
-        DepartureDateTime: `${ticket.travel_date} ${ticket.dep_time}`,
-        ArrivalDateTime: "", // duration base calculate karu shakto nantar
-        CompanyName: ticket.travels,
+        const dbData = {
 
-        PickupInfo: {
-          PickupTime: ticket.boarding_point_details?.dep_time,
-          Address: ticket.boarding_point_details?.boarding_stage_address,
-          Phone: ticket.boarding_point_details?.contact_numbers,
-          Landmark: ticket.boarding_point_details?.landmark,
-          PickupName: ticket.boarding_point_details?.name
-        },
+          TicketNo: ticket.ticket_number,
+          PNRNo: ticket.operator_pnr,
+          BusTypeName: ticket.bus_type,
+          DepartureDateTime: `${ticket.travel_date} ${ticket.dep_time}`,
+          ArrivalDateTime: dropoffTimeDate.toISOString(), // Estimated arrival time
+          CompanyName: ticket.travels,
 
-        DropoffInfo: {
-          DropoffTime: "",   // confirm API madhe nahi yet
-          DropoffName: ticket.destination
-        },
+          PickupInfo: {
+            PickupTime: pickupTimeDate.toISOString(),
+            Address: ticket.boarding_point_details?.boarding_stage_address,
+            Phone: ticket.boarding_point_details?.contact_numbers,
+            Landmark: ticket.boarding_point_details?.landmark,
+            PickupName: ticket.boarding_point_details?.name
+          },
+
+          DropoffInfo: {
+            DropoffTime: dropoffTimeDate.toISOString(),
+            DropoffName: ticket.destination
+          },
 
         TotalSeats: ticket.no_of_seats,
         TotalFare: ticket.total_fare,
