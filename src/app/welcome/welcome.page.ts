@@ -48,8 +48,8 @@ export class WelcomePage implements OnInit {
 
   verifyOTP() {
     this.loader = true;
-    // if (this.valueOTP == this.serverOTP) {
-    if (this.valueOTP == '1234' || this.valueOTP == this.serverOTP) {
+     if (this.valueOTP == this.serverOTP) {
+    //if (this.valueOTP == '1234' || this.valueOTP == this.serverOTP) {
       this.authService.checkUser(this.mobileNo).subscribe(res => {
         this.presentToast("OTP Verifed", "success");
         this.loader = false;
