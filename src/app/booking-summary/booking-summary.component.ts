@@ -261,7 +261,7 @@ export class BookingSummaryComponent implements OnInit {
             "DropoffName": this.dropoffs.DropoffName,
           },
           "TotalSeats": data.TotalSeats,
-          "TotalFare": data.TotalFare,
+          "TotalFare": data.TotalFare || data.fare || data.total_fare || this.fare,
           "PaymentId": paymentId,
           "status": "Success"
         }
@@ -360,7 +360,7 @@ export class BookingSummaryComponent implements OnInit {
           },
 
         TotalSeats: ticket.no_of_seats,
-        TotalFare: ticket.total_fare,
+        TotalFare: ticket.total_fare || ticket.totalFare || ticket.fare || ticket.total_amount || ticket.totalAmount || this.fare,
 
         SeatNumbers: ticket.seat_numbers,
         PassengerDetails: ticket.passenger_details,

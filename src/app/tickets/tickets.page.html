@@ -218,6 +218,7 @@
           </ion-col>
           <ion-col class="p-0 m-0">
             <p class="text-sm font-bold text-center text-dark">{{item.TotalSeats}} Seat{{item.TotalSeats > 1 ? 's' : ''}}</p>
+            <p class="font-12 font-bold text-center text-primary" style="margin: 0;" *ngIf="item.TotalFare || item.fare || item.total_fare">₹{{item.TotalFare || item.fare || item.total_fare}}</p>
           </ion-col>
 
         </ion-row>

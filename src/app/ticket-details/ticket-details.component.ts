@@ -49,6 +49,24 @@ export class TicketDetailsComponent implements OnInit {
     });
   }
 
+  getTotalFare(): number {
+    if (this.journeyData?.TotalFare) return Number(this.journeyData.TotalFare);
+    if (this.journeyData?.total_fare) return Number(this.journeyData.total_fare);
+    if (this.journeyData?.fare) return Number(this.journeyData.fare);
+    if (this.journeyData?.TotalAmount) return Number(this.journeyData.TotalAmount);
+    if (this.journeyData?.amount) return Number(this.journeyData.amount);
+    
+    if (Array.isArray(this.journeyData?.Passengers) && this.journeyData.Passengers.length > 0) {
+      const sum = this.journeyData.Passengers.reduce((acc: number, p: any) => {
+        const fare = Number(p.Fare || p.fare || p.Price || p.price || 0);
+        return acc + fare;
+      }, 0);
+      if (sum > 0) return sum;
+    }
+    
+    return 0;
+  }
+
   async generateAndSendPDF(type: string) {
     const element = document.getElementById('ticket-pdf-content');
     if (!element) return;
@@ -240,7 +258,7 @@ export class TicketDetailsComponent implements OnInit {
         <div style="border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
             <span style="font-size: 12px; color: #666;">Total Fare:</span>
-            <span style="font-size: 12px; font-weight: 600; color: #333;">₹${this.journeyData?.TotalFare || 0}</span>
+            <span style="font-size: 12px; font-weight: 600; color: #333;">₹${this.getTotalFare()}</span>
           </div>
           <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
             <span style="font-size: 12px; color: #666;">Deduction Charges:</span>

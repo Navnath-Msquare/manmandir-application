@@ -99,7 +99,7 @@
         <td style="text-align: right;">
           <div style="background: #f9f9f9; padding: 15px 25px; border-radius: 8px; display: inline-block;">
             <p style="margin: 0 0 5px 0; font-size: 12px; color: #666; text-transform: uppercase;">Total Fare</p>
-            <p style="margin: 0; font-size: 24px; font-weight: bold; color: #111;">₹{{journeyData?.TotalFare}}</p>
+            <p style="margin: 0; font-size: 24px; font-weight: bold; color: #111;">₹{{getTotalFare()}}</p>
           </div>
         </td>
       </tr>
@@ -143,7 +143,7 @@
     <div style="background-color: rgba(255, 255, 255, 0.7); border-radius: 8px; padding: 12px;">
       <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px;">
         <span style="color: #666;">Total Fare Paid:</span>
-        <span style="font-weight: 600; color: #333;">₹{{journeyData?.TotalFare || 0}}</span>
+        <span style="font-weight: 600; color: #333;">₹{{getTotalFare()}}</span>
       </div>
       <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px;">
         <span style="color: #666;">Cancellation Charges:</span>
@@ -290,7 +290,7 @@
       <ion-item lines="none" style="border-width: 0px 0px 1px 0px;--padding-start:0px;">
         <ion-label class="font-semibold mb-0 mt-0" style="font-size: 14px !important;">Total Amount</ion-label>
         <ion-label slot="end" class="font-semibold mb-0 mt-0" style="font-size: 14px !important;">₹
-          {{journeyData?.TotalFare || journeyData?.fare || 0}}</ion-label>
+          {{getTotalFare()}}</ion-label>
       </ion-item>
     </ion-card-header>
 

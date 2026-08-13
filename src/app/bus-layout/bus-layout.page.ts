@@ -1255,6 +1255,8 @@ export class BusLayoutPage implements OnInit {
         GstCompany: this.businessName
       },
       Passengers: passengersData,
+      TotalFare: this.calculateFare(),
+      TotalSeats: passengersData.length,
       HoldId: this.holdId,
       source: this.source,
       status: "Pending",

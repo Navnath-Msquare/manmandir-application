@@ -140,6 +140,8 @@ export class GuestDetailsPage implements OnInit {
           "GstCompany": this.businessName
         },
         "Passengers": passengersData,
+        "TotalFare": this.fare,
+        "TotalSeats": passengersData.length,
         "HoldId": this.holdId,
         "user": this.authS.currentUserValue._id,
         "status": "Pending"
