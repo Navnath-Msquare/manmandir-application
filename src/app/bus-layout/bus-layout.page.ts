@@ -1261,14 +1261,16 @@ export class BusLayoutPage implements OnInit {
       user: this.authS.currentUserValue._id
     };
 
-    this.api.createBookings(dbData).subscribe(async () => {
+    this.api.createBookings(dbData).subscribe(async (res: any) => {
 
       this.holdLoader = false;
+      const createdBooking = res?.data || null;
 
       const modal = await this.modalS.create({
         component: BookingSummaryComponent,
         componentProps: {
           holdId: this.holdId,
+          holdData: createdBooking,
           source: this.source,
           fare: this.calculateFare(),
           gst: this.gstcalculate(),

@@ -5,6 +5,7 @@ import { ApiService } from '../core/services/api.service';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
 import { Checkout } from 'capacitor-razorpay';
+import * as moment from 'moment-timezone';
 
 @Component({
   selector: 'app-booking-summary',
@@ -36,7 +37,7 @@ export class BookingSummaryComponent implements OnInit {
   walletPaidAmount = 0;
 
   loading = false;
-  holdData: any = [];
+  holdData: any = this.navParams.get('holdData') || null;
 
   constructor(public modalCtrl: ModalController, public navParams: NavParams, public auth: AuthenticationService, public api: ApiService,
     public toast: ToastController, public router: Router
@@ -44,6 +45,22 @@ export class BookingSummaryComponent implements OnInit {
 
   ngOnInit(): void {
     this.amount = this.fare;
+    if (!this.holdData || !this.holdData._id) {
+      this.fetchHoldData();
+    }
+  }
+
+  fetchHoldData(callback?: () => void) {
+    if (!this.holdId || !this.auth.currentUserValue?._id) return;
+    this.api.getBookings({ HoldId: this.holdId, user: this.auth.currentUserValue._id }, 1, 1, "").subscribe(res => {
+      if (res.data?.length > 0) {
+        this.holdData = res.data[0];
+      }
+      if (callback) callback();
+    }, error => {
+      console.error(error);
+      if (callback) callback();
+    });
   }
 
   async applyCoupon() {
@@ -90,19 +107,16 @@ export class BookingSummaryComponent implements OnInit {
   async payWithRazorpay() {
     this.loading = true;
 
-    this.api.getBookings({ HoldId: this.holdId, user: this.auth.currentUserValue._id }, 1, 1, "").subscribe(res => {
-      console.log(res);
-      if (res.data?.length == 0) {
-        this.presentToast("Something went Wrong!", "danger")
-        return;
+    if (!this.holdData || !this.holdData._id) {
+      try {
+        const res: any = await this.api.getBookings({ HoldId: this.holdId, user: this.auth.currentUserValue._id }, 1, 1, "").toPromise();
+        if (res?.data?.length > 0) {
+          this.holdData = res.data[0];
+        }
+      } catch (error) {
+        console.error(error);
       }
-
-      this.holdData = res.data[0];
-    }, error => {
-      console.error(error);
-      this.presentToast("Something went Wrong!", "danger")
-      this.loading = false;
-    })
+    }
 
     if (this.amount == 0) {
       let wData = JSON.stringify({
@@ -252,16 +266,37 @@ export class BookingSummaryComponent implements OnInit {
           "status": "Success"
         }
 
-        this.api.updateBookings(dbData, this.holdData._id).subscribe(res => {
-          this.presentToast("Booking Successful", "success");
-          this.router.navigate(['/ticket-details'], { queryParams: { id: this.holdData._id, action: 'notify-booking' } });
-          this.modalCtrl.dismiss();
-          this.loading = false;
-        }, error => {
-          console.error(error);
-          this.presentToast("Something Went Wrong!", "danger");
-          this.loading = false;
-        });
+        let bookingId = this.holdData?._id;
+        const executeOldUpdate = (targetId: string) => {
+          this.api.updateBookings(dbData, targetId).subscribe(res => {
+            this.presentToast("Booking Successful", "success");
+            this.router.navigate(['/ticket-details'], { queryParams: { id: targetId, action: 'notify-booking' } });
+            this.modalCtrl.dismiss();
+            this.loading = false;
+          }, error => {
+            console.error(error);
+            this.presentToast("Something Went Wrong!", "danger");
+            this.loading = false;
+          });
+        };
+
+        if (bookingId) {
+          executeOldUpdate(bookingId);
+        } else {
+          this.api.getBookings({ HoldId: this.holdId, user: this.auth.currentUserValue._id }, 1, 1, "").subscribe(res => {
+            if (res.data?.length > 0) {
+              this.holdData = res.data[0];
+              executeOldUpdate(this.holdData._id);
+            } else {
+              this.presentToast("Something Went Wrong!", "danger");
+              this.loading = false;
+            }
+          }, error => {
+            console.error(error);
+            this.presentToast("Something Went Wrong!", "danger");
+            this.loading = false;
+          });
+        }
       });
     });
   }
@@ -294,9 +329,11 @@ export class BookingSummaryComponent implements OnInit {
 
         let travelDate = ticket.travel_date || this.date;
         let depTime = ticket.boarding_point_details?.dep_time || ticket.dep_time || "00:00:00";
-        let pickupTimeDate = new Date(`${travelDate} ${depTime}`);
-        if(isNaN(pickupTimeDate.getTime())) {
-          pickupTimeDate = new Date(travelDate);
+        
+        let pickupMoment = moment(`${travelDate} ${depTime}`, ['YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD HH:mm', 'YYYY-MM-DD hh:mm A', 'DD-MM-YYYY HH:mm', 'YYYY-MM-DD']);
+        let pickupTimeDate = pickupMoment.isValid() ? pickupMoment.toDate() : new Date(travelDate);
+        if (isNaN(pickupTimeDate.getTime())) {
+          pickupTimeDate = new Date();
         }
         let dropoffTimeDate = new Date(pickupTimeDate.getTime() + (12 * 60 * 60 * 1000)); // Estimated 12 hours later
 
@@ -305,7 +342,7 @@ export class BookingSummaryComponent implements OnInit {
           TicketNo: ticket.ticket_number,
           PNRNo: ticket.operator_pnr,
           BusTypeName: ticket.bus_type,
-          DepartureDateTime: `${ticket.travel_date} ${ticket.dep_time}`,
+          DepartureDateTime: `${travelDate} ${depTime}`,
           ArrivalDateTime: dropoffTimeDate.toISOString(), // Estimated arrival time
           CompanyName: ticket.travels,
 
@@ -337,15 +374,37 @@ export class BookingSummaryComponent implements OnInit {
         source: this.source
       };
 
-      this.api.updateBookings(dbData, this.holdData._id).subscribe(() => {
-        this.presentToast("Booking Successful", "success");
-        this.router.navigate(['/ticket-details'], { queryParams: { id: this.holdData._id, action: 'notify-booking' } });
-        this.modalCtrl.dismiss();
-        this.loading = false;
-      }, err => {
-        this.presentToast("DB Update Failed", "danger");
-        this.loading = false;
-      });
+      const executeBookingUpdate = (targetId: string) => {
+        this.api.updateBookings(dbData, targetId).subscribe(() => {
+          this.presentToast("Booking Successful", "success");
+          this.router.navigate(['/ticket-details'], { queryParams: { id: targetId, action: 'notify-booking' } });
+          this.modalCtrl.dismiss();
+          this.loading = false;
+        }, err => {
+          console.error(err);
+          this.presentToast("DB Update Failed", "danger");
+          this.loading = false;
+        });
+      };
+
+      let bookingId = this.holdData?._id;
+      if (bookingId) {
+        executeBookingUpdate(bookingId);
+      } else {
+        this.api.getBookings({ HoldId: this.holdId, user: this.auth.currentUserValue._id }, 1, 1, "").subscribe(res => {
+          if (res.data?.length > 0) {
+            this.holdData = res.data[0];
+            executeBookingUpdate(this.holdData._id);
+          } else {
+            this.presentToast("Booking update failed: Record not found", "danger");
+            this.loading = false;
+          }
+        }, err => {
+          console.error(err);
+          this.presentToast("DB Update Failed", "danger");
+          this.loading = false;
+        });
+      }
 
     }, err => {
       console.error(err);

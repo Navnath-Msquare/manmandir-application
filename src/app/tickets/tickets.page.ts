@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../core/services/api.service';
 import { AuthenticationService } from '../core/services/authentication.service';
+import * as moment from 'moment-timezone';
 
 @Component({
   selector: 'app-tickets',
@@ -16,10 +17,10 @@ export class TicketsPage implements OnInit {
   constructor(private api: ApiService, private auth: AuthenticationService) { }
 
   handleRefresh(event: any) {
+    this.fetchBookingData();
     setTimeout(() => {
-      // Any calls to load data go here
       event.target.complete();
-    }, 2000);
+    }, 1500);
   };
 
 
@@ -35,33 +36,62 @@ export class TicketsPage implements OnInit {
   fetchBookingData() {
     this.loader = true;
     this.journeyData = [];
-    if (this.segmentData == 'upcoming') {
-      this.api.getBookings({ status: "Success", "PickupInfo.PickupTime": { $gte: new Date() }, user: this.auth.currentUserValue._id }, 1, 50, "").subscribe(res => {
+    const userId = this.auth.currentUserValue?._id;
+    if (!userId) {
+      this.loader = false;
+      return;
+    }
+
+    if (this.segmentData == 'upcoming' || this.segmentData == 'completed') {
+      const condition = {
+        status: "Success",
+        user: userId,
+        IsCancelled: { $ne: true }
+      };
+
+      this.api.getBookings(condition, 1, 100, "").subscribe(res => {
         console.info(res);
-        this.journeyData = res.data;
+        const allBookings = res.data || [];
+        const startOfToday = moment().startOf('day');
+
+        this.journeyData = allBookings.filter((item: any) => {
+          let dateStr = item.PickupInfo?.PickupTime || item.DepartureDateTime || item.JourneyDate;
+          let ticketMoment = moment(dateStr);
+
+          if (!ticketMoment.isValid()) {
+            return this.segmentData === 'upcoming';
+          }
+
+          if (this.segmentData === 'upcoming') {
+            return ticketMoment.isSameOrAfter(startOfToday);
+          } else {
+            return ticketMoment.isBefore(startOfToday);
+          }
+        });
+
         this.loader = false;
       }, error => {
         console.error(error);
         this.loader = false;
-      })
-    } else if (this.segmentData == 'completed') {
-      this.api.getBookings({ status: "Success", "DropoffInfo.DropoffTime": { $lte: new Date() }, user: this.auth.currentUserValue._id }, 1, 50, "").subscribe(res => {
-        console.info(res);
-        this.journeyData = res.data;
-        this.loader = false;
-      }, error => {
-        console.error(error);
-        this.loader = false;
-      })
+      });
+
     } else if (this.segmentData == 'cancelled') {
-      this.api.getBookings({ status: "Cancel", user: this.auth.currentUserValue._id }, 1, 50, "").subscribe(res => {
+      const condition = {
+        user: userId,
+        $or: [
+          { status: "Cancel" },
+          { IsCancelled: true }
+        ]
+      };
+
+      this.api.getBookings(condition, 1, 100, "").subscribe(res => {
         console.info(res);
-        this.journeyData = res.data;
+        this.journeyData = res.data || [];
         this.loader = false;
       }, error => {
         console.error(error);
         this.loader = false;
-      })
+      });
     }
   }
 }

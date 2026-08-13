@@ -637,12 +637,23 @@ export class HomePage implements OnInit {
  
  
   fetchBookingData() {
-    this.api.getBookings({ status: { $ne: "Pending" }, user: this.auth.currentUserValue._id, ArrivalDateTime: { $gte: moment().tz('Asia/Kolkata') } }, 1, 50, "").subscribe(res => {
+    const userId = this.auth.currentUserValue?._id;
+    if (!userId) return;
+
+    this.api.getBookings({ status: "Success", user: userId, IsCancelled: { $ne: true } }, 1, 50, "").subscribe(res => {
       console.info(res);
-      this.journeyData = res.data;
+      const allBookings = res.data || [];
+      const startOfToday = moment().startOf('day');
+
+      this.journeyData = allBookings.filter((item: any) => {
+        let dateStr = item.PickupInfo?.PickupTime || item.DepartureDateTime || item.JourneyDate || item.ArrivalDateTime;
+        let ticketMoment = moment(dateStr);
+        if (!ticketMoment.isValid()) return true;
+        return ticketMoment.isSameOrAfter(startOfToday);
+      });
     }, error => {
       console.error(error);
-    })
+    });
   }
  
  
