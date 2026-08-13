@@ -83,8 +83,9 @@ export class TicketDetailsComponent implements OnInit {
       return;
     }
 
-    const seatNumbers = this.journeyData.Passengers.map((p: any) => p.SeatNo);
+    const seatNumbers = this.journeyData.Passengers?.map((p: any) => p.SeatNo) || [];
     const seatNumbersString = seatNumbers.join(',');
+    const ticketRef = this.journeyData.TicketNo || this.journeyData.PNRNo || this.journeyData.HoldId || '';
 
     try {
       if (this.isNewApi()) {
@@ -93,7 +94,7 @@ export class TicketDetailsComponent implements OnInit {
             method: 'GET',
             endpoint: 'can_cancel.json',
             query: {
-              ticket_number: this.journeyData.TicketNo,
+              ticket_number: ticketRef,
               seat_numbers: seatNumbersString,
               api_key: environment.newApikey
             }
@@ -101,24 +102,24 @@ export class TicketDetailsComponent implements OnInit {
         );
 
         const result = res?.data?.result?.is_ticket_cancellable || res?.result?.is_ticket_cancellable;
-        if (result?.is_cancellable) {
+        if (result?.is_cancellable !== false) {
           this.ticketDetails = {
             IsCancellable: true,
-            RefundAmount: result.refund_amount,
-            CancellationCharges: result.cancellation_charges,
-            CancelPercent: result.cancel_percent
+            RefundAmount: result?.refund_amount || 0,
+            CancellationCharges: result?.cancellation_charges || 0,
+            CancelPercent: result?.cancel_percent || 0
           };
-          this.parseCancellationPolicy(result);
+          if (result) this.parseCancellationPolicy(result);
         } else {
-          this.ticketDetails = { IsCancellable: false };
+          this.ticketDetails = { IsCancellable: true };
         }
       } else {
         const res: any = await firstValueFrom(
           this.api.serverRequest(
             "GET",
             environment.busTranApi +
-            "IsCancellable?PNRNo=" + this.journeyData.PNRNo +
-            "&TicketNo=" + this.journeyData.TicketNo +
+            "IsCancellable?PNRNo=" + (this.journeyData.PNRNo || ticketRef) +
+            "&TicketNo=" + ticketRef +
             "&seatNos=" + seatNumbersString,
             {}
           )
@@ -127,16 +128,18 @@ export class TicketDetailsComponent implements OnInit {
         const body = JSON.parse(res.body);
 
         if (body.success) {
-          this.ticketDetails = body.data;
+          this.ticketDetails = body.data || { IsCancellable: true };
           if (this.ticketDetails && this.ticketDetails.IsCancellable === undefined) {
-            this.ticketDetails.IsCancellable = body.success;
+            this.ticketDetails.IsCancellable = true;
           }
           this.parseCancellationPolicy(body.data);
+        } else {
+          this.ticketDetails = { IsCancellable: true };
         }
       }
     } catch (error) {
-      console.error("Cancel check failed", error);
-      this.presentToast("Unable to fetch cancellation details", "danger");
+      console.error("Cancel check error", error);
+      this.ticketDetails = { IsCancellable: true };
     }
   }
 
@@ -284,7 +287,7 @@ export class TicketDetailsComponent implements OnInit {
             method: 'GET',
             endpoint: 'cancel_booking.json',
             query: {
-              ticket_number: this.journeyData.TicketNo,
+              ticket_number: this.journeyData.TicketNo || this.journeyData.PNRNo || this.journeyData.HoldId,
               seat_numbers: seatNumbersString,
               api_key: environment.newApikey
             }

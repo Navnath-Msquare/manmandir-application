@@ -44,8 +44,8 @@ export class TicketsPage implements OnInit {
 
     if (this.segmentData == 'upcoming' || this.segmentData == 'completed') {
       const condition = {
-        status: "Success",
         user: userId,
+        status: { $ne: "Cancel" },
         IsCancelled: { $ne: true }
       };
 
@@ -54,9 +54,23 @@ export class TicketsPage implements OnInit {
         const allBookings = res.data || [];
         const startOfToday = moment().startOf('day');
 
+        const dateFormats = [
+          'YYYY-MM-DD HH:mm:ss',
+          'YYYY-MM-DD HH:mm',
+          'YYYY-MM-DD',
+          'DD-MM-YYYY HH:mm',
+          'DD-MM-YYYY',
+          'DD/MM/YYYY',
+          'YYYY-MM-DDTHH:mm:ss.SSSZ',
+          'YYYY-MM-DDTHH:mm:ss.SSS'
+        ];
+
         this.journeyData = allBookings.filter((item: any) => {
-          let dateStr = item.PickupInfo?.PickupTime || item.DepartureDateTime || item.JourneyDate;
-          let ticketMoment = moment(dateStr);
+          let dateStr = item.PickupInfo?.PickupTime || item.DepartureDateTime || item.JourneyDate || item.ArrivalDateTime;
+          let ticketMoment = moment(dateStr, dateFormats, true);
+          if (!ticketMoment.isValid()) {
+            ticketMoment = moment(dateStr);
+          }
 
           if (!ticketMoment.isValid()) {
             return this.segmentData === 'upcoming';
