@@ -150,4 +150,42 @@ export class TicketsPage implements OnInit {
 
     return Array.from(seenMap.values());
   }
+
+  formatLocationText(name?: string, city?: string, address?: string, landmark?: string): string {
+    const parts: string[] = [];
+
+    if (name && name.trim()) {
+      parts.push(name.trim());
+    }
+
+    if (city && city.trim()) {
+      const trimmedCity = city.trim();
+      if (!name || !name.toLowerCase().includes(trimmedCity.toLowerCase())) {
+        parts.push(trimmedCity);
+      }
+    }
+
+    if (address && address.trim()) {
+      const trimmedAddress = address.trim();
+      if (!name || !name.toLowerCase().includes(trimmedAddress.toLowerCase())) {
+        parts.push(trimmedAddress);
+      }
+    }
+
+    if (landmark && landmark.trim()) {
+      const trimmedLandmark = landmark.trim();
+      if (!name || !name.toLowerCase().includes(trimmedLandmark.toLowerCase())) {
+        parts.push(trimmedLandmark);
+      }
+    }
+
+    const uniqueParts: string[] = [];
+    for (const part of parts) {
+      if (!uniqueParts.some(p => p.toLowerCase() === part.toLowerCase())) {
+        uniqueParts.push(part);
+      }
+    }
+
+    return uniqueParts.join(', ') || city || name || '';
+  }
 }

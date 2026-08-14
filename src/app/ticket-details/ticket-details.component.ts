@@ -67,6 +67,44 @@ export class TicketDetailsComponent implements OnInit {
     return 0;
   }
 
+  formatLocationText(name?: string, city?: string, address?: string, landmark?: string): string {
+    const parts: string[] = [];
+
+    if (name && name.trim()) {
+      parts.push(name.trim());
+    }
+
+    if (city && city.trim()) {
+      const trimmedCity = city.trim();
+      if (!name || !name.toLowerCase().includes(trimmedCity.toLowerCase())) {
+        parts.push(trimmedCity);
+      }
+    }
+
+    if (address && address.trim()) {
+      const trimmedAddress = address.trim();
+      if (!name || !name.toLowerCase().includes(trimmedAddress.toLowerCase())) {
+        parts.push(trimmedAddress);
+      }
+    }
+
+    if (landmark && landmark.trim()) {
+      const trimmedLandmark = landmark.trim();
+      if (!name || !name.toLowerCase().includes(trimmedLandmark.toLowerCase())) {
+        parts.push(trimmedLandmark);
+      }
+    }
+
+    const uniqueParts: string[] = [];
+    for (const part of parts) {
+      if (!uniqueParts.some(p => p.toLowerCase() === part.toLowerCase())) {
+        uniqueParts.push(part);
+      }
+    }
+
+    return uniqueParts.join(', ') || city || name || '';
+  }
+
   async generateAndSendPDF(type: string) {
     const element = document.getElementById('ticket-pdf-content');
     if (!element) return;
@@ -295,7 +333,8 @@ export class TicketDetailsComponent implements OnInit {
     try {
       let dbData: any = {
         status: "Cancel",
-        IsCancelled: true
+        IsCancelled: true,
+        PaymentId: this.journeyData?.PaymentId
       };
 
       // ================= NEW API =================

@@ -212,7 +212,7 @@
                 <p class="text-xs font-medium text-light text-left" style="margin: 0; display: block;">Boarding Point</p>
                 <p class="text-xs font-medium text-dark text-left" style="line-height: 1.2; margin: 0; display: block;">
                   <span *ngIf="journeyData?.PickupInfo?.PickupTime">{{journeyData?.PickupInfo?.PickupTime | date: 'hh:mm a'}}, </span>
-                  {{journeyData?.PickupInfo?.PickupName || journeyData?.FromCityName}}{{journeyData?.PickupInfo?.Address ? ', ' + journeyData.PickupInfo.Address : ''}}{{journeyData?.PickupInfo?.Landmark ? ', ' + journeyData.PickupInfo.Landmark : ''}}
+                  {{formatLocationText(journeyData?.PickupInfo?.PickupName, journeyData?.FromCityName, journeyData?.PickupInfo?.Address, journeyData?.PickupInfo?.Landmark)}}
                 </p>
               </ion-col>
             </ion-row>
@@ -226,7 +226,7 @@
                 <p class="text-xs font-medium text-light text-left" style="margin: 0; display: block;">Dropping Point</p>
                 <p class="text-xs font-medium text-dark text-left" style="line-height: 1.2; margin: 0; display: block;">
                   <span *ngIf="journeyData?.DropoffInfo?.DropoffTime || journeyData?.ArrivalDateTime">{{(journeyData?.DropoffInfo?.DropoffTime || journeyData?.ArrivalDateTime) | date: 'hh:mm a'}}, </span>
-                  {{journeyData?.DropoffInfo?.DropoffName || journeyData?.DropoffInfo?.name || journeyData?.ToCityName}}
+                  {{formatLocationText(journeyData?.DropoffInfo?.DropoffName || journeyData?.DropoffInfo?.name, journeyData?.ToCityName, journeyData?.DropoffInfo?.Address, journeyData?.DropoffInfo?.Landmark)}}
                 </p>
               </ion-col>
             </ion-row>
