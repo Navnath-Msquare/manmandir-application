@@ -642,7 +642,16 @@ export class HomePage implements OnInit {
 
     this.api.getBookings({ status: "Success", user: userId, IsCancelled: { $ne: true } }, 1, 50, "").subscribe(res => {
       console.info(res);
-      const allBookings = res.data || [];
+      const rawBookings = res.data || [];
+      const seenMap = new Map<string, any>();
+      for (const item of rawBookings) {
+        const seatStr = item.Passengers?.map((p: any) => p.SeatNo).sort().join(',') || item.SeatNumbers || '';
+        const key = item.TicketNo || item.PNRNo || item.HoldId ? `KEY_${item.TicketNo || item.PNRNo || item.HoldId}` : `COMP_${item.JourneyDate}_${item.FromCityName}_${item.ToCityName}_${seatStr}`;
+        if (!seenMap.has(key)) {
+          seenMap.set(key, item);
+        }
+      }
+      const allBookings = Array.from(seenMap.values());
       const startOfToday = moment().startOf('day');
 
       this.journeyData = allBookings.filter((item: any) => {

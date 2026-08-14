@@ -45,13 +45,14 @@ export class TicketsPage implements OnInit {
     if (this.segmentData == 'upcoming' || this.segmentData == 'completed') {
       const condition = {
         user: userId,
-        status: { $ne: "Cancel" },
+        status: { $nin: ["Pending", "Cancel", "Cancelled"] },
         IsCancelled: { $ne: true }
       };
 
       this.api.getBookings(condition, 1, 100, "").subscribe(res => {
         console.info(res);
-        const allBookings = res.data || [];
+        const rawBookings = res.data || [];
+        const allBookings = this.deduplicateBookings(rawBookings);
         const startOfToday = moment().startOf('day');
 
         const dateFormats = [
@@ -83,6 +84,13 @@ export class TicketsPage implements OnInit {
           }
         });
 
+        // Sort upcoming (nearest first) or completed (newest first)
+        this.journeyData.sort((a: any, b: any) => {
+          let dateA = moment(a.PickupInfo?.PickupTime || a.DepartureDateTime || a.JourneyDate).valueOf();
+          let dateB = moment(b.PickupInfo?.PickupTime || b.DepartureDateTime || b.JourneyDate).valueOf();
+          return this.segmentData === 'upcoming' ? dateA - dateB : dateB - dateA;
+        });
+
         this.loader = false;
       }, error => {
         console.error(error);
@@ -100,12 +108,46 @@ export class TicketsPage implements OnInit {
 
       this.api.getBookings(condition, 1, 100, "").subscribe(res => {
         console.info(res);
-        this.journeyData = res.data || [];
+        const rawBookings = res.data || [];
+        this.journeyData = this.deduplicateBookings(rawBookings);
+        this.journeyData.sort((a: any, b: any) => {
+          let dateA = moment(a.cancellationDate || a.JourneyDate).valueOf();
+          let dateB = moment(b.cancellationDate || b.JourneyDate).valueOf();
+          return dateB - dateA;
+        });
         this.loader = false;
       }, error => {
         console.error(error);
         this.loader = false;
       });
     }
+  }
+
+  deduplicateBookings(bookings: any[]): any[] {
+    const seenMap = new Map<string, any>();
+
+    for (const item of bookings) {
+      if (item.status === 'Pending') {
+        continue;
+      }
+
+      const seatStr = item.Passengers?.map((p: any) => p.SeatNo).sort().join(',') || item.SeatNumbers || '';
+      const primaryKey = item.TicketNo || item.PNRNo || item.HoldId;
+      const compositeKey = `${item.JourneyDate}_${item.FromCityName}_${item.ToCityName}_${seatStr}`;
+      const uniqueKey = primaryKey ? `KEY_${primaryKey}` : `COMP_${compositeKey}`;
+
+      if (!seenMap.has(uniqueKey)) {
+        seenMap.set(uniqueKey, item);
+      } else {
+        const existing = seenMap.get(uniqueKey);
+        if (existing.status !== 'Success' && item.status === 'Success') {
+          seenMap.set(uniqueKey, item);
+        } else if (!existing.TicketNo && item.TicketNo) {
+          seenMap.set(uniqueKey, item);
+        }
+      }
+    }
+
+    return Array.from(seenMap.values());
   }
 }
