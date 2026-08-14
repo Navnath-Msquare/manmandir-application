@@ -121,7 +121,10 @@
               </ion-col>
               <ion-col size="10" class="p-0 m-0">
                 <p class="font-12 font-medium text-light">Boarding Point</p>
-                <p class="font-12 font-medium text-dark" style="line-height: 1.1;">{{item.PickupInfo?.PickupTime | date: 'hh:mm a'}},  {{item.PickupInfo?.PickupName}}{{item.PickupInfo?.Address ? ', ' + item.PickupInfo.Address : ''}}{{item.PickupInfo?.Landmark ? ', ' + item.PickupInfo.Landmark : ''}}</p>
+                <p class="font-12 font-medium text-dark" style="line-height: 1.1;">
+                  <span *ngIf="item.PickupInfo?.PickupTime">{{item.PickupInfo?.PickupTime | date: 'hh:mm a'}}, </span>
+                  {{item.PickupInfo?.PickupName || item.FromCityName}}{{item.PickupInfo?.Address ? ', ' + item.PickupInfo.Address : ''}}{{item.PickupInfo?.Landmark ? ', ' + item.PickupInfo.Landmark : ''}}
+                </p>
               </ion-col>
             </ion-row>
 
@@ -132,7 +135,10 @@
               </ion-col>
               <ion-col size="10" class="p-0 m-0">
                 <p class="font-12 font-medium text-light">Drop Point</p>
-                <p class="font-12 font-medium text-dark" style="line-height: 1.1;">{{item.ArrivalDateTime | date: 'hh:mm a'}}, {{item.ToCityName}}</p>
+                <p class="font-12 font-medium text-dark" style="line-height: 1.1;">
+                  <span *ngIf="item.DropoffInfo?.DropoffTime || item.ArrivalDateTime">{{(item.DropoffInfo?.DropoffTime || item.ArrivalDateTime) | date: 'hh:mm a'}}, </span>
+                  {{item.DropoffInfo?.DropoffName || item.DropoffInfo?.name || item.ToCityName}}
+                </p>
               </ion-col>
             </ion-row>
           </ion-col>

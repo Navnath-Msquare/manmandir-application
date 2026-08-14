@@ -243,6 +243,8 @@ export class BookingSummaryComponent implements OnInit {
         let data = body.data;
 
         let dbData = {
+          "FromCityName": this.from || data.FromCityName,
+          "ToCityName": this.to || data.ToCityName,
           "TicketNo": data.TicketNo,
           "PNRNo": data.PNRNo,
           "BusTypeName": data.BusTypeName,
@@ -250,15 +252,15 @@ export class BookingSummaryComponent implements OnInit {
           "ArrivalDateTime": data.ArrivalDateTime,
           "CompanyName": data.CompanyName,
           "PickupInfo": {
-            "PickupTime": data.PickupInfo?.PickupTime,
-            "Address": data.PickupInfo?.Address,
-            "Phone": data.PickupInfo?.Phone,
-            "Landmark": data.PickupInfo?.Landmark,
-            "PickupName": data.PickupInfo?.PickupName,
+            "PickupTime": data.PickupInfo?.PickupTime || this.pickups?.PickupTime,
+            "Address": data.PickupInfo?.Address || this.pickups?.Address,
+            "Phone": data.PickupInfo?.Phone || this.pickups?.Phone,
+            "Landmark": data.PickupInfo?.Landmark || this.pickups?.Landmark,
+            "PickupName": data.PickupInfo?.PickupName || this.pickups?.PickupName || this.pickups?.name,
           },
           "DropoffInfo": {
-            "DropoffTime": this.dropoffs.DropoffTime,
-            "DropoffName": this.dropoffs.DropoffName,
+            "DropoffTime": this.dropoffs?.DropoffTime || data.DropoffInfo?.DropoffTime,
+            "DropoffName": this.dropoffs?.DropoffName || this.dropoffs?.name || data.DropoffInfo?.DropoffName,
           },
           "TotalSeats": data.TotalSeats,
           "TotalFare": data.TotalFare || data.fare || data.total_fare || this.fare,
@@ -339,6 +341,8 @@ export class BookingSummaryComponent implements OnInit {
 
         const dbData = {
 
+          FromCityName: this.from || ticket.source_city_name || ticket.source,
+          ToCityName: this.to || ticket.destination_city_name || ticket.destination,
           TicketNo: ticket.ticket_number,
           PNRNo: ticket.operator_pnr,
           BusTypeName: ticket.bus_type,
@@ -348,15 +352,15 @@ export class BookingSummaryComponent implements OnInit {
 
           PickupInfo: {
             PickupTime: pickupTimeDate.toISOString(),
-            Address: ticket.boarding_point_details?.boarding_stage_address,
-            Phone: ticket.boarding_point_details?.contact_numbers,
-            Landmark: ticket.boarding_point_details?.landmark,
-            PickupName: ticket.boarding_point_details?.name
+            Address: ticket.boarding_point_details?.boarding_stage_address || this.pickups?.Address,
+            Phone: ticket.boarding_point_details?.contact_numbers || this.pickups?.Phone,
+            Landmark: ticket.boarding_point_details?.landmark || this.pickups?.Landmark,
+            PickupName: ticket.boarding_point_details?.name || this.pickups?.PickupName || this.pickups?.name
           },
 
           DropoffInfo: {
             DropoffTime: dropoffTimeDate.toISOString(),
-            DropoffName: ticket.destination
+            DropoffName: this.dropoffs?.DropoffName || this.dropoffs?.name || ticket.destination
           },
 
         TotalSeats: ticket.no_of_seats,

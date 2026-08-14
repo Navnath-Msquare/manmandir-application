@@ -210,8 +210,10 @@
               </ion-col>
               <ion-col size="10" class="p-0 m-0 text-left">
                 <p class="text-xs font-medium text-light text-left" style="margin: 0; display: block;">Boarding Point</p>
-                <p class="text-xs font-medium text-dark text-left" style="line-height: 1.2; margin: 0; display: block;">{{journeyData?.PickupInfo?.PickupTime
-                  | date: 'hh:mm a'}}, {{journeyData?.PickupInfo?.PickupName}}{{journeyData?.PickupInfo?.Address ? ', ' + journeyData.PickupInfo.Address : ''}}{{journeyData?.PickupInfo?.Landmark ? ', ' + journeyData.PickupInfo.Landmark : ''}}</p>
+                <p class="text-xs font-medium text-dark text-left" style="line-height: 1.2; margin: 0; display: block;">
+                  <span *ngIf="journeyData?.PickupInfo?.PickupTime">{{journeyData?.PickupInfo?.PickupTime | date: 'hh:mm a'}}, </span>
+                  {{journeyData?.PickupInfo?.PickupName || journeyData?.FromCityName}}{{journeyData?.PickupInfo?.Address ? ', ' + journeyData.PickupInfo.Address : ''}}{{journeyData?.PickupInfo?.Landmark ? ', ' + journeyData.PickupInfo.Landmark : ''}}
+                </p>
               </ion-col>
             </ion-row>
 
@@ -222,8 +224,10 @@
               </ion-col>
               <ion-col size="10" class="p-0 m-0 text-left">
                 <p class="text-xs font-medium text-light text-left" style="margin: 0; display: block;">Dropping Point</p>
-                <p class="text-xs font-medium text-dark text-left" style="line-height: 1.2; margin: 0; display: block;">{{journeyData?.ArrivalDateTime |
-                  date: 'hh:mm a'}}, {{journeyData?.ToCityName}}</p>
+                <p class="text-xs font-medium text-dark text-left" style="line-height: 1.2; margin: 0; display: block;">
+                  <span *ngIf="journeyData?.DropoffInfo?.DropoffTime || journeyData?.ArrivalDateTime">{{(journeyData?.DropoffInfo?.DropoffTime || journeyData?.ArrivalDateTime) | date: 'hh:mm a'}}, </span>
+                  {{journeyData?.DropoffInfo?.DropoffName || journeyData?.DropoffInfo?.name || journeyData?.ToCityName}}
+                </p>
               </ion-col>
             </ion-row>
           </ion-col>

@@ -169,6 +169,8 @@ export class PaymentComponent implements OnInit {
           let data = body.data;
 
           let dbData = {
+            "FromCityName": this.holdData?.FromCityName,
+            "ToCityName": this.holdData?.ToCityName,
             "TicketNo":data.TicketNo,
             "PNRNo": data.PNRNo,
             "BusTypeName":data.BusTypeName,
@@ -176,18 +178,18 @@ export class PaymentComponent implements OnInit {
             "ArrivalDateTime":data.ArrivalDateTime,
             "CompanyName":data.CompanyName,
             "PickupInfo":{
-              "PickupTime":data.PickupInfo?.PickupTime,
-              "Address":data.PickupInfo?.Address,
-              "Phone":data.PickupInfo?.Phone,
-              "Landmark":data.PickupInfo?.Landmark,
-              "PickupName":data.PickupInfo?.PickupName,
+              "PickupTime":data.PickupInfo?.PickupTime || this.pickups?.PickupTime,
+              "Address":data.PickupInfo?.Address || this.pickups?.Address,
+              "Phone":data.PickupInfo?.Phone || this.pickups?.Phone,
+              "Landmark":data.PickupInfo?.Landmark || this.pickups?.Landmark,
+              "PickupName":data.PickupInfo?.PickupName || this.pickups?.PickupName || this.pickups?.name,
             },
             "DropoffInfo":{
-              "DropoffTime":this.dropoffs.DropoffTime,
-              "DropoffName":this.dropoffs.DropoffName,
+              "DropoffTime":this.dropoffs?.DropoffTime,
+              "DropoffName":this.dropoffs?.DropoffName || this.dropoffs?.name,
             },
             "TotalSeats":data.TotalSeats,
-            "TotalFare":data.TotalFare,
+            "TotalFare":data.TotalFare || this.fare,
             "PaymentId": paymentId,
             "status": "Success"
           }
