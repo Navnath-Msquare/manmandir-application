@@ -705,6 +705,7 @@ export class HomePage implements OnInit {
  
  
   ionViewDidEnter() {
+    this.fetchBookingData();
     this.slides.startAutoplay();
  
     if (this.backButtonSubscription) {

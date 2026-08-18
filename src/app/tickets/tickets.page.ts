@@ -28,6 +28,11 @@ export class TicketsPage implements OnInit {
     this.fetchBookingData();
   }
 
+  ionViewWillEnter(): void {
+    this.segmentData = "upcoming";
+    this.fetchBookingData();
+  }
+
   changeBooking(event: any) {
     this.segmentData = event.detail.value;
     this.fetchBookingData();
@@ -187,5 +192,25 @@ export class TicketsPage implements OnInit {
     }
 
     return uniqueParts.join(', ') || city || name || '';
+  }
+
+  getTicketFare(item: any): number {
+    if (!item) return 0;
+    if (item.TotalFare !== undefined && item.TotalFare !== null && Number(item.TotalFare) > 0) return Number(item.TotalFare);
+    if (item.TotalAmount !== undefined && item.TotalAmount !== null && Number(item.TotalAmount) > 0) return Number(item.TotalAmount);
+    if (item.fare !== undefined && item.fare !== null && Number(item.fare) > 0) return Number(item.fare);
+    if (item.total_fare !== undefined && item.total_fare !== null && Number(item.total_fare) > 0) return Number(item.total_fare);
+    if (item.amount !== undefined && item.amount !== null && Number(item.amount) > 0) return Number(item.amount);
+    if (item.PaidAmount !== undefined && item.PaidAmount !== null && Number(item.PaidAmount) > 0) return Number(item.PaidAmount);
+
+    if (Array.isArray(item.Passengers) && item.Passengers.length > 0) {
+      const sum = item.Passengers.reduce((acc: number, p: any) => {
+        const fare = Number(p.Fare || p.fare || p.Price || p.price || 0);
+        return acc + fare;
+      }, 0);
+      if (sum > 0) return sum;
+    }
+
+    return 0;
   }
 }

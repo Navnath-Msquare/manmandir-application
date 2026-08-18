@@ -282,5 +282,21 @@ export class ApiService {
     }).pipe(map((data: any) => data));
   }
 
+  // Dedicated Cancellation API Helpers
+  getCancellationPreview(id: any) {
+    return this.http.get<any>(`${environment.baseURL}bookings/${id}/cancellation-details`)
+      .pipe(map(data => data));
+  }
+
+  cancelBookingApi(id: any) {
+    return this.http.post<any>(`${environment.baseURL}bookings/${id}/cancel`, {}, { headers: { 'Content-Type': 'application/json' } })
+      .pipe(map(data => data));
+  }
+
+  getCancelledTicket(id: any) {
+    return this.http.get<any>(`${environment.baseURL}bookings/${id}/cancelled-ticket`)
+      .pipe(map(data => data));
+  }
+
 
 }

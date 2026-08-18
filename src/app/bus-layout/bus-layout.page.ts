@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../core/services/api.service';
 import * as _ from 'lodash';
-import { ModalController, ToastController, IonRouterOutlet, LoadingController, Platform, } from '@ionic/angular';
+import { ModalController, ToastController, IonRouterOutlet, LoadingController, Platform, NavController } from '@ionic/angular';
 import { Dir } from 'fs';
 import { dir, log } from 'console';
 import { AuthenticationService } from '../core/services/authentication.service';
@@ -142,7 +142,7 @@ export class BusLayoutPage implements OnInit {
   gridTemplateColumnsLower: string = 'repeat(5, 1fr)';
   gridTemplateColumnsUpper: string = 'repeat(5, 1fr)';
   constructor(private route: ActivatedRoute, public api: ApiService, public router: Router, public location: Location, private toast: ToastController,
-    public modalS: ModalController, public authS: AuthenticationService, public platform: Platform, private routerOutlet: IonRouterOutlet) { }
+    public modalS: ModalController, public authS: AuthenticationService, public platform: Platform, private routerOutlet: IonRouterOutlet, public navCtrl: NavController) { }
 
   ngOnInit() {
     this.name = this.authS.currentUserValue.name;
@@ -1138,6 +1138,11 @@ export class BusLayoutPage implements OnInit {
           }
         });
 
+        modal.onDidDismiss().then((res) => {
+          if (res?.data?.booked) {
+            this.navCtrl.navigateRoot('/tickets');
+          }
+        });
         await modal.present();
       }, error => {
         console.log(error);
@@ -1287,6 +1292,11 @@ export class BusLayoutPage implements OnInit {
         }
       });
 
+      modal.onDidDismiss().then((res) => {
+        if (res?.data?.booked) {
+          this.navCtrl.navigateRoot('/tickets');
+        }
+      });
       await modal.present();
 
     }, err => {

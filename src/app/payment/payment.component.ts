@@ -21,27 +21,27 @@ export class PaymentComponent implements OnInit {
 
   viewDetails = true;
   loading = false;
-  holdData:any = [];
+  holdData: any = [];
   couponValue = "";
   amount = 0;
   walletPaidAmount = 0;
   discountAmount = 0;
 
 
-    
+
   orderId = Math.floor(100000000 + Math.random() * 900000000);
   baseURL = environment.baseURL;
-  item:any = [];
+  item: any = [];
   paymentModal = false;
-  amountToAdd:any = 0;
-  constructor(public modal:ModalController,public navParams:NavParams, private toast: ToastController,private api: ApiService,public auth: AuthenticationService, public router: Router) { }
+  amountToAdd: any = 0;
+  constructor(public modal: ModalController, public navParams: NavParams, private toast: ToastController, private api: ApiService, public auth: AuthenticationService, public router: Router) { }
 
   ngOnInit(): void {
-      console.log(this.pickups);
-      console.log(this.dropoffs);
-      console.log(this.holdId);
+    console.log(this.pickups);
+    console.log(this.dropoffs);
+    console.log(this.holdId);
 
-      this.amount = parseFloat(this.fare);
+    this.amount = parseFloat(this.fare);
   }
 
   cancel() {
@@ -49,84 +49,94 @@ export class PaymentComponent implements OnInit {
   }
 
 
-  async payWithRazorpay(){
+  async payWithRazorpay() {
     this.loading = true;
 
-    this.api.getBookings({HoldId:this.holdId,user:this.auth.currentUserValue._id},1,1,"").subscribe(res=>{
+    this.api.getBookings({ HoldId: this.holdId, user: this.auth.currentUserValue._id }, 1, 1, "").subscribe(res => {
       console.log(res);
-      if(res.data?.length == 0){
-        this.presentToast("Something went Wrong!","danger")
+      if (res.data?.length == 0) {
+        this.presentToast("Something went Wrong!", "danger")
         return;
       }
 
       this.holdData = res.data[0];
-    },error=>{
+    }, error => {
       console.error(error);
-      this.presentToast("Something went Wrong!","danger")
+      this.presentToast("Something went Wrong!", "danger")
     })
-    
-    if(this.amount == 0){
+
+    if (this.amount == 0) {
       let wData = JSON.stringify({
-        description:"For Ticket Booking",
-        amount:(this.discountAmount == 0)?this.fare:this.fare-this.discountAmount,
-        type:"debit",
-        user:this.auth.currentUserValue._id
+        description: "For Ticket Booking",
+        amount: (this.discountAmount == 0) ? this.fare : this.fare - this.discountAmount,
+        type: "debit",
+        user: this.auth.currentUserValue._id
       })
-      this.api.createWallet(wData).subscribe(res=>{
+      this.api.createWallet(wData).subscribe(res => {
         this.bookASeat();
         this.loading = false;
-      },error=>{
+      }, error => {
         console.error(error);
-        this.presentToast("Something went wrong!","danger")
+        this.presentToast("Something went wrong!", "danger")
       })
 
-    }else{
-      this.api.createPaymentOrder((this.discountAmount == 0)?this.fare:this.fare-this.discountAmount,this.makeid(10)).subscribe(async res=>{
-        
+    } else {
+      const numericFare = Number(this.fare) || 0;
+      const numericDiscount = Number(this.discountAmount) || 0;
+      const finalAmount = (numericDiscount === 0) ? numericFare : (numericFare - numericDiscount);
+
+      this.api.createPaymentOrder(finalAmount, this.makeid(10)).subscribe(async (res: any) => {
+        console.log("➡️ Razorpay Order Response:", res);
+        if (!res || !res.id) {
+          this.loading = false;
+          this.presentToast(res?.message || "Payment initiation failed. Please try again.", "danger");
+          return;
+        }
+
         const options = {
           key: environment.razorpayKey,
-          amount: (this.discountAmount == 0)?((Number.isInteger(this.fare))?(this.fare+"00").toString():this.fare.toFixed(2)):((Number.isInteger(this.fare-this.discountAmount))?((this.fare-this.discountAmount)+"00").toString():(this.fare-this.discountAmount).toFixed(2)),
-          description: 'KBCash Credits',
+          amount: res.amount ? res.amount.toString() : Math.round(finalAmount * 100).toString(),
+          description: 'Bus Ticket Booking',
           image: 'https://karobooking.com/assets/images/logo.png',
           order_id: res.id,
           currency: 'INR',
-          name: 'Karobooking',
+          name: 'Manmandir Travels',
           prefill: {
-            email: this.auth.currentUserValue.email,
-            contact: this.auth.currentUserValue.mobile
+            email: this.auth.currentUserValue?.email || '',
+            contact: this.auth.currentUserValue?.mobile || ''
           },
           theme: {
             color: '#D92519'
           }
-        }
+        };
         try {
           this.loading = false;
           let initPayment = await Checkout.open(options);
-          
+
           let transData = JSON.parse(JSON.stringify(initPayment.response))
-          if(this.walletPaidAmount == 0){
+          if (this.walletPaidAmount == 0) {
             this.bookASeat(transData?.razorpay_payment_id);
             this.loading = false;
-          }else{
+          } else {
             let wData = JSON.stringify({
-              description:"For Ticket Booking",
-              amount:this.walletPaidAmount,
-              type:"debit",
-              user:this.auth.currentUserValue._id
+              description: "For Ticket Booking",
+              amount: this.walletPaidAmount,
+              type: "debit",
+              user: this.auth.currentUserValue._id
             })
-            this.api.createWallet(wData).subscribe(res=>{
+            this.api.createWallet(wData).subscribe(res => {
               this.bookASeat(transData?.razorpay_payment_id);
               this.loading = false;
-            },error=>{
+            }, error => {
               console.error(error);
-              this.presentToast("Something went wrong!","danger")
+              this.presentToast("Something went wrong!", "danger")
             })
           }
-          
-          
-          
-        } catch (error:any) {
-          
+
+
+
+        } catch (error: any) {
+
           console.log(error);
           let err = JSON.parse(error);
         }
@@ -136,82 +146,82 @@ export class PaymentComponent implements OnInit {
 
 
 
-  bookASeat(paymentId?: string){
+  bookASeat(paymentId?: string) {
     const data = {
       "HoldId": this.holdId
     }
-    this.api.serverRequest("POST",environment.busTranApi+"BookSeats",data).subscribe(async res=>{
+    this.api.serverRequest("POST", environment.busTranApi + "BookSeats", data).subscribe(async res => {
+      console.log(res);
+      let body = JSON.parse(res.body);
+      let status = body.success;
+
+      if (!status) {
+        this.presentToast(body?.Error.Msg, "danger");
+        return;
+      }
+
+      let data = body.data;
+      let TicketNo = data.TicketNo;
+      let PNRNo = data.PNRNo;
+
+      console.log("TicketNo", TicketNo);
+      console.log("PNRNo", PNRNo);
+      this.api.serverRequest("GET", environment.busTranApi + "BookingDetails?PNR=" + PNRNo + "&TicketNo=" + TicketNo, {}).subscribe(async res => {
         console.log(res);
         let body = JSON.parse(res.body);
         let status = body.success;
-        
-        if(!status){
-          this.presentToast(body?.Error.Msg,"danger");
+
+        if (!status) {
+          this.presentToast(body?.Error.Msg, "danger");
           return;
         }
-        
+
         let data = body.data;
-        let TicketNo = data.TicketNo;
-        let PNRNo = data.PNRNo;
 
-        console.log("TicketNo",TicketNo);
-        console.log("PNRNo",PNRNo);
-        this.api.serverRequest("GET",environment.busTranApi+"BookingDetails?PNR="+PNRNo+"&TicketNo="+TicketNo,{}).subscribe(async res=>{
-          console.log(res);
-          let body = JSON.parse(res.body);
-          let status = body.success;
-          
-          if(!status){
-            this.presentToast(body?.Error.Msg,"danger");
-            return;
-          }
-          
-          let data = body.data;
+        let dbData = {
+          "FromCityName": this.holdData?.FromCityName,
+          "ToCityName": this.holdData?.ToCityName,
+          "TicketNo": data.TicketNo,
+          "PNRNo": data.PNRNo,
+          "BusTypeName": data.BusTypeName,
+          "DepartureDateTime": data.DepartureDateTime,
+          "ArrivalDateTime": data.ArrivalDateTime,
+          "CompanyName": data.CompanyName,
+          "PickupInfo": {
+            "PickupTime": data.PickupInfo?.PickupTime || this.pickups?.PickupTime,
+            "Address": data.PickupInfo?.Address || this.pickups?.Address,
+            "Phone": data.PickupInfo?.Phone || this.pickups?.Phone,
+            "Landmark": data.PickupInfo?.Landmark || this.pickups?.Landmark,
+            "PickupName": data.PickupInfo?.PickupName || this.pickups?.PickupName || this.pickups?.name,
+          },
+          "DropoffInfo": {
+            "DropoffTime": this.dropoffs?.DropoffTime,
+            "DropoffName": this.dropoffs?.DropoffName || this.dropoffs?.name,
+          },
+          "TotalSeats": data.TotalSeats,
+          "TotalFare": data.TotalFare || this.fare,
+          "PaymentId": paymentId,
+          "status": "Success"
+        }
 
-          let dbData = {
-            "FromCityName": this.holdData?.FromCityName,
-            "ToCityName": this.holdData?.ToCityName,
-            "TicketNo":data.TicketNo,
-            "PNRNo": data.PNRNo,
-            "BusTypeName":data.BusTypeName,
-            "DepartureDateTime":data.DepartureDateTime,
-            "ArrivalDateTime":data.ArrivalDateTime,
-            "CompanyName":data.CompanyName,
-            "PickupInfo":{
-              "PickupTime":data.PickupInfo?.PickupTime || this.pickups?.PickupTime,
-              "Address":data.PickupInfo?.Address || this.pickups?.Address,
-              "Phone":data.PickupInfo?.Phone || this.pickups?.Phone,
-              "Landmark":data.PickupInfo?.Landmark || this.pickups?.Landmark,
-              "PickupName":data.PickupInfo?.PickupName || this.pickups?.PickupName || this.pickups?.name,
-            },
-            "DropoffInfo":{
-              "DropoffTime":this.dropoffs?.DropoffTime,
-              "DropoffName":this.dropoffs?.DropoffName || this.dropoffs?.name,
-            },
-            "TotalSeats":data.TotalSeats,
-            "TotalFare":data.TotalFare || this.fare,
-            "PaymentId": paymentId,
-            "status": "Success"
-          }
-
-          this.api.updateBookings(dbData,this.holdData._id).subscribe(res=>{
-            this.presentToast("Booking Successful","success");
-            this.router.navigateByUrl("/tickets");
-            this.modal.dismiss();
-          },error=>{
-            console.error(error);
-            this.presentToast("Something Went Wrong!","danger");
-          });
-
-
+        this.api.updateBookings(dbData, this.holdData._id).subscribe(res => {
+          this.presentToast("Booking Successful", "success");
+          this.router.navigateByUrl("/tickets");
+          this.modal.dismiss();
+        }, error => {
+          console.error(error);
+          this.presentToast("Something Went Wrong!", "danger");
         });
 
-        
+
+      });
+
+
     });
   }
 
 
-  async presentToast(message:string,color:string) {
+  async presentToast(message: string, color: string) {
     const toast = await this.toast.create({
       message: message,
       color: color,
@@ -223,7 +233,7 @@ export class PaymentComponent implements OnInit {
   }
 
 
-  makeid(length:number) {
+  makeid(length: number) {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const charactersLength = characters.length;
@@ -235,47 +245,49 @@ export class PaymentComponent implements OnInit {
     return result;
   }
 
-  changePaymentMode(event:any){
-    
-    if(event.detail.value == "wallet"){
+  changePaymentMode(event: any) {
+
+    if (event.detail.value == "wallet") {
       let walletBalance = this.auth.currentUserValue.walletBalance;
-      if(walletBalance >= parseFloat((parseFloat(this.fare) - this.discountAmount).toFixed(2))){
+      if (walletBalance >= parseFloat((parseFloat(this.fare) - this.discountAmount).toFixed(2))) {
         this.amount = 0;
-      }else{
+      } else {
         this.amount = parseFloat((parseFloat(this.fare) - this.discountAmount).toFixed(2)) - walletBalance;
         this.walletPaidAmount = walletBalance;
       }
 
-    } else{
+    } else {
       this.amount = parseFloat((parseFloat(this.fare) - this.discountAmount).toFixed(2));
     }
   }
 
-  async applyCoupon(){
+  async applyCoupon() {
     let userType = "";
-    await this.api.getBookings({status: {$ne:"Pending"},user:this.auth.currentUserValue._id},1,50,"").subscribe(res=>{
-      if(res.data.length > 0){
+    await this.api.getBookings({ status: { $ne: "Pending" }, user: this.auth.currentUserValue._id }, 1, 50, "").subscribe(res => {
+      if (res.data.length > 0) {
         userType = "Existing"
-      } else{
+      } else {
         userType = "New"
       }
-    },error=>{
+    }, error => {
       console.error(error);
     })
-    this.api.getCoupon({code:this.couponValue,role:"User",$or:[{type:userType},{type:"All"}]},1,1,"").subscribe(res=>{
+    this.api.getCoupon({ code: this.couponValue, role: "User", $or: [{ type: userType }, { type: "All" }] }, 1, 1, "").subscribe(res => {
       console.log(res);
-      if(res.data.length > 0){
+      if (res.data.length > 0) {
         console.log(res.data[0].discount);
         console.log(this.fare);
         let discountPercentage = parseInt(res.data[0].discount);
 
-        this.amount = parseFloat((parseFloat(this.fare) * ((100-discountPercentage)/100)).toFixed(2));
+        this.amount = parseFloat((parseFloat(this.fare) * ((100 - discountPercentage) / 100)).toFixed(2));
         this.discountAmount = parseFloat((parseFloat(this.fare) - this.amount).toFixed(2));
       }
-      
+
     })
   }
 
 
 
 }
+
+

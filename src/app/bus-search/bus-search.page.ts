@@ -2275,23 +2275,21 @@ export class BusSearchPage implements OnInit, OnDestroy {
     this.modal.dismiss();
   }
   clearAll() {
-    this.busList = [];
-    this.busList = this.OriginalbusList;
-    location.reload()
-    this.modal.dismiss()
+    this.selectBusOpt = [];
+    this.checkedPickup = [];
+    this.checkedDroping = [];
+    this.checkedSeatType = [];
+    this.checkeAmenties = [];
+    this.operatorSearchTerm = '';
+    this.boardingSearchTerm = '';
+    this.droppingSearchTerm = '';
+    this.activeFilter = '';
+    this.DeptSelections = { Morning: false, Afternoon: false, Evening: false, Night: false };
+    this.ArrivalTime = { Morning: false, Afternoon: false, Evening: false, Night: false };
+    this.busList = [...this.OriginalbusList];
+    this.busAvailable = this.busList.length;
+    if (this.modal) {
+      this.modal.dismiss();
+    }
   }
-  // applyFilters() {
-  //   this.busList = this.busList.filter((bus: any) => {
-  //     const matchesPickup = !this.checkedPickup.length || bus.Pickups.some((p: any) => this.checkedPickup.includes(p.PickupName));
-  //     const matchesDropoff = !this.checkedDroping.length || bus.Dropoffs.some((d: any) => this.checkedDroping.includes(d.DropoffName));
-  //     const matchesIsAC = this.checkedSeatType.includes(bus.BusType.IsAC);
-  //     return matchesPickup && matchesDropoff && matchesIsAC;
-
-
-
-  //   });
-
-
-  //   this.modal.dismiss();
-  // }
 }

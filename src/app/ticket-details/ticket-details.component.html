@@ -1,7 +1,7 @@
 <ion-header mode="ios" class="ion-no-border">
   <ion-toolbar color="dark">
     <ion-buttons>
-      <ion-back-button></ion-back-button>
+      <ion-back-button defaultHref="/tickets"></ion-back-button>
     </ion-buttons>
     <ion-title>
       Ticket Details
@@ -10,7 +10,7 @@
 </ion-header>
 
 <!-- Hidden Layout for PDF Generation -->
-<div style="position: absolute; top: 0; left: 0; width: 800px; background: white; z-index: -9999;" id="ticket-pdf-content">
+<div style="position: fixed; left: -9999px; top: 0; width: 800px; background: #ffffff; z-index: 1000; opacity: 1; pointer-events: none;" id="ticket-pdf-content">
   <div style="padding: 20px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333;">
     
     <!-- PDF Header -->
@@ -76,41 +76,51 @@
 
     <!-- Passengers -->
     <h3 style="margin: 0 0 10px 0; font-size: 14px; color: #666; text-transform: uppercase;">Passenger Details</h3>
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
       <thead>
         <tr>
           <th style="background: #f5f5f5; border-bottom: 2px solid #ddd; padding: 10px; text-align: left; font-size: 13px; color: #333; vertical-align: middle;">Name</th>
           <th style="background: #f5f5f5; border-bottom: 2px solid #ddd; padding: 10px; text-align: left; font-size: 13px; color: #333; vertical-align: middle;">Age/Gender</th>
-          <th style="background: #f5f5f5; border-bottom: 2px solid #ddd; padding: 10px; text-align: right; font-size: 13px; color: #333; vertical-align: middle;">Seat No</th>
+          <th style="background: #f5f5f5; border-bottom: 2px solid #ddd; padding: 10px; text-align: center; font-size: 13px; color: #333; vertical-align: middle;">Seat No</th>
+          <th style="background: #f5f5f5; border-bottom: 2px solid #ddd; padding: 10px; text-align: right; font-size: 13px; color: #333; vertical-align: middle;">Fare (₹)</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let item of journeyData?.Passengers" style="border-bottom: 1px solid #eee;">
           <td style="padding: 10px; font-size: 14px; font-weight: bold;">{{item.Name}}</td>
           <td style="padding: 10px; font-size: 14px;">{{item.Age}} yrs, {{item.Gender}}</td>
-          <td style="padding: 10px; font-size: 14px; text-align: right; font-weight: bold;">{{item.SeatNo}}</td>
+          <td style="padding: 10px; font-size: 14px; text-align: center; font-weight: bold;">{{item.SeatNo}}</td>
+          <td style="padding: 10px; font-size: 14px; text-align: right; font-weight: bold; color: #111;">₹{{item.Fare || item.fare || (getTotalFare() / (journeyData?.Passengers?.length || 1))}}</td>
         </tr>
       </tbody>
     </table>
 
-    <!-- Total Fare -->
-    <table style="width: 100%; margin-bottom: 30px;">
-      <tr>
-        <td style="text-align: right;">
-          <div style="background: #f9f9f9; padding: 15px 25px; border-radius: 8px; display: inline-block;">
-            <p style="margin: 0 0 5px 0; font-size: 12px; color: #666; text-transform: uppercase;">Total Fare</p>
-            <p style="margin: 0; font-size: 24px; font-weight: bold; color: #111;">₹{{getTotalFare()}}</p>
-          </div>
-        </td>
-      </tr>
-    </table>
+    <!-- Payment & Total Fare Summary -->
+    <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+      <table style="width: 100%;">
+        <tr>
+          <td style="vertical-align: middle;">
+            <p style="margin: 0 0 4px 0; font-size: 12px; color: #666; text-transform: uppercase;">Payment Details</p>
+            <p style="margin: 0; font-size: 13px; color: #333;">
+              <strong>ID:</strong> {{journeyData?.PaymentId || '-'}} &nbsp;|&nbsp; 
+              <strong>Method:</strong> {{journeyData?.PaymentMethod || journeyData?.payment_method || 'RAZORPAY'}} &nbsp;|&nbsp; 
+              <span style="color: #2e7d32; font-weight: bold;">{{journeyData?.PaymentStatus || 'PAID (SUCCESS)'}}</span>
+            </p>
+          </td>
+          <td style="text-align: right; vertical-align: middle;">
+            <p style="margin: 0 0 4px 0; font-size: 12px; color: #666; text-transform: uppercase;">Total Booking Fare</p>
+            <p style="margin: 0; font-size: 22px; font-weight: bold; color: #111;">₹{{getTotalFare()}}</p>
+          </td>
+        </tr>
+      </table>
+    </div>
 
     <!-- Cancellation details if cancelled -->
     <div *ngIf="journeyData?.status === 'Cancel' || journeyData?.IsCancelled" style="border: 1px solid #ffcdd2; background: #ffebee; border-radius: 8px; margin-bottom: 20px;">
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
           <td colspan="2" style="padding: 15px 15px 5px 15px;">
-            <h3 style="margin: 0; font-size: 14px; color: #b71c1c; text-transform: uppercase;">Cancellation Details</h3>
+            <h3 style="margin: 0; font-size: 14px; color: #b71c1c; text-transform: uppercase;">Cancellation & Refund Details</h3>
           </td>
         </tr>
         <tr>
@@ -124,6 +134,52 @@
           </td>
         </tr>
       </table>
+    </div>
+
+    <!-- RedBus Style Cancellation Policy Table -->
+    <div style="border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px; overflow: hidden;">
+      <div style="background: #f0f4f8; padding: 10px 15px; border-bottom: 1px solid #e0e0e0;">
+        <h4 style="margin: 0; font-size: 13px; color: #b71c1c; text-transform: uppercase; font-weight: bold;">Cancellation Policy & Refund Slabs (RedBus Style)</h4>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+        <thead>
+          <tr style="background: #fafafa; border-bottom: 1px solid #eee;">
+            <th style="padding: 8px 15px; text-align: left; color: #555;">Cancellation Time</th>
+            <th style="padding: 8px 15px; text-align: center; color: #555;">Charges</th>
+            <th style="padding: 8px 15px; text-align: right; color: #555;">Refund Estimate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #f0f0f0;">
+            <td style="padding: 8px 15px; color: #333;">More than 24 hours before departure</td>
+            <td style="padding: 8px 15px; text-align: center; color: #d32f2f; font-weight: 600;">10% Deduction</td>
+            <td style="padding: 8px 15px; text-align: right; color: #2e7d32; font-weight: 600;">90% Refund</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f0f0f0; background: #fafafa;">
+            <td style="padding: 8px 15px; color: #333;">Between 12 to 24 hours before departure</td>
+            <td style="padding: 8px 15px; text-align: center; color: #d32f2f; font-weight: 600;">25% Deduction</td>
+            <td style="padding: 8px 15px; text-align: right; color: #2e7d32; font-weight: 600;">75% Refund</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f0f0f0;">
+            <td style="padding: 8px 15px; color: #333;">Between 4 to 12 hours before departure</td>
+            <td style="padding: 8px 15px; text-align: center; color: #d32f2f; font-weight: 600;">50% Deduction</td>
+            <td style="padding: 8px 15px; text-align: right; color: #2e7d32; font-weight: 600;">50% Refund</td>
+          </tr>
+          <tr style="background: #fafafa;">
+            <td style="padding: 8px 15px; color: #333;">Less than 4 hours before departure</td>
+            <td style="padding: 8px 15px; text-align: center; color: #d32f2f; font-weight: 600;">100% Deduction</td>
+            <td style="padding: 8px 15px; text-align: right; color: #d32f2f; font-weight: 600;">0% Refund (No Refund)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Important Instructions -->
+    <div style="background: #fffde7; border: 1px solid #fff59d; border-radius: 8px; padding: 12px 15px; margin-bottom: 15px;">
+      <h4 style="margin: 0 0 6px 0; font-size: 12px; color: #f57f17; text-transform: uppercase; font-weight: bold;">Important Travel Instructions</h4>
+      <p style="margin: 0 0 4px 0; font-size: 11px; color: #555;">• Please report at the boarding point at least 15-30 minutes prior to departure.</p>
+      <p style="margin: 0 0 4px 0; font-size: 11px; color: #555;">• Carry a valid Government ID proof and this E-Ticket during journey.</p>
+      <p style="margin: 0; font-size: 11px; color: #555;">• For 24x7 Customer Support: 📞 +91 9874563210 | ✉️ support@karobooking.com</p>
     </div>
     
   </div>

@@ -36,25 +36,45 @@ export class TicketDetailsComponent implements OnInit {
 
       this.journeyData = res.data[0];
 
-      await this.getCancellationDetails();
+      if (this.journeyData?.status === 'Cancel' || this.journeyData?.IsCancelled) {
+        // Fetch cancelled ticket historical snapshot strictly from MongoDB (No GDS API call)
+        try {
+          const cancelledRes: any = await firstValueFrom(this.api.getCancelledTicket(params.id));
+          if (cancelledRes?.status && cancelledRes?.data) {
+            const cData = cancelledRes.data;
+            this.journeyData = {
+              ...this.journeyData,
+              ChargeAmt: cData.cancellation?.cancellationCharge || cData.ChargeAmt || this.journeyData.ChargeAmt,
+              RefundAmount: cData.cancellation?.refundAmount || cData.refund?.amount || cData.RefundAmount || this.journeyData.RefundAmount,
+              cancellationStatus: cData.refund?.status || cData.cancellation?.status || this.journeyData.cancellationStatus,
+              cancellationDate: cData.cancellation?.cancelledAt || this.journeyData.cancellationDate,
+              cancellationRef: cData.cancellation?.cancellationId || this.journeyData.cancellationRef
+            };
+          }
+        } catch (e) {
+          console.error("Error fetching cancelled ticket from MongoDB:", e);
+        }
+      } else {
+        await this.getCancellationDetails();
+      }
 
       const action = params.action;
       if (action === 'notify-booking' || action === 'notify-cancellation') {
-        // Remove action from URL so it doesn't fire again on reload
+        // Clean URL action parameter
         this.location.replaceState(`/ticket-details?id=${params.id}`);
-        setTimeout(() => {
-          this.generateAndSendPDF(action === 'notify-cancellation' ? 'cancellation' : 'booking');
-        }, 1500);
       }
     });
   }
 
   getTotalFare(): number {
-    if (this.journeyData?.TotalFare) return Number(this.journeyData.TotalFare);
-    if (this.journeyData?.total_fare) return Number(this.journeyData.total_fare);
-    if (this.journeyData?.fare) return Number(this.journeyData.fare);
-    if (this.journeyData?.TotalAmount) return Number(this.journeyData.TotalAmount);
-    if (this.journeyData?.amount) return Number(this.journeyData.amount);
+    if (this.journeyData?.TotalFare && Number(this.journeyData.TotalFare) > 0) return Number(this.journeyData.TotalFare);
+    if (this.journeyData?.total_fare && Number(this.journeyData.total_fare) > 0) return Number(this.journeyData.total_fare);
+    if (this.journeyData?.fare && Number(this.journeyData.fare) > 0) return Number(this.journeyData.fare);
+    if (this.journeyData?.TotalAmount && Number(this.journeyData.TotalAmount) > 0) return Number(this.journeyData.TotalAmount);
+    if (this.journeyData?.amount && typeof this.journeyData.amount === 'number' && this.journeyData.amount > 0) return Number(this.journeyData.amount);
+    if (this.journeyData?.amount?.totalBookingAmount) return Number(this.journeyData.amount.totalBookingAmount);
+    if (this.journeyData?.amount?.ticketAmount) return Number(this.journeyData.amount.ticketAmount);
+    if (this.journeyData?.PaidAmount && Number(this.journeyData.PaidAmount) > 0) return Number(this.journeyData.PaidAmount);
     
     if (Array.isArray(this.journeyData?.Passengers) && this.journeyData.Passengers.length > 0) {
       const sum = this.journeyData.Passengers.reduce((acc: number, p: any) => {
@@ -106,30 +126,42 @@ export class TicketDetailsComponent implements OnInit {
   }
 
   async generateAndSendPDF(type: string) {
+    let base64Data: string | null = null;
     const element = document.getElementById('ticket-pdf-content');
-    if (!element) return;
-    try {
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff'
-      });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      const base64Data = pdf.output('datauristring'); // data:application/pdf;base64,...
 
-      await firstValueFrom(
-        this.api.sendNotifications(this.journeyData._id, {
-          type: type,
-          pdfBase64: base64Data
-        })
-      );
-      console.log('Notifications sent successfully with PDF');
+    if (element) {
+      try {
+        const canvas = await html2canvas(element, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff'
+        });
+        if (canvas.width > 50 && canvas.height > 50) {
+          const imgData = canvas.toDataURL('image/png');
+          const pdf = new jsPDF('p', 'mm', 'a4');
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, Math.min(pdfHeight, 280));
+          base64Data = pdf.output('datauristring');
+        }
+      } catch (canvasErr) {
+        console.warn('Frontend canvas generation skipped, backend will generate PDF:', canvasErr);
+      }
+    }
+
+    try {
+      if (this.journeyData?._id) {
+        await firstValueFrom(
+          this.api.sendNotifications(this.journeyData._id, {
+            type: type,
+            pdfBase64: base64Data
+          })
+        );
+        console.log(`[${type}] Notifications dispatched successfully with PDF`);
+      }
     } catch (e) {
-      console.error('Failed to generate and send PDF', e);
+      console.error('Failed to dispatch notifications', e);
     }
   }
 
@@ -139,59 +171,20 @@ export class TicketDetailsComponent implements OnInit {
       return;
     }
 
-    const seatNumbers = this.journeyData.Passengers?.map((p: any) => p.SeatNo) || [];
-    const seatNumbersString = seatNumbers.join(',');
-    const ticketRef = this.journeyData.TicketNo || this.journeyData.PNRNo || this.journeyData.HoldId || '';
-
     try {
-      if (this.isNewApi()) {
-        const res: any = await firstValueFrom(
-          this.api.serverRequestGds('POST', '/gds', {
-            method: 'GET',
-            endpoint: 'can_cancel.json',
-            query: {
-              ticket_number: ticketRef,
-              seat_numbers: seatNumbersString,
-              api_key: environment.newApikey
-            }
-          })
-        );
-
-        const result = res?.data?.result?.is_ticket_cancellable || res?.result?.is_ticket_cancellable;
-        if (result?.is_cancellable !== false) {
-          this.ticketDetails = {
-            IsCancellable: true,
-            RefundAmount: result?.refund_amount || 0,
-            CancellationCharges: result?.cancellation_charges || 0,
-            CancelPercent: result?.cancel_percent || 0
-          };
-          if (result) this.parseCancellationPolicy(result);
-        } else {
-          this.ticketDetails = { IsCancellable: true };
+      const res: any = await firstValueFrom(this.api.getCancellationPreview(this.journeyData._id));
+      if (res?.status) {
+        this.ticketDetails = {
+          IsCancellable: res.canCancel !== false,
+          RefundAmount: res.refundAmount || 0,
+          CancellationCharges: res.cancellationCharge || 0,
+          CancelPercent: res.cancellationChargePercentage || 0
+        };
+        if (res.cancellationPolicy) {
+          this.parseCancellationPolicy(res.cancellationPolicy);
         }
       } else {
-        const res: any = await firstValueFrom(
-          this.api.serverRequest(
-            "GET",
-            environment.busTranApi +
-            "IsCancellable?PNRNo=" + (this.journeyData.PNRNo || ticketRef) +
-            "&TicketNo=" + ticketRef +
-            "&seatNos=" + seatNumbersString,
-            {}
-          )
-        );
-
-        const body = JSON.parse(res.body);
-
-        if (body.success) {
-          this.ticketDetails = body.data || { IsCancellable: true };
-          if (this.ticketDetails && this.ticketDetails.IsCancellable === undefined) {
-            this.ticketDetails.IsCancellable = true;
-          }
-          this.parseCancellationPolicy(body.data);
-        } else {
-          this.ticketDetails = { IsCancellable: true };
-        }
+        this.ticketDetails = { IsCancellable: true };
       }
     } catch (error) {
       console.error("Cancel check error", error);
@@ -327,96 +320,20 @@ export class TicketDetailsComponent implements OnInit {
   async cancelTicket() {
     this.loader = true;
 
-    const seatNumbers = this.journeyData.Passengers.map((p: any) => p.SeatNo);
-    const seatNumbersString = seatNumbers.join(',');
-
     try {
-      let dbData: any = {
-        status: "Cancel",
-        IsCancelled: true,
-        PaymentId: this.journeyData?.PaymentId
-      };
+      const res: any = await firstValueFrom(this.api.cancelBookingApi(this.journeyData._id));
 
-      // ================= NEW API =================
-      if (this.journeyData.source === "NEW_API") {
-        const cancelRes: any = await firstValueFrom(
-          this.api.serverRequestGds('POST', '/gds', {
-            method: 'GET',
-            endpoint: 'cancel_booking.json',
-            query: {
-              ticket_number: this.journeyData.TicketNo || this.journeyData.PNRNo || this.journeyData.HoldId,
-              seat_numbers: seatNumbersString,
-              api_key: environment.newApikey
-            }
-          })
-        );
-        const cancelData = cancelRes?.data?.result?.cancel_ticket;
-        if (!cancelData) throw "Cancel Failed";
-
-        const seatDetail =
-          cancelData.cancel_seat_details?.[0]?.cancel_seat_detail;
-
-        dbData = {
-          ...dbData,
-          RefundAmount: cancelData.refund_amount,
-          ChargeAmt: cancelData.cancellation_charges,
-          ChargePct: seatDetail?.cancel_percent || 0,
-          CancelledSeatNumbers: cancelData.seat_numbers,
-          CancelledFare: seatDetail?.cancelled_fare || 0,
-          BaseCancelledFare: seatDetail?.base_cancelled_fare || 0,
-          CancelledServiceTax: seatDetail?.cancelled_service_tax || 0,
-          GstAmount: cancelData.operator_gst_details?.igst_amount || 0,
-          cancellationPolicy: this.cancellationPolicyText || JSON.stringify(this.cancellationPolicySlabs) || '',
-          cancellationStatus: "Cancelled",
-          cancellationRef: cancelData.ticket_number || cancelData.pnr_number || this.journeyData.TicketNo,
-          cancellationDate: new Date().toISOString()
-        };
-      }
-      else {
-        const res: any = await firstValueFrom(
-          this.api.serverRequest(
-            "POST",
-            environment.busTranApi + "CancelSeats",
-            {
-              PNR: this.journeyData.PNRNo,
-              TicketNo: this.journeyData.TicketNo,
-              SeatNos: seatNumbersString
-            }
-          )
-        );
-
-        const body = JSON.parse(res.body);
-        if (!body.success) throw body?.Error?.Msg;
-
-        const data = body.data;
-
-        dbData = {
-          ...dbData,
-          NewHoldId: data.NewHoldId,
-          NewTotalFare: data.NewTotalFare,
-          TotalFare: data.TotalFare,
-          ChargeAmt: data.ChargeAmt,
-          ChargePct: data.ChargePct,
-          RefundAmount: data.RefundAmount,
-          NewTicketNo: data.NewTicketNo,
-          NewPNRNo: data.NewPNRNo,
-          cancellationPolicy: this.cancellationPolicyText || JSON.stringify(this.cancellationPolicySlabs) || '',
-          cancellationStatus: "Cancelled",
-          cancellationRef: data.NewHoldId || data.NewTicketNo || data.NewPNRNo || this.journeyData.TicketNo,
-          cancellationDate: new Date().toISOString()
-        };
+      if (res?.status) {
+        this.presentToast("Booking Cancelled Successfully", "success");
+        this.router.navigate(['/ticket-details'], { queryParams: { id: this.journeyData._id, action: 'notify-cancellation' } });
+      } else {
+        throw new Error(res?.message || "Cancellation Failed");
       }
 
-      await firstValueFrom(
-        this.api.updateBookings(dbData, this.journeyData._id)
-      );
-
-      this.presentToast("Booking Cancelled Successfully", "success");
-      this.router.navigate(['/ticket-details'], { queryParams: { id: this.journeyData._id, action: 'notify-cancellation' } });
-
-    } catch (error) {
-      console.error(error);
-      this.presentToast("Cancellation Failed", "danger");
+    } catch (error: any) {
+      console.error("Cancellation error:", error);
+      const errMsg = error?.error?.message || error?.message || "Cancellation Failed";
+      this.presentToast(errMsg, "danger");
     }
 
     this.loader = false;

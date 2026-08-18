@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ModalController, NavParams, ToastController } from '@ionic/angular';
+import { ModalController, NavController, NavParams, ToastController } from '@ionic/angular';
 import { AuthenticationService } from '../core/services/authentication.service';
 import { ApiService } from '../core/services/api.service';
 import { environment } from 'src/environments/environment';
@@ -40,7 +40,7 @@ export class BookingSummaryComponent implements OnInit {
   holdData: any = this.navParams.get('holdData') || null;
 
   constructor(public modalCtrl: ModalController, public navParams: NavParams, public auth: AuthenticationService, public api: ApiService,
-    public toast: ToastController, public router: Router
+    public toast: ToastController, public router: Router, public navCtrl: NavController
   ) { }
 
   ngOnInit(): void {
@@ -134,24 +134,34 @@ export class BookingSummaryComponent implements OnInit {
       })
 
     } else {
-      this.api.createPaymentOrder((this.discount == 0) ? this.fare : this.fare - this.discount, this.makeid(10)).subscribe(async res => {
+      const numericFare = Number(this.fare) || 0;
+      const numericDiscount = Number(this.discount) || 0;
+      const finalAmount = (numericDiscount === 0) ? numericFare : (numericFare - numericDiscount);
+
+      this.api.createPaymentOrder(finalAmount, this.makeid(10)).subscribe(async (res: any) => {
+        console.log("➡️ Razorpay Order Response:", res);
+        if (!res || !res.id) {
+          this.loading = false;
+          this.presentToast(res?.message || "Order creation failed. Please try again.", "danger");
+          return;
+        }
 
         const options = {
           key: environment.razorpayKey,
-          amount: (this.discount == 0) ? ((Number.isInteger(this.fare)) ? (this.fare + "00").toString() : this.fare.toFixed(2)) : ((Number.isInteger(this.fare - this.discount)) ? ((this.fare - this.discount) + "00").toString() : (this.fare - this.discount).toFixed(2)),
-          description: 'KBCash Credits',
+          amount: (res.amount ? res.amount.toString() : Math.round(finalAmount * 100).toString()),
+          description: 'Bus Ticket Booking',
           image: 'https://karobooking.com/assets/images/logo.png',
           order_id: res.id,
           currency: 'INR',
-          name: 'Karobooking',
+          name: 'Manmandir Travels',
           prefill: {
-            email: this.auth.currentUserValue.email,
-            contact: this.auth.currentUserValue.mobile
+            email: this.auth.currentUserValue?.email || '',
+            contact: this.auth.currentUserValue?.mobile || ''
           },
           theme: {
             color: '#D92519'
           }
-        }
+        };
         try {
           this.loading = false;
           let initPayment = await Checkout.open(options);
@@ -223,7 +233,7 @@ export class BookingSummaryComponent implements OnInit {
       let TicketNo = data.TicketNo;
       let PNRNo = data.PNRNo;
 
-      
+
       this.api.serverRequest("GET", environment.busTranApi + "BookingDetails?PNR=" + PNRNo + "&TicketNo=" + TicketNo, {}).subscribe(async res => {
         console.log(res);
         let body = JSON.parse(res.body);
@@ -270,11 +280,11 @@ export class BookingSummaryComponent implements OnInit {
 
         let bookingId = this.holdData?._id;
         const executeOldUpdate = (targetId: string) => {
-          this.api.updateBookings(dbData, targetId).subscribe(res => {
+          this.api.updateBookings(dbData, targetId).subscribe(async res => {
             this.presentToast("Booking Successful", "success");
-            this.router.navigate(['/ticket-details'], { queryParams: { id: targetId, action: 'notify-booking' } });
-            this.modalCtrl.dismiss();
             this.loading = false;
+            await this.modalCtrl.dismiss({ booked: true, id: targetId }).catch(() => {});
+            this.navCtrl.navigateRoot('/tickets');
           }, error => {
             console.error(error);
             this.presentToast("Something Went Wrong!", "danger");
@@ -329,44 +339,45 @@ export class BookingSummaryComponent implements OnInit {
         return;
       }
 
-        let travelDate = ticket.travel_date || this.date;
-        let depTime = ticket.boarding_point_details?.dep_time || ticket.dep_time || "00:00:00";
-        
-        let pickupMoment = moment(`${travelDate} ${depTime}`, ['YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD HH:mm', 'YYYY-MM-DD hh:mm A', 'DD-MM-YYYY HH:mm', 'YYYY-MM-DD']);
-        let pickupTimeDate = pickupMoment.isValid() ? pickupMoment.toDate() : new Date(travelDate);
-        if (isNaN(pickupTimeDate.getTime())) {
-          pickupTimeDate = new Date();
-        }
-        let dropoffTimeDate = new Date(pickupTimeDate.getTime() + (12 * 60 * 60 * 1000)); // Estimated 12 hours later
+      let travelDate = ticket.travel_date || this.date;
+      let depTime = ticket.boarding_point_details?.dep_time || ticket.dep_time || "00:00:00";
 
-        const dbData = {
+      let pickupMoment = moment(`${travelDate} ${depTime}`, ['YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD HH:mm', 'YYYY-MM-DD hh:mm A', 'DD-MM-YYYY HH:mm', 'YYYY-MM-DD']);
+      let pickupTimeDate = pickupMoment.isValid() ? pickupMoment.toDate() : new Date(travelDate);
+      if (isNaN(pickupTimeDate.getTime())) {
+        pickupTimeDate = new Date();
+      }
+      let dropoffTimeDate = new Date(pickupTimeDate.getTime() + (12 * 60 * 60 * 1000)); // Estimated 12 hours later
 
-          FromCityName: this.from || ticket.source_city_name || ticket.source,
-          ToCityName: this.to || ticket.destination_city_name || ticket.destination,
-          TicketNo: ticket.ticket_number,
-          PNRNo: ticket.operator_pnr,
-          BusTypeName: ticket.bus_type,
-          DepartureDateTime: `${travelDate} ${depTime}`,
-          ArrivalDateTime: dropoffTimeDate.toISOString(), // Estimated arrival time
-          CompanyName: ticket.travels,
-
-          PickupInfo: {
-            PickupTime: pickupTimeDate.toISOString(),
-            Address: ticket.boarding_point_details?.boarding_stage_address || this.pickups?.Address,
-            Phone: ticket.boarding_point_details?.contact_numbers || this.pickups?.Phone,
-            Landmark: ticket.boarding_point_details?.landmark || this.pickups?.Landmark,
-            PickupName: ticket.boarding_point_details?.name || this.pickups?.PickupName || this.pickups?.name
-          },
-
-          DropoffInfo: {
-            DropoffTime: dropoffTimeDate.toISOString(),
-            DropoffName: this.dropoffs?.DropoffName || this.dropoffs?.name || ticket.destination
-          },
-
-        TotalSeats: ticket.no_of_seats,
-        TotalFare: ticket.total_fare || ticket.totalFare || ticket.fare || ticket.total_amount || ticket.totalAmount || this.fare,
-
-        SeatNumbers: ticket.seat_numbers,
+      let dbData = {
+        "FromCityName": this.from || ticket.origin,
+        "ToCityName": this.to || ticket.destination,
+        "TicketNo": ticket.ticket_number || ticket.pnr_number,
+        "PNRNo": ticket.pnr_number || ticket.ticket_number,
+        "BusTypeName": ticket.bus_type || this.busDetails?.BusType,
+        "DepartureDateTime": pickupTimeDate.toISOString(),
+        "ArrivalDateTime": dropoffTimeDate.toISOString(),
+        "CompanyName": ticket.travels_name || this.busDetails?.CompanyName,
+        "PickupInfo": {
+          "PickupTime": pickupTimeDate.toISOString(),
+          "Address": ticket.boarding_point_details?.address || this.pickups?.Address || "",
+          "Phone": ticket.boarding_point_details?.contact_numbers || this.pickups?.Phone || "",
+          "Landmark": ticket.boarding_point_details?.landmark || this.pickups?.Landmark || "",
+          "PickupName": ticket.boarding_point_details?.name || this.pickups?.PickupName || this.pickups?.name || "",
+        },
+        "DropoffInfo": {
+          "DropoffTime": dropoffTimeDate.toISOString(),
+          "DropoffName": ticket.dropoff_point_details?.name || this.dropoffs?.DropoffName || this.dropoffs?.name || this.to || "",
+        },
+        "TotalSeats": ticket.total_seats || (ticket.passenger_details?.length || 1),
+        "TotalFare": ticket.total_fare || this.fare,
+        "Passengers": (ticket.passenger_details || []).map((p: any) => ({
+          Name: p.name,
+          Age: p.age,
+          Gender: (p.title === 'Mr' || p.title === 'Male') ? 'M' : 'F',
+          SeatNo: p.seat_number,
+          Fare: p.fare || (ticket.total_fare / (ticket.passenger_details.length || 1))
+        })),
         PassengerDetails: ticket.passenger_details,
 
         Commission: ticket.commission,
@@ -379,11 +390,11 @@ export class BookingSummaryComponent implements OnInit {
       };
 
       const executeBookingUpdate = (targetId: string) => {
-        this.api.updateBookings(dbData, targetId).subscribe(() => {
+        this.api.updateBookings(dbData, targetId).subscribe(async res => {
           this.presentToast("Booking Successful", "success");
-          this.router.navigate(['/ticket-details'], { queryParams: { id: targetId, action: 'notify-booking' } });
-          this.modalCtrl.dismiss();
           this.loading = false;
+          await this.modalCtrl.dismiss({ booked: true, id: targetId }).catch(() => {});
+          this.navCtrl.navigateRoot('/tickets');
         }, err => {
           console.error(err);
           this.presentToast("DB Update Failed", "danger");

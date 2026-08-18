@@ -3,26 +3,26 @@ import { ModalController, ToastController } from '@ionic/angular';
 import { environment } from 'src/environments/environment';
 import { ApiService } from '../core/services/api.service';
 import { AuthenticationService } from '../core/services/authentication.service';
-declare var Razorpay:any;
+declare var Razorpay: any;
 import { Checkout } from 'capacitor-razorpay';
 @Component({
   selector: 'app-wallet',
   templateUrl: 'wallet.page.html',
   styleUrls: ['wallet.page.scss']
 })
-export class WalletPage implements OnInit{
+export class WalletPage implements OnInit {
 
   userWalletBalance = this.auth.currentUserValue.walletBalance;
-  walletTransactions:any = [];
+  walletTransactions: any = [];
   addAmountValue = 1000;
   lodingTrans = true;
 
   razorpayResponse: any;
   paymentId = '';
-  characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   paymentRazorpayStatus = false;
   RAZORPAY_OPTIONS: any = {
-   // key: environment.razorpayKey,
+    // key: environment.razorpayKey,
     amount: '',
     name: '',
     order_id: '',
@@ -38,17 +38,17 @@ export class WalletPage implements OnInit{
       color: '#F5A522'
     }
   };
-  
+
   orderId = Math.floor(100000000 + Math.random() * 900000000);
   baseURL = environment.baseURL;
-  item:any = [];
+  item: any = [];
   paymentModal = false;
 
   //client = ZoomMtgEmbedded.createClient();
-  interval:any = "";
-  amountToAdd:any = 0;
-  selectedSchedule:any=[];
-  constructor(public auth: AuthenticationService, public toastController: ToastController, public api: ApiService, public modal:ModalController) {}
+  interval: any = "";
+  amountToAdd: any = 0;
+  selectedSchedule: any = [];
+  constructor(public auth: AuthenticationService, public toastController: ToastController, public api: ApiService, public modal: ModalController) { }
 
 
 
@@ -56,71 +56,71 @@ export class WalletPage implements OnInit{
     this.fetchData();
   }
 
-  fetchData(){
+  fetchData() {
     this.walletTransactions = [];
-    this.api.getAllWalletTransactions({user:this.auth.currentUserValue._id},1,25,"").subscribe(res=>{
+    this.api.getAllWalletTransactions({ user: this.auth.currentUserValue._id }, 1, 25, "").subscribe(res => {
       this.walletTransactions = res.data;
       this.lodingTrans = false;
       console.log(this.walletTransactions)
     });
 
     this.userWalletBalance = 0;
-    this.api.getAllUser({_id:this.auth.currentUserValue._id},1,1,"").subscribe(res=>{
+    this.api.getAllUser({ _id: this.auth.currentUserValue._id }, 1, 1, "").subscribe(res => {
       this.userWalletBalance = res.data[0].walletBalance;
     });
   }
 
 
-  addAmount(amount:number){
+  addAmount(amount: number) {
     this.addAmountValue += amount;
   }
 
-  handleRefresh(event:any){
+  handleRefresh(event: any) {
     this.fetchData();
     setTimeout(() => {
       event.target.complete();
     }, 2000);
   }
 
-  
 
 
-  paymentSuccess(){
+
+  paymentSuccess() {
     let wData = JSON.stringify({
-      description:"Amount added",
-      amount:this.addAmountValue,
-      type:"credit",
-      user:this.auth.currentUserValue._id
+      description: "Amount added",
+      amount: this.addAmountValue,
+      type: "credit",
+      user: this.auth.currentUserValue._id
     })
-    this.api.createWallet(wData).subscribe(res=>{
-      this.presentToast(res.message,"success");
-      let data :any = {
-        adminAgentCommission:0,
+    this.api.createWallet(wData).subscribe(res => {
+      this.presentToast(res.message, "success");
+      let data: any = {
+        adminAgentCommission: 0,
         mobile: this.auth.currentUserValue.mobile,
         role: this.auth.currentUserValue.role,
-        walletBalance: ((this.auth.currentUserValue.walletBalance*1) + (this.addAmountValue*1)).toString(),
-        _id:this.auth.currentUserValue._id,
+        walletBalance: ((this.auth.currentUserValue.walletBalance * 1) + (this.addAmountValue * 1)).toString(),
+        _id: this.auth.currentUserValue._id,
         name: this.auth.currentUserValue.name,
         email: this.auth.currentUserValue.email,
       }
-     localStorage.setItem("currentUser",JSON.stringify(data));
-     this.auth.updateData(data);
+      localStorage.setItem("currentUser", JSON.stringify(data));
+      this.auth.updateData(data);
       this.modal.dismiss();
       this.fetchData();
-    },error=>{
+    }, error => {
       console.error(error);
-      this.presentToast("Something went wrong!","danger")
+      this.presentToast("Something went wrong!", "danger")
     })
   }
 
-  async payWithRazorpay(){
-    if(this.addAmountValue == 0 || this.addAmountValue == undefined){
+  async payWithRazorpay() {
+    if (this.addAmountValue == 0 || this.addAmountValue == undefined) {
       return;
     }
-    this.api.createPaymentOrder(this.addAmountValue,this.generateRandomString()).subscribe(async res=>{
+    this.api.createPaymentOrder(this.addAmountValue, this.generateRandomString()).subscribe(async res => {
       const options = {
         key: environment.razorpayKey,
-        amount:Number(this.addAmountValue)+"00",
+        amount: Number(this.addAmountValue) + "00",
         description: 'Add Money to wallet',
         image: 'https://karobooking.com/assets/images/logo.png',
         order_id: res.id,
@@ -140,10 +140,10 @@ export class WalletPage implements OnInit{
       } catch (error) {
         //it's paramount that you parse the data into a JSONObject
         console.log(error);
-        this.presentToast("Payment Transaction Cancelled","danger");
+        this.presentToast("Payment Transaction Cancelled", "danger");
       }
     });
-    
+
   }
 
   // pay(){
@@ -154,7 +154,7 @@ export class WalletPage implements OnInit{
 
   // }
 
-  async presentToast(message:string,color:string) {
+  async presentToast(message: string, color: string) {
     const toast = await this.toastController.create({
       message: message,
       color: color,
@@ -170,7 +170,7 @@ export class WalletPage implements OnInit{
     let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let charactersLength = characters.length;
     for (let i = 0; i < 6; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
   }

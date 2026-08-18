@@ -24,6 +24,11 @@ const routes: Routes = [
         loadChildren: () => import('../settings/settings.module').then(m => m.SettingsPageModule)
       },
       {
+        path: 'tabs/tickets',
+        redirectTo: 'tickets',
+        pathMatch: 'full'
+      },
+      {
         path: '',
         redirectTo: '/home',
         pathMatch: 'full'

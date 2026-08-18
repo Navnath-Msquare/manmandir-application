@@ -171,10 +171,10 @@
         <ion-col size="11" style="display: flex; justify-content: space-between; align-items: center;">
           <ion-label color="dark" class="font-black ">
             {{ item.CompanyName || item.BusName || 'Travels'}}
-             <!-- <span style="font-size: 10px;">
+            <!-- <span style="font-size: 10px;">
               <ion-icon *ngFor="let star of [1,2,3]" name="star" color="warning"></ion-icon>
             </span> -->
-             <span style="font-size: 10px;">
+            <span style="font-size: 10px;">
               <ng-container *ngIf="item.source === 'NEW_API'">
                 <ion-icon *ngFor="let star of [1,2,3]" name="star" color="warning"></ion-icon>
               </ng-container>
@@ -182,7 +182,8 @@
           </ion-label>
         </ion-col>
         <ion-col size="1" class="flex justify-center items-center">
-          <img src=".\assets\img\Map Pinpoint.png" alt="routes" style="cursor: pointer;" (click)="openRoutesModal(item, $event)">
+          <img src=".\assets\img\Map Pinpoint.png" alt="routes" style="cursor: pointer;"
+            (click)="openRoutesModal(item, $event)">
         </ion-col>
       </ion-row>
       <div (click)="selectBus(item.RouteBusId, item.source)">
@@ -206,7 +207,8 @@
         </ion-row>
         <ion-row>
           <ion-col size="7">
-            <ion-badge *ngIf="!(item.source === 'NEW_API' && item.BusType?.IsAC === 'NON_AC')" color="success" class="shadow-lg py-1.5 px-3 me-2 rounded-full text-black max-sm:text-[10px]"
+            <ion-badge *ngIf="!(item.source === 'NEW_API' && item.BusType?.IsAC === 'NON_AC')" color="success"
+              class="shadow-lg py-1.5 px-3 me-2 rounded-full text-black max-sm:text-[10px]"
               shape="round">{{item.BusType?.IsAC.replace('_', ' ')}}</ion-badge>
             <ion-badge color="success" class="shadow-lg py-1.5 px-3 me-2 rounded-full text-black max-sm:text-[10px]"
               shape="round">{{item.BusType?.Seating.replace('_', ' ')}}</ion-badge>
@@ -409,18 +411,20 @@
             class="w-2/3 bg-white p-4 h-screen overflow-auto flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between p-2 rounded-full bg-slate-200">
-                <ion-searchbar clear-icon="close" id="boarding-searchbar" type="text" name="boardingSearch" mode="ios" shape="round"
-                  search-icon="none" [(ngModel)]="boardingSearchTerm" class="px-2"
+                <ion-searchbar clear-icon="close" id="boarding-searchbar" type="text" name="boardingSearch" mode="ios"
+                  shape="round" search-icon="none" [(ngModel)]="boardingSearchTerm" class="px-2"
                   placeholder="Enter your Boarding Point">
                 </ion-searchbar>
               </div>
               <ul class="mt-4 px-2" id="boarding-list">
-                <li *ngFor="let item of filteredPickupPoints;" class="flex items-center justify-between py-3 border-b border-gray-100">
-                  <label class="text-black text-sm flex-grow pr-2 cursor-pointer select-none" [htmlFor]="item + '_board'">
+                <li *ngFor="let item of filteredPickupPoints;"
+                  class="flex items-center justify-between py-3 border-b border-gray-100">
+                  <label class="text-black text-sm flex-grow pr-2 cursor-pointer select-none"
+                    [htmlFor]="item + '_board'">
                     {{item}}
                   </label>
-                  <input type="checkbox" name="boarding" [value]="item" [id]="item + '_board'" (change)="checkPickup($event)"
-                    [checked]="checkedPickup.includes(item)"
+                  <input type="checkbox" name="boarding" [value]="item" [id]="item + '_board'"
+                    (change)="checkPickup($event)" [checked]="checkedPickup.includes(item)"
                     class="h-5 w-5 accent-red-500 focus:accent-red-500 cursor-pointer">
                 </li>
               </ul>
@@ -436,18 +440,20 @@
             class="w-2/3 bg-white p-4 h-screen overflow-auto flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between p-2 rounded-full bg-slate-200">
-                <ion-searchbar clear-icon="close" id="dropping-searchbar" type="text" name="droppingSearch" mode="ios" shape="round"
-                  search-icon="none" [(ngModel)]="droppingSearchTerm" class="px-2"
+                <ion-searchbar clear-icon="close" id="dropping-searchbar" type="text" name="droppingSearch" mode="ios"
+                  shape="round" search-icon="none" [(ngModel)]="droppingSearchTerm" class="px-2"
                   placeholder="Enter your Dropping Point">
                 </ion-searchbar>
               </div>
               <ul class="mt-4 px-2" id="dropping-list">
-                <li *ngFor="let item of filteredDropoffPoints;" class="flex items-center justify-between py-3 border-b border-gray-100">
-                  <label class="text-black text-sm flex-grow pr-2 cursor-pointer select-none" [htmlFor]="item + '_drop'">
+                <li *ngFor="let item of filteredDropoffPoints;"
+                  class="flex items-center justify-between py-3 border-b border-gray-100">
+                  <label class="text-black text-sm flex-grow pr-2 cursor-pointer select-none"
+                    [htmlFor]="item + '_drop'">
                     {{item}}
                   </label>
-                  <input type="checkbox" name="dropping" [value]="item" [id]="item + '_drop'" (change)="checkDropoff($event)"
-                    [checked]="checkedDroping.includes(item)"
+                  <input type="checkbox" name="dropping" [value]="item" [id]="item + '_drop'"
+                    (change)="checkDropoff($event)" [checked]="checkedDroping.includes(item)"
                     class="h-5 w-5 accent-red-500 focus:accent-red-500 cursor-pointer">
                 </li>
               </ul>
@@ -468,7 +474,8 @@
                   <ion-grid>
                     <ion-row>
                       <ion-col size="10">
-                        <label [htmlFor]="item.CompanyName" class="flex-grow text-black cursor-pointer select-none">{{item.CompanyName}}</label>
+                        <label [htmlFor]="item.CompanyName"
+                          class="flex-grow text-black cursor-pointer select-none">{{item.CompanyName}}</label>
                       </ion-col>
                       <ion-col size="2" style="display: flex;
                       align-items: center;
@@ -495,14 +502,14 @@
                   <ion-grid>
                     <ion-row>
                       <ion-col size="10">
-                        <label [htmlFor]="Amenities" class="flex-grow text-black cursor-pointer select-none">{{Amenities}}</label>
+                        <label [htmlFor]="Amenities"
+                          class="flex-grow text-black cursor-pointer select-none">{{Amenities}}</label>
                       </ion-col>
                       <ion-col size="2" style="display: flex;
                       align-items: center;
                       justify-content: center;">
                         <input type="checkbox" name="sort" value="{{Amenities}}" id="{{Amenities}}"
-                          (change)="checkAmenities($event)"
-                          [checked]="checkeAmenties.includes(Amenities)"
+                          (change)="checkAmenities($event)" [checked]="checkeAmenties.includes(Amenities)"
                           class="form-radio h-5 w-5 accent-red-500 focus:accent-red-500 cursor-pointer">
                       </ion-col>
                     </ion-row>
@@ -616,7 +623,8 @@
   </span>
 
 
-  <ion-modal [isOpen]="isRoutesModalOpen" (didDismiss)="isRoutesModalOpen = false" [initialBreakpoint]="0.8" [breakpoints]="[0, 0.8, 1]" mode="ios">
+  <ion-modal [isOpen]="isRoutesModalOpen" (didDismiss)="isRoutesModalOpen = false" [initialBreakpoint]="0.8"
+    [breakpoints]="[0, 0.8, 1]" mode="ios">
     <ng-template>
       <ion-header class="ion-no-border" style="background-color: white; color:black">
         <ion-toolbar>
@@ -628,15 +636,16 @@
       <ion-content class="ion-padding" style="--background: #fff;">
         <h2 class="text-2xl font-bold mb-1 text-black">Boarding point</h2>
         <p class="text-gray-500 mb-6 text-sm">{{from}} <span *ngIf="fromState">({{fromState}})</span></p>
-        
+
         <div class="relative pl-1 mb-8">
           <!-- Vertical line -->
           <div class="absolute left-[4.5rem] top-3 bottom-0 w-1.5 bg-gray-200"></div>
-          
+
           <div class="flex mb-6 relative" *ngFor="let item of selectedBusForRoutes?.Pickups">
             <!-- Time -->
             <div class="w-[4rem] text-center pr-2 z-10 bg-white">
-              <p class="font-bold text-base text-black leading-tight">{{(item.PickupTime || item.time) | date:'HH:mm'}}</p>
+              <p class="font-bold text-base text-black leading-tight">{{(item.PickupTime || item.time) | date:'HH:mm'}}
+              </p>
               <p class="text-xs text-gray-500 mt-0.5">{{date | date:'dd MMM'}}</p>
             </div>
             <!-- Dot -->
@@ -644,7 +653,8 @@
             <!-- Info -->
             <div class="pl-8 flex-1">
               <p class="font-bold text-[15px] text-black leading-tight">{{item.PickupName || item.name}}</p>
-              <p class="text-[13px] text-gray-500 mt-1 leading-snug">{{item.Address || item.Landmark || 'Boarding Point'}}</p>
+              <p class="text-[13px] text-gray-500 mt-1 leading-snug">{{item.Address || item.Landmark || 'Boarding
+                Point'}}</p>
             </div>
           </div>
         </div>
@@ -653,15 +663,16 @@
 
         <h2 class="text-2xl font-bold mb-1 mt-4 text-black">Dropping point</h2>
         <p class="text-gray-500 mb-6 text-sm">{{to}} <span *ngIf="toState">({{toState}})</span></p>
-        
+
         <div class="relative pl-1 pb-8">
           <!-- Vertical line -->
           <div class="absolute left-[4.5rem] top-3 bottom-0 w-1.5 bg-gray-200"></div>
-          
+
           <div class="flex mb-6 relative" *ngFor="let item of selectedBusForRoutes?.Dropoffs">
             <!-- Time -->
             <div class="w-[4rem] text-center pr-2 z-10 bg-white">
-              <p class="font-bold text-base text-black leading-tight">{{(item.DropoffTime || item.time) | date:'HH:mm'}}</p>
+              <p class="font-bold text-base text-black leading-tight">{{(item.DropoffTime || item.time) | date:'HH:mm'}}
+              </p>
               <p class="text-xs text-gray-500 mt-0.5">{{date | date:'dd MMM'}}</p>
             </div>
             <!-- Dot -->
@@ -669,11 +680,12 @@
             <!-- Info -->
             <div class="pl-8 flex-1">
               <p class="font-bold text-[15px] text-black leading-tight">{{item.DropoffName || item.name}}</p>
-              <p class="text-[13px] text-gray-500 mt-1 leading-snug">{{item.Address || item.Landmark || 'Dropping Point'}}</p>
+              <p class="text-[13px] text-gray-500 mt-1 leading-snug">{{item.Address || item.Landmark || 'Dropping
+                Point'}}</p>
             </div>
           </div>
         </div>
-        
+
       </ion-content>
     </ng-template>
   </ion-modal>
